@@ -312,16 +312,47 @@ populate();
 /* ================= ARMS + VAPE ================= */
 const FLAV=[['Mango Regret',0xffb02e,'🥭'],['Blue Razz Funeral',0x3c8cff,'🫐'],['Cherry Lawsuit',0xe0244a,'🍒'],['Sour Apple Divorce',0x8fe03c,'🍏'],['Mojito Mistake',0x6fe0a0,'🍹'],['Watermelon Ice',0xff6a8a,'🍉'],['Grape Mistake',0xa070ff,'🍇'],['Strawberry Debt',0xff4f6a,'🍓'],['Peach Felony',0xffb38a,'🍑'],['Pineapple Panic',0xffe04a,'🍍'],['Banana Incident',0xfff07a,'🍌'],['Gas Station Sushi',0xff9a7a,'🍣'],['Lemon Subpoena',0xfff04a,'🍋'],['Coconut Alibi',0xf2ead8,'🥥']];
 let flav=FLAV[0];
-const vapeMat=new T.MeshLambertMaterial({color:flav[1],emissive:0x000000});
-function arm(side){const g=new T.Group();cyl(g,.17,.42,.17,0x4a2a7a,0,0,.38).rotation.x=PI/2;cyl(g,.185,.06,.185,0xb6ff3c,0,0,.17).rotation.x=PI/2;cyl(g,.12,.36,.12,0xe0b088,0,0,-.02).rotation.x=PI/2;ball(g,.16,.15,.17,0xe0b088,0,-.01,-.26);
-  box(g,.15,.22,.28,vapeMat,0,.05,-.43);box(g,.156,.07,.286,0x1a1a1a,0,-.04,-.43);box(g,.157,.07,.16,0xfff7ea,0,.07,-.43);mk('v',g,.1,.1,.07,0x1a1a1a,0,.13,-.6).rotation.x=-PI/2;ball(g,.03,.03,.02,new T.MeshBasicMaterial({color:0xb6ff3c}),side*.076,.12,-.36);
-  for(let i=0;i<4;i++)box(g,.04,.045,.1,0xe0b088,-side*.085,.1-i*.05,-.4);box(g,.05,.05,.12,0xe0b088,side*.085,.06,-.36);cam.add(g);return g}
+/* first-person viewmodel: cel-shaded (three hard light bands) with ink outlines */
+const GRAD=(()=>{const t=new T.DataTexture(new Uint8Array([135,200,255]),3,1,T.LuminanceFormat);t.minFilter=t.magFilter=T.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t})();
+const TOON={},toon=c=>TOON[c]||(TOON[c]=new T.MeshToonMaterial({color:c,gradientMap:GRAD}));
+const INK=new T.MeshBasicMaterial({color:0x15101d,side:T.BackSide});
+function tk(geo,p,w,h,d,c,x,y,z,th){const m=mk(geo,p,w,h,d,typeof c==='number'?toon(c):c,x,y,z);if(th!==0){const o=new T.Mesh(m.geometry,INK),q=th||.011;o.scale.set(1+q/w,1+q/h,1+q/d);m.add(o)}return m}
+function seg(p,r,len,c,x,y,z,rz,rx){const g=new T.Group();g.position.set(x||0,y||0,z||0);g.rotation.set(rx||0,0,rz||0);p.add(g);tk('c',g,r*2,len,r*2,c,0,len/2,0);tk('s',g,r*2,r*2,r*2,c,0,0,0);
+  const tip=new T.Group();tip.position.y=len;g.add(tip);tk('s',tip,r*2,r*2,r*2,c,0,0,0);g.tip=tip;return g}
+const vapeMat=new T.MeshToonMaterial({color:flav[1],gradientMap:GRAD,emissive:0x000000}),labelMat=new T.MeshToonMaterial({color:flav[1],gradientMap:GRAD,emissive:0x000000});
+const lcdC=document.createElement('canvas');lcdC.width=64;lcdC.height=32;const lcdK=lcdC.getContext('2d'),lcdT=new T.CanvasTexture(lcdC);lcdT.magFilter=T.NearestFilter;const lcdMat=new T.MeshBasicMaterial({map:lcdT,fog:false});
+function drawLCD(){lcdK.fillStyle='#08160d';lcdK.fillRect(0,0,64,32);lcdK.fillStyle='#b6ff3c';lcdK.font='bold 16px monospace';lcdK.textAlign='center';lcdK.textBaseline='middle';
+  lcdK.fillText(count>=10000?Math.round(count/1000)+'K':count>=1000?(count/1000).toFixed(1)+'K':String(count),32,12);lcdK.strokeStyle='#b6ff3c';lcdK.strokeRect(6.5,23.5,51,6);lcdK.fillRect(8,25,Math.max(1,48*clamp(charge,0,1)),3);lcdT.needsUpdate=true}
+const SKIN=0xe9b48c,JACKET=0x6a3fb5,CUFF=0xb6ff3c,DARK=0x1d1a24;
+function arm(side){const g=new T.Group(),S=side;
+  // track-jacket sleeve, lime cuff, tapered forearm
+  tk('v',g,.25,.62,.25,JACKET,0,0,.33).rotation.x=PI/2;tk('c',g,.205,.06,.205,CUFF,0,0,.03,.013).rotation.x=PI/2;
+  tk('v',g,.135,.36,.135,SKIN,0,0,-.13).rotation.x=PI/2;tk('s',g,.12,.095,.13,SKIN,0,-.07,-.33);
+  // palm cupped under the vape
+  tk('s',g,.2,.09,.25,SKIN,S*.01,-.088,-.45);
+  // the vape: chunky cube body, label on top, rear cap, mouthpiece, LED strip and a live puff counter on the side facing you
+  const V=new T.Group();V.position.set(0,.06,-.46);g.add(V);
+  tk('b',V,.16,.24,.3,[vapeMat,vapeMat,labelMat,vapeMat,vapeMat,vapeMat],0,0,0,.014);
+  tk('b',V,.166,.246,.012,0xfff7ea,0,0,.152,.01);tk('b',V,.166,.03,.302,DARK,0,-.11,0,.01);
+  tk('v',V,.12,.1,.075,DARK,0,.065,-.2,.012).rotation.x=PI/2;mk('b',V,.055,.014,.01,new T.MeshBasicMaterial({color:0x000000}),0,.065,-.252);
+  mk('b',V,.11,.016,.006,new T.MeshBasicMaterial({color:0xb6ff3c,fog:false}),0,-.075,.162);
+  mk('b',V,.004,.075,.14,lcdMat,-S*.0815,.045,-.02);
+  // four fingers wrapping up the inner side, three knuckles each
+  g.F=[];[[-.555,.026,1],[-.495,.028,1.08],[-.435,.027,1],[-.375,.022,.82]].forEach(([z,r,L],i)=>{
+    const s1=seg(g,r,.07*L,SKIN,-S*.075,-.105,z,S*.5),s2=seg(s1.tip,r*.95,.06*L,SKIN,0,0,0,-S*.55),s3=seg(s2.tip,r*.9,.035*L,SKIN,0,0,0,-S*.35);
+    tk('s',s3.tip,r*1.25,r*.7,r*1.1,0xffe4dc,-S*r*.55,0,0,0);g.F.push(s2)});
+  // thumb up the outer side, curling over the top onto the fire button
+  const t1=seg(g,.032,.12,SKIN,S*.075,-.07,-.37,-S*.12),t2=seg(t1.tip,.03,.1,SKIN,0,0,0,S*.25),t3=seg(t2.tip,.028,.055,SKIN,0,0,0,S*1.15);g.TH=t3;
+  cam.add(g);return g}
 const armR=arm(1),armL=arm(-1);armL.visible=false;
-const grab=new T.Group();{const sk=0xe0b088;cyl(grab,.17,1.1,.17,0x4a2a7a,0,0,.72).rotation.x=PI/2;cyl(grab,.185,.06,.185,0xb6ff3c,0,0,.17).rotation.x=PI/2;cyl(grab,.12,.36,.12,sk,0,0,-.02).rotation.x=PI/2;box(grab,.07,.18,.17,sk,0,0,-.27);for(let i=0;i<4;i++){box(grab,.045,.038,.13,sk,0,-.066+i*.044,-.4);box(grab,.15,.038,.045,sk,.06,-.066+i*.044,-.47)}box(grab,.12,.045,.045,sk,.05,.115,-.3);cam.add(grab);grab.visible=false}
+// the left hand that reaches around and grips the back of the target's head
+const grab=new T.Group();{tk('v',grab,.25,1.1,.25,JACKET,0,0,.72).rotation.x=PI/2;tk('c',grab,.205,.06,.205,CUFF,0,0,.17,.013).rotation.x=PI/2;tk('v',grab,.135,.36,.135,SKIN,0,0,-.02).rotation.x=PI/2;
+  tk('s',grab,.1,.2,.2,SKIN,0,0,-.27);[.065,.022,-.022,-.062].forEach((y,i)=>{const r=i===3?.022:.027,s1=seg(grab,r,.08,SKIN,.03,y,-.35,-PI/2),s2=seg(s1.tip,r*.95,.06,SKIN,0,0,0,0,.75);seg(s2.tip,r*.9,.04,SKIN,0,0,0,0,.6)});
+  seg(grab,.03,.09,SKIN,.02,.1,-.24,-.4,-.5);cam.add(grab);grab.visible=false}
 const mark=cone(scene,.35,.5,.35,new T.MeshBasicMaterial({color:0xb6ff3c,fog:false}),0,-9,0);mark.rotation.x=PI;
 const glow=new T.PointLight(0xff7a1a,0,6);cam.add(glow);glow.position.set(0,-.1,-.8);
 let ext=0,swapT=0,gk=0;
-function poseArm(g,side,t,bob){const k=ext,j=k*Math.sin(t*26)*.03;g.position.set(side*lerp(.34,.09,k),lerp(-.34,-.16,k)+bob,lerp(-.42,-.3,k)+j);g.rotation.set(lerp(.12,.2,k),side*lerp(.2,.09,k),side*lerp(-.1,0,k)+k*Math.sin(t*19)*.05)}
+function poseArm(g,side,t,bob){if(g.F){for(let i=0;i<g.F.length;i++)g.F[i].rotation.z=-side*(.55+ext*.22)+Math.sin(t*21+i*1.7)*.05*ext;g.TH.rotation.z=side*(1.15+ext*.2+(ext>.5?Math.max(0,Math.sin(t*12))*.35:0))}const k=ext,j=k*Math.sin(t*26)*.03;g.position.set(side*lerp(.36,.09,k),lerp(-.31,-.16,k)+bob,lerp(-.47,-.3,k)+j);g.rotation.set(lerp(.32,.2,k),side*lerp(.44,.09,k),side*lerp(-.18,0,k)+k*Math.sin(t*19)*.05)}
 
 /* ================= SMOKE, EMOJI, LITTER ================= */
 const stex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,32,2,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.5,'rgba(255,255,255,.45)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new T.CanvasTexture(c)})();
@@ -422,7 +453,7 @@ function texCut(im,sx,sy,sw,sh,sz,proc,near){const c=document.createElement('can
 function addFaces(){if(!FACE)return;for(const n of npcs){if(!(HUMAN[n.type]||n.type==='baby')||n.H.dec)continue;
   const m=new T.Mesh(DECG,new T.MeshLambertMaterial({map:FACE[0],alphaTest:.5,polygonOffset:true,polygonOffsetFactor:-2}));m.scale.setScalar(n.H.d*1.05);n.H.h.add(m);n.H.dec=m;n.fi=0;
   for(const e of n.H.E)e.visible=false;n.H.m.visible=false;if(n.H.B)for(const b of n.H.B)b.visible=false}}
-texImg('vape',im=>{const t=texCut(im,0,0,im.width,im.height,128);vapeMat.map=t;vapeMat.needsUpdate=true;for(const l of litter){l.m.material.map=t;l.m.material.needsUpdate=true}});
+texImg('vape',im=>{const t=texCut(im,0,0,im.width,im.height,128);labelMat.map=t;labelMat.needsUpdate=true;for(const l of litter){l.m.material.map=t;l.m.material.needsUpdate=true}});
 texImg('smoke',im=>{const t=texCut(im,0,0,im.width,im.height,64,(a,i)=>{const v=Math.max(a[i],a[i+1],a[i+2]);a[i+3]=v<18?0:Math.min(255,(v-18)*1.25);a[i]=a[i+1]=a[i+2]=255},false);for(const p of puffs){p.s.material.map=t;p.s.material.needsUpdate=true}});
 texImg('fabric',im=>{const h=im.width/2,v=im.height/2,F=[[0,0],[h,0],[0,v],[h,v]].map(([x,y])=>{const t=texCut(im,x,y,h,v,64);t.wrapS=t.wrapT=T.RepeatWrapping;return t});
   for(const key in clothC){const m=clothC[key],ti=+key.split('_')[1],tx=F[[0,1,2][ti]].clone();tx.needsUpdate=true;tx.repeat.set(1.4,1.4);m.map=tx;m.needsUpdate=true}FAB=F});
@@ -455,7 +486,7 @@ const bubs=[];for(let i=0;i<14;i++){const d=document.createElement('div');d.clas
 function say(n,s,d){let b=bubs.find(b=>b.n===n)||bubs.find(b=>!b.n)||bubs[0];b.n=n;b.t=d||2.2;b.d.textContent=s}
 function mouth(n,o){const ry=n.g.rotation.y;return o.set(n.g.position.x+Math.sin(ry)*n.hz,n.g.position.y+n.hy,n.g.position.z+Math.cos(ry)*n.hz)}
 const mult=()=>Math.min(5,1+combo*.25)*(act.boost>0?2:1)*(act.dual>0?2:1);
-function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;flav=pick(FLAV);vapeMat.color.setHex(flav[1]);$('flavor').textContent=flav[2]+' '+flav[0];toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
+function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;flav=pick(FLAV);vapeMat.color.setHex(flav[1]);labelMat.color.setHex(flav[1]);$('flavor').textContent=flav[2]+' '+flav[0];toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
   if(newsI<NEWS.length&&count<=NEWS[newsI][0]){newsEl.textContent='BREAKING: '+NEWS[newsI++][1];newsEl.classList.add('on');newsT=6}
   if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);voice('twist',1);if(!clip('sfx/slam',{vol:.9}))beep(120,.8,'sawtooth',.08)}
   if(count<=0){count=0;win()}}
@@ -563,12 +594,12 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
       if(Math.hypot(p.g.position.x-px,p.g.position.z-pz)<1.8){act[p.k]=PW[p.k].dur;toast(PW[p.k].msg,2.4);if(tut===2){tut=3;tutT=8}voice(p.k,1);scene.remove(p.g);picks.splice(i,1);if(p.k==='boost')clip('sfx/fire',{vol:.6});if(!clip('sfx/pickup',{vol:.55}))[440,660,880].forEach((q,j)=>beep(q,.15,'triangle',.05,j*.08))}}
     for(const k in act){const on=act[k]>0;if(on)act[k]-=dt;if(pwEl[k].hidden===on)pwEl[k].hidden=!on;if(on)pwEl[k].lastChild.style.width=act[k]/PW[k].dur*100+'%'}
     armL.visible=act.dual>0;const bz=act.boost>0;$('fx').classList.toggle('boost',bz);glow.intensity=bz?1.5+Math.sin(t*20)*.5:0;
-    vapeMat.emissive.setHex(bz?0xff4a00:0);vapeMat.emissiveIntensity=bz?.7+Math.sin(t*25)*.3:0;
+    vapeMat.emissive.setHex(bz?0xff4a00:0);vapeMat.emissiveIntensity=bz?.7+Math.sin(t*25)*.3:0;labelMat.emissive.copy(vapeMat.emissive);labelMat.emissiveIntensity=vapeMat.emissiveIntensity;
     if(bz&&Math.random()<dt*24){cam.localToWorld(tmp.set(.3-ext*.2,-.25,-.9));puff(tmp.x,tmp.y,tmp.z,rand(-.3,.3),rand(.8,1.6),rand(-.3,.3),fireC,.6,.08,.4)}
     const fv=act.rush>0?90:75;if(Math.abs(cam.fov-fv)>.1){cam.fov=lerp(cam.fov,fv,.1);cam.updateProjectionMatrix()}
     comboT-=dt;if(comboT<0&&combo>0){combo=Math.max(0,combo-1);comboT=1.2}
     dingT-=dt;lT-=dt;tossT-=dt;copT-=dt;if(fr%20===0)updMusic();heat=Math.max(0,heat-dt*.012);alertR=3+13*heat;
-    if(count!==shown){shown=count;numEl.textContent=count.toLocaleString();numEl.classList.toggle('bump',!!held)}
+    if(count!==shown||fr%6===0)drawLCD();if(count!==shown){shown=count;numEl.textContent=count.toLocaleString();numEl.classList.toggle('bump',!!held)}
     $('multv').textContent='x'+(Math.round(mult()*10)/10);$('charge').style.width=clamp(charge,0,1)*100+'%';$('panicv').style.width=heat*100+'%';
     const pr=$('prompt');pr.hidden=!(tgt&&!held);if(tgt&&!held)pr.textContent=(touch?'Hold VAPE':'Hold click')+' to vape the '+tgt.t.name;lg.hidden=!held;if(touch)vbtn.style.opacity=tgt||held?1:.6;
     if(fr%3===0)radar();voxN=Math.max(0,voxN-dt*6);ambient(dt);
@@ -597,7 +628,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
   R.render(scene,cam);
 }
 requestAnimationFrame(frame);
-if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!vapeMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
+if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!labelMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
 })();
 </script>
 </body>
