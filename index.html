@@ -667,6 +667,7 @@ window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,
   get mode(){return mode},set mode(v){mode=v},get count(){return count},set count(v){count=v},get used(){return used},get px(){return px},set px(v){px=v},get pz(){return pz},set pz(v){pz=v},
   get yaw(){return yaw},set yaw(v){yaw=v},get pitch(){return pitch},set pitch(v){pitch=v},get heat(){return heat},set heat(v){heat=v},get combo(){return combo},set combo(v){combo=v},
   get held(){return held},get tgt(){return tgt},get time(){return time},get lungs(){return lungs},get best(){return best},get stun(){return stun},set stun(v){stun=v},get fi(){return fi},get flav(){return flav},
+  set used(v){used=v},get twist(){return twist},set twist(v){twist=v},
   get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
 Object.defineProperty(window.TMV,'slow',{get:()=>slow,set:v=>{slow=v}});
 {const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
