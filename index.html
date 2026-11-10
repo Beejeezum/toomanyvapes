@@ -413,6 +413,22 @@ function prime(){if(!AC)audio();else if(AC.state==='suspended')AC.resume()}
 addEventListener('pointerdown',prime);addEventListener('keydown',prime);addEventListener('touchstart',prime,{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend();else AC.resume()});
 
+/* ================= GENERATED TEXTURES =================
+   Images in assets/tex/ (made in Runway), shrunk to chunky N64-size textures. Anything missing keeps the procedural look. */
+let FACE=null;const DECG=new T.SphereGeometry(.5,12,8,PI/2-1.15,2.3,PI*.27,PI*.46);
+function texImg(name,fn){const im=new Image();im.onload=()=>{try{fn(im)}catch(e){}};im.src='assets/tex/'+name+'.png'}
+function texCut(im,sx,sy,sw,sh,sz,proc,near){const c=document.createElement('canvas');c.width=c.height=sz;const k=c.getContext('2d');k.imageSmoothingEnabled=true;k.drawImage(im,sx,sy,sw,sh,0,0,sz,sz);
+  if(proc){const d=k.getImageData(0,0,sz,sz),a=d.data;for(let i=0;i<a.length;i+=4)proc(a,i);k.putImageData(d,0,0)}const t=new T.CanvasTexture(c);if(near!==false)t.magFilter=T.NearestFilter;return t}
+function addFaces(){if(!FACE)return;for(const n of npcs){if(!(HUMAN[n.type]||n.type==='baby')||n.H.dec)continue;
+  const m=new T.Mesh(DECG,new T.MeshLambertMaterial({map:FACE[0],alphaTest:.5,polygonOffset:true,polygonOffsetFactor:-2}));m.scale.setScalar(n.H.d*1.05);n.H.h.add(m);n.H.dec=m;n.fi=0;
+  for(const e of n.H.E)e.visible=false;n.H.m.visible=false;if(n.H.B)for(const b of n.H.B)b.visible=false}}
+texImg('vape',im=>{const t=texCut(im,0,0,im.width,im.height,128);vapeMat.map=t;vapeMat.needsUpdate=true;for(const l of litter){l.m.material.map=t;l.m.material.needsUpdate=true}});
+texImg('smoke',im=>{const t=texCut(im,0,0,im.width,im.height,64,(a,i)=>{const v=Math.max(a[i],a[i+1],a[i+2]);a[i+3]=v<18?0:Math.min(255,(v-18)*1.25);a[i]=a[i+1]=a[i+2]=255},false);for(const p of puffs){p.s.material.map=t;p.s.material.needsUpdate=true}});
+texImg('fabric',im=>{const h=im.width/2,v=im.height/2,F=[[0,0],[h,0],[0,v],[h,v]].map(([x,y])=>{const t=texCut(im,x,y,h,v,64);t.wrapS=t.wrapT=T.RepeatWrapping;return t});
+  for(const key in clothC){const m=clothC[key],ti=+key.split('_')[1],tx=F[[0,1,2][ti]].clone();tx.needsUpdate=true;tx.repeat.set(1.4,1.4);m.map=tx;m.needsUpdate=true}FAB=F});
+texImg('face',im=>{const h=im.width/2,v=im.height/2;FACE=[[0,0],[h,0],[0,v],[h,v]].map(([x,y])=>texCut(im,x,y,h,v,128,(a,i)=>{const r=a[i],g=a[i+1],b=a[i+2];if(r>140&&b>140&&g<120&&Math.min(r,b)-g>60)a[i+3]=0}));addFaces()});
+let FAB=null;
+
 /* ================= STATE + INPUT ================= */
 let slow=0,holdN=0,tut=0,tutT=0,mode='intro',px=0,pz=5,yaw=0,pitch=0,pvx=0,pvz=0,stun=0,count=5000,used=0,charge=1,combo=0,comboT=0,best=1,lungs=0,time=0,heat=0,twist=false,tgt=null,held=null,hold=false,bob=0,dingT=0,newsI=0,fr=0;
 const keys={};let locked=false,drag=false,mvx=0,mvz=0;
@@ -482,6 +498,7 @@ function pose(n,mv,arms,face,t,dt){const k=Math.min(1,dt*14),H=n.H,run=arms===1;
   if(n.ts){const f=face===1?Math.min(1.25,n.inh/n.t.cap):0,v=lerp(n.torso.scale.x/n.ts.x,1+f*.45,k*.6);n.torso.scale.x=n.ts.x*v;n.torso.scale.z=n.ts.z*v}
   let es=1,ey=1,mx=1,my=1,hs=1;
   if(face===1){es=1.4;mx=.8;my=4.5;hs=1+.24*Math.min(1,n.inh/n.t.cap)}else if(face===2){ey=.3;mx=.7;my=3.4}else if(face===3){es=1.25;my=2.6}else if(n.hooked)ey=.5;
+  if(H.dec){const fi=face===1?2:face===3?1:(face===2||n.hooked)?3:0;if(n.fi!==fi){n.fi=fi;H.dec.material.map=FACE[fi]}}
   for(const e of H.E){e.scale.x=lerp(e.scale.x,es,k);e.scale.y=lerp(e.scale.y,es*ey,k)}
   if(H.B){const bz=face===1||face===3?.5:face===2?-.35:0;for(let i=0;i<2;i++)H.B[i].rotation.z=lerp(H.B[i].rotation.z,(i?-1:1)*bz,k)}
   H.m.scale.x=lerp(H.m.scale.x,n.ms.x*mx,k);H.m.scale.y=lerp(H.m.scale.y,n.ms.y*my,k);H.h.scale.setScalar(lerp(H.h.scale.x,hs,k));
@@ -580,7 +597,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
   R.render(scene,cam);
 }
 requestAnimationFrame(frame);
-if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
+if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!vapeMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
 })();
 </script>
 </body>
