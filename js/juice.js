@@ -165,7 +165,8 @@ function burst(n,k){J.mouth(n,mv);const col=n.col||WHITE,N=J.touch?10:16;for(let
 
 /* ---------- events ---------- */
 let lastX=J.px,lastZ=J.pz,stepAcc=0,stepSide=1,lastCount=J.count,beatT=0,moving=false;
-J.on('start',()=>{if(fin)finEnd();tierI=0;lastCount=J.count;lastX=J.px;lastZ=J.pz;if(!introDone)cineStart()});
+J.playIntro=()=>{if(!introDone)cineStart()};
+J.on('start',()=>{if(fin)finEnd();tierI=0;lastCount=J.count;lastX=J.px;lastZ=J.pz;if(!introDone)setTimeout(cineStart,0)});
 J.on('win',()=>{if(cine)cineEnd();if(!fin)finStart()});
 J.on('grab',n=>{J.mouth(n,mv);for(let i=0;i<5;i++){const a=rand(0,PI*2);J.emo(J.pick(['⭐','✨','💥']),mv.x,mv.y+.15,mv.z,Math.cos(a)*rand(1,2.4),rand(.8,2.2),Math.sin(a)*rand(1,2.4),rand(.22,.34))}
   J.slide(420,1150,.09,'triangle',.035);shake(.12);punch(.035)});

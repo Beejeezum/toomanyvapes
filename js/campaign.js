@@ -160,7 +160,7 @@ function showDay(d){const def=DAYS[d-1];
    wireWardrobe({go:()=>beginDay(d),free:toFree}))}
 
 function beginDay(d){const def=DAYS[d-1],extra=Math.min(60,(S.run.rtry[d]||0)*20),len=def.len+extra;
-  ov.hidden=true;X.mode='play';X.stun=0;X.px=def.x;X.pz=def.z;X.yaw=def.yaw;X.pitch=-.05;X.heat=0;X.combo=0;clearAct();seedCrates(def);
+  ov.hidden=true;X.mode='play';X.stun=0;X.px=def.x;X.pz=def.z;X.yaw=def.yaw;X.pitch=-.05;X.heat=0;X.combo=0;clearAct();seedCrates(def);if(X.playIntro)X.playIntro();
   D={d,def,len,t:len,el:0,moved:0,quotaAt:null,perfects:0,matches:0,busts:0,hooks:0,lungs0:X.lungs,danger:0,idle:0,last:X.count,over:0,
     ch:def.ch().map((c,i)=>Object.assign({p:0,done:0,fail:0,rw:def.rw[i]},c))};
   chHTML='';panel(true);hud();X.toast('DAY '+d+': '+def.n.toUpperCase(),2.6);S.seen=1;save()}
