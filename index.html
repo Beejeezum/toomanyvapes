@@ -344,11 +344,18 @@ function seedPicks(){while(picks.length)scene.remove(picks.pop().g);spawnPick('b
 seedPicks();
 
 /* ================= SOUND ================= */
-let AC,inG,NB;
-function audio(){try{AC=new (window.AudioContext||window.webkitAudioContext)();NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-  const s=AC.createBufferSource();s.buffer=NB;s.loop=true;const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=1100;f.Q.value=.8;inG=AC.createGain();inG.gain.value=0;s.connect(f);f.connect(inG);inG.connect(AC.destination);s.start()}catch(e){AC=null}}
-function beep(f,d,type,v,at){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),t0=AC.currentTime+(at||0);o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.05,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+d)}
-function cough(f){if(!AC)return;for(let i=0;i<2;i++){const s=AC.createBufferSource(),b=AC.createBiquadFilter(),g=AC.createGain(),t0=AC.currentTime+i*.16;s.buffer=NB;b.type='bandpass';b.frequency.value=f||700;g.gain.setValueAtTime(.16,t0);g.gain.exponentialRampToValueAtTime(.001,t0+.13);s.connect(b);b.connect(g);g.connect(AC.destination);s.start(t0,Math.random()*.5,.14)}}
+let AC,inG,NB,OUT;
+function audio(){try{AC=new (window.AudioContext||window.webkitAudioContext)();const lp=AC.createBiquadFilter(),cp=AC.createDynamicsCompressor(),mg=AC.createGain();lp.type='lowpass';lp.frequency.value=3400;mg.gain.value=touch?.45:.7;lp.connect(cp);cp.connect(mg);mg.connect(AC.destination);OUT=lp;NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const s=AC.createBufferSource();s.buffer=NB;s.loop=true;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=750;f.Q.value=.3;inG=AC.createGain();inG.gain.value=0;s.connect(f);f.connect(inG);inG.connect(OUT);s.start()}catch(e){AC=null}}
+function beep(f,d,type,v,at){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),t0=AC.currentTime+(at||0);o.type=type||'triangle';o.frequency.value=f;g.gain.setValueAtTime(v||.05,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(OUT);o.start(t0);o.stop(t0+d)}
+function cough(f){if(!AC)return;for(let i=0;i<2;i++){const s=AC.createBufferSource(),b=AC.createBiquadFilter(),g=AC.createGain(),t0=AC.currentTime+i*.16;s.buffer=NB;b.type='bandpass';b.frequency.value=f||700;g.gain.setValueAtTime(.09,t0);g.gain.exponentialRampToValueAtTime(.001,t0+.13);s.connect(b);b.connect(g);g.connect(OUT);s.start(t0,Math.random()*.5,.14)}}
+
+function slide(f1,f2,d,type,v){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),t0=AC.currentTime;o.type=type||'sawtooth';o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(v||.06,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(OUT);o.start(t0);o.stop(t0+d)}
+function sfx(good){if(good){beep(98,.3,'sawtooth',.07);beep(147,.3,'sawtooth',.06);beep(196,.4,'sawtooth',.06,.1);beep(294,.5,'sawtooth',.05,.1)}else{slide(330,180,.3,'sawtooth',.07);setTimeout(()=>slide(240,90,.55,'sawtooth',.07),260)}}
+const VO={start:['Time to move some product.','Five thousand vapes. One town. Let\'s go.'],perfect:['Now that\'s a rip.','Textbook.','Lungs: served.','Clean hit, baby.','Smooth.','Who wants seconds?','Breathe it in, pal.'],ok:['Weak.','Barely a puff.','My grandma rips harder.'],over:['Too greedy.','Easy, tiger.','You broke this one.','That\'s on you.'],busted:['Busted.','Aw, come on, officer.','I regret nothing.'],hooked:['Another loyal customer.','They always come back.'],twist:['Oh no. Not another one.'],win:['Zero vapes. I\'m a hero.'],boost:['Light it up.','Now we\'re cooking.'],dual:['Two hands. No waiting.'],free:['Free samples, people!'],fog:['Fog \'em.','Hose time.'],chain:['Sharing is caring.'],rush:['Gotta go fast.']};
+let voT=0,voV=null;
+function voice(k,force){try{const ss=window.speechSynthesis;if(!ss||!VO[k])return;const now=performance.now();if(now<voT&&!force)return;voT=now+2400;if(!voV){const vs=ss.getVoices();voV=vs.find(v=>/Daniel|Fred|Alex|Aaron|Arthur|Male/i.test(v.name)&&/^en/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null}
+  const u=new SpeechSynthesisUtterance(pick(VO[k]));if(voV)u.voice=voV;u.pitch=.1;u.rate=.95;u.volume=.9;ss.cancel();ss.speak(u)}catch(e){}}
 
 /* ================= STATE + INPUT ================= */
 let mode='intro',px=0,pz=5,yaw=0,pitch=0,pvx=0,pvz=0,stun=0,count=5000,used=0,charge=1,combo=0,comboT=0,best=1,lungs=0,time=0,heat=0,twist=false,tgt=null,held=null,hold=false,bob=0,dingT=0,newsI=0,fr=0;
@@ -376,23 +383,23 @@ const bubs=[];for(let i=0;i<14;i++){const d=document.createElement('div');d.clas
 function say(n,s,d){let b=bubs.find(b=>b.n===n)||bubs.find(b=>!b.n)||bubs[0];b.n=n;b.t=d||2.2;b.d.textContent=s}
 function mouth(n,o){const ry=n.g.rotation.y;return o.set(n.g.position.x+Math.sin(ry)*n.hz,n.g.position.y+n.hy,n.g.position.z+Math.cos(ry)*n.hz)}
 const mult=()=>Math.min(5,1+combo*.25)*(act.boost>0?2:1)*(act.dual>0?2:1);
-function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;flav=pick(FLAV);vapeMat.color.setHex(flav[1]);$('flavor').textContent=flav[2]+' '+flav[0];toss();if(dingT<=0){beep(rand(500,900),.08,'square',.025);dingT=.07}}
+function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;flav=pick(FLAV);vapeMat.color.setHex(flav[1]);$('flavor').textContent=flav[2]+' '+flav[0];toss();if(dingT<=0){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
   if(newsI<NEWS.length&&count<=NEWS[newsI][0]){newsEl.textContent='BREAKING: '+NEWS[newsI++][1];newsEl.classList.add('on');newsT=6}
-  if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);beep(120,.8,'sawtooth',.08)}
+  if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);voice('twist',1);beep(120,.8,'sawtooth',.08)}
   if(count<=0){count=0;win()}}
 const whiteC=new T.Color(1,1,1),fireC=new T.Color(0xff7a1a);
 function release(n,kind){if(held===n)held=null;const f=n.inh/n.t.cap;n.state='exhale';n.exI=clamp(f,.3,1.15)*n.t.cloud;n.ex=.8+Math.min(n.inh,n.t.cap)*.8;n.times++;lungs++;n.ringT=0;n.side=Math.random()<.5?-1:1;heat=Math.min(1,heat+.05);
-  if(kind==='perfect'){combo+=2;toast('PERFECT RIP',1);beep(880,.1,'square',.05);beep(1320,.18,'square',.05,.09);drain(n.t.rate*mult()*n.t.cap*.5)}
-  else if(kind==='over'){combo=Math.floor(combo/2);toast('TOO MUCH — COUGHING FIT',1.4);n.ex+=1.2;n.exI*=1.3;beep(110,.4,'sawtooth',.07)}
-  else combo++;
+  if(kind==='perfect'){combo+=2;toast('PERFECT RIP',1);sfx(1);voice('perfect');beep(880,.1,'triangle',.05);beep(1320,.18,'triangle',.05,.09);drain(n.t.rate*mult()*n.t.cap*.5)}
+  else if(kind==='over'){combo=Math.floor(combo/2);toast('TOO MUCH — COUGHING FIT',1.4);sfx(0);voice('over');n.ex+=1.2;n.exI*=1.3;beep(110,.4,'sawtooth',.07)}
+  else{combo++;if(kind==='ok'&&Math.random()<.3)voice('ok')}
   comboT=7;best=Math.max(best,mult());n.col.setHex(act.boost>0?0xff7a1a:flav[1]).lerp(whiteC,act.boost>0?.25:.5);n.emo=act.boost>0?'🔥':flav[2];
   say(n,pick(n.t.say),2.6);cough(n.type==='cow'||n.type==='tuba'?260:n.r<.35?1500:700);if(n.type==='tuba')beep(58,.7,'sawtooth',.09);
-  if(!n.hooked&&n.times>=n.t.hook){n.hooked=true;if(kind!=='passive')say(n,'…ok I love it',2.6)}}
+  if(!n.hooked&&n.times>=n.t.hook){n.hooked=true;if(kind!=='passive'){say(n,'…ok I love it',2.6);if(Math.random()<.5)voice('hooked')}}}
 function soak(n,k,dt){n.inh+=dt*k;drain(n.t.rate*mult()*dt*.5);if(mode==='play'&&n.inh>=n.t.cap*.85)release(n,'passive')}
 const soakable=n=>n.state!=='held'&&n.state!=='exhale'&&n.cool<=0;
-function win(){mode='won';hold=false;held=null;if(document.exitPointerLock)document.exitPointerLock();$('hud').hidden=true;$('win').hidden=false;
+function win(){mode='won';hold=false;held=null;voice('win',1);if(document.exitPointerLock)document.exitPointerLock();$('hud').hidden=true;$('win').hidden=false;
   const m=Math.floor(time/60),s=Math.floor(time%60);$('stats').textContent=`${lungs.toLocaleString()} lungs visited · ${npcs.filter(n=>n.hooked).length} townsfolk hooked · ${m}:${String(s).padStart(2,'0')} · best combo x${best}`}
-function start(){mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();toast('GET RID OF THEM',2.5)}
+function start(){mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();toast('GET RID OF THEM',2.5);voice('start',1)}
 function reset(){px=0;pz=5;yaw=pitch=0;count=5000;used=0;charge=1;combo=0;best=1;lungs=0;time=0;heat=0;twist=false;newsI=0;for(const k in act)act[k]=0;
   for(const n of npcs){n.state='wander';n.times=0;n.hooked=n.type==='gym';n.cool=0;n.inh=0;n.fl=0;n.g.position.set(n.hx,0,n.hzz)}seedPicks();start()}
 $('go').onclick=start;$('again').onclick=reset;
@@ -440,7 +447,7 @@ function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,
   if(want){arms=n.A.length?2:0;if(d>1.7+n.r){go(n,px,pz,ty.speed*.85,dt);mv=1}else n.g.rotation.y=Math.atan2(-dx,-dz);
     n.sayT-=dt;if(n.sayT<0){n.sayT=rand(4,10);if(d<12)say(n,pick(ty.want),2)}}
   else if(n.type==='cop'&&heat>.3&&d<48&&n.state!=='flee'){go(n,px,pz,ty.speed,dt);mv=1;n.sayT-=dt;if(n.sayT<0){n.sayT=rand(3,6);say(n,pick(['STOP! VAPE POLICE!','DROP THE MANGO','HANDS OFF THE PIGEON']),1.6)}
-    if(d<1.4&&n.bust<=0&&stun<=0&&held!==n){n.bust=6;combo=0;stun=.8;pvx=-dx/d*16;pvz=-dz/d*16;if(held)release(held,'ok');toast('BUSTED — COMBO CONFISCATED',1.8);beep(200,.3,'sawtooth',.08);beep(150,.4,'sawtooth',.08,.15)}}
+    if(d<1.4&&n.bust<=0&&stun<=0&&held!==n){n.bust=6;combo=0;stun=.8;pvx=-dx/d*16;pvz=-dz/d*16;if(held)release(held,'ok');toast('BUSTED — COMBO CONFISCATED',1.8);sfx(0);voice('busted',1);beep(200,.3,'sawtooth',.08);beep(150,.4,'sawtooth',.08,.15)}}
   else if(n.state==='flee'){n.tm-=dt;arms=1;face=3;let fx=dx/d,fz=dz/d;if(ty.zig){const w=Math.sin(t*5+n.ph)*.7;fx+=-dz/d*w;fz+=dx/d*w}
     if(Math.abs(p.x)>B-8||Math.abs(p.z)>B-8){fx=-p.x;fz=-p.z}
     n.fl+=dt;go(n,p.x+fx*5,p.z+fz*5,ty.speed*Math.max(.5,1-.12*n.times)*Math.max(.6,1-n.fl*.07),dt);mv=1;if(n.fl>5&&Math.random()<dt*.4)say(n,pick(['*wheeze*','ok… ok…','my lungs']),1.2);if(ty.hop)p.y=Math.abs(Math.sin(t*11+n.ph))*.6;if(n.tm<0&&d>alertR+4){n.state='wander';n.tm=0}}
@@ -471,10 +478,10 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
         if(Math.random()<dt*16)puff(m.x,m.y+.1,m.z,rand(-.4,.4),rand(.4,1),rand(-.4,.4),act.boost>0?fireC:whiteC,1.2,.1,.7)}}
     if(act.fog>0&&holding){cam.localToWorld(tmp.set(.15,-.15,-.9));for(let i=0;i<3;i++)puff(tmp.x,tmp.y,tmp.z,fwd.x*14+rand(-2,2),fwd.y*14+rand(-1,2),fwd.z*14+rand(-2,2),act.boost>0?fireC:whiteC,rand(.7,1.3),.3,rand(2,3.6));
       for(const n of npcs){if(!soakable(n))continue;mouth(n,tmp).sub(cam.position);const d=tmp.length();if(d<13&&tmp.angleTo(fwd)<.45+n.r/d)soak(n,1.1,dt)}}
-    ext=lerp(ext,held||(act.fog>0&&holding)?1:0,Math.min(1,dt*14));if(inG)inG.gain.value=lerp(inG.gain.value,held||(act.fog>0&&holding)?.22:0,.2);
+    ext=lerp(ext,held||(act.fog>0&&holding)?1:0,Math.min(1,dt*14));if(inG)inG.gain.value=lerp(inG.gain.value,held||(act.fog>0&&holding)?.07:0,.08);
     pickT-=dt;if(pickT<0){pickT=7;spawnPick()}
     for(let i=picks.length-1;i>=0;i--){const p=picks[i];p.cr.rotation.y+=dt*2;p.cr.rotation.x+=dt;p.g.position.y=1.2+Math.sin(t*3+i)*.2;
-      if(Math.hypot(p.g.position.x-px,p.g.position.z-pz)<1.8){act[p.k]=PW[p.k].dur;toast(PW[p.k].msg,2.4);scene.remove(p.g);picks.splice(i,1);[440,660,880].forEach((q,j)=>beep(q,.15,'square',.05,j*.08))}}
+      if(Math.hypot(p.g.position.x-px,p.g.position.z-pz)<1.8){act[p.k]=PW[p.k].dur;toast(PW[p.k].msg,2.4);voice(p.k,1);scene.remove(p.g);picks.splice(i,1);[440,660,880].forEach((q,j)=>beep(q,.15,'triangle',.05,j*.08))}}
     for(const k in act){const on=act[k]>0;if(on)act[k]-=dt;if(pwEl[k].hidden===on)pwEl[k].hidden=!on;if(on)pwEl[k].lastChild.style.width=act[k]/PW[k].dur*100+'%'}
     armL.visible=act.dual>0;const bz=act.boost>0;$('fx').classList.toggle('boost',bz);glow.intensity=bz?1.5+Math.sin(t*20)*.5:0;
     vapeMat.emissive.setHex(bz?0xff4a00:0);vapeMat.emissiveIntensity=bz?.7+Math.sin(t*25)*.3:0;
