@@ -42,6 +42,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 #vape{bottom:calc(16px + env(safe-area-inset-bottom,0px));left:max(16px,env(safe-area-inset-left,0px));background:var(--panel);padding:8px 12px;width:min(230px,46vw)}
 #vape small{font-weight:800;font-size:10px;letter-spacing:.16em;color:var(--sky)}
 #flavor{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vape{pointer-events:auto;cursor:pointer}#swap{float:right;color:var(--paper);font-weight:800;letter-spacing:.06em}#stock{font-size:11px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
 .bar{height:10px;background:rgba(255,255,255,.15);margin-top:6px}
 .bar i{display:block;height:100%;width:100%;background:var(--lime)}
 #cross{top:50%;left:50%;width:8px;height:8px;margin:-4px;border-radius:50%;border:2px solid var(--paper);opacity:.8}
@@ -92,7 +93,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
     <div id="count" class="hud"><small>VAPES LEFT</small><div id="num">5,000</div><div id="panic">TOWN PANIC<div class="bar"><i id="panicv"></i></div></div></div>
     <div id="right" class="hud"><div id="mult"><small>CLOUD COMBO</small><span id="multv">x1</span></div><canvas id="radar" width="208" height="208"></canvas></div>
     <div id="powers" class="hud"></div>
-    <div id="vape" class="hud"><small>NOW SERVING</small><div id="flavor">🥭 Mango Regret</div><div class="bar"><i id="charge"></i></div></div>
+    <div id="vape" class="hud"><small>NOW SERVING <b id="swap">◀ Q · E ▶</b></small><div id="flavor">🥭 Mango Regret</div><div id="stock">0 left</div><div class="bar"><i id="charge"></i></div></div>
     <div id="cross" class="hud"></div>
     <div id="lung" class="hud" hidden><small id="lungt">LET GO IN THE GREEN</small><div class="bar"><i id="lungv"></i></div></div>
     <div id="prompt" class="hud" hidden></div>
@@ -128,7 +129,7 @@ const rand=(a,b)=>a+Math.random()*(b-a),ri=n=>Math.floor(Math.random()*n),pick=a
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,k)=>a+(b-a)*k,css=c=>'#'+c.toString(16).padStart(6,'0');
 const touch=matchMedia('(pointer:coarse)').matches;
 const game=$('game'),cv=$('cv');
-const R=new T.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(1);const RES=touch?430:600;
+const R=new T.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(1);let RES=touch?430:600;
 const scene=new T.Scene(),SKY=new T.Color(0xbfe6ff),HAZE=new T.Color(0xf6d6ec);
 scene.background=SKY.clone();scene.fog=new T.Fog(0xbfe6ff,30,210);
 const cam=new T.PerspectiveCamera(75,1,.05,500);cam.rotation.order='YXZ';scene.add(cam);
@@ -136,6 +137,7 @@ scene.add(new T.HemisphereLight(0xffffff,0x7aa06a,.78));
 const sun=new T.DirectionalLight(0xfff2d0,.55);sun.position.set(40,80,20);scene.add(sun);
 function size(){const w=game.clientWidth,h=game.clientHeight,q=Math.min(1,RES/Math.min(w,h));R.setSize(Math.max(2,Math.round(w*q)),Math.max(2,Math.round(h*q)),false);cam.aspect=w/h;cam.updateProjectionMatrix()}
 addEventListener('resize',size);size();
+let wheelT=0;addEventListener('wheel',e=>{if(mode!=='play')return;const n=performance.now();if(n-wheelT<120)return;wheelT=n;cycleFlav(e.deltaY>0?1:-1)},{passive:true});
 
 const G={b:new T.BoxGeometry(1,1,1),s:new T.SphereGeometry(.5,8,6),c:new T.CylinderGeometry(.5,.5,1,8),k:new T.ConeGeometry(.5,1,7),v:new T.CylinderGeometry(.5,.3,1,8),h:new T.SphereGeometry(.5,8,4,0,PI*2,0,PI/2),o:new T.CircleGeometry(.5,8)};
 
@@ -320,6 +322,18 @@ populate();
 /* ================= ARMS + VAPE ================= */
 const FLAV=[['Mango Regret',0xffb02e,'🥭'],['Blue Razz Funeral',0x3c8cff,'🫐'],['Cherry Lawsuit',0xe0244a,'🍒'],['Sour Apple Divorce',0x8fe03c,'🍏'],['Mojito Mistake',0x6fe0a0,'🍹'],['Watermelon Ice',0xff6a8a,'🍉'],['Grape Mistake',0xa070ff,'🍇'],['Strawberry Debt',0xff4f6a,'🍓'],['Peach Felony',0xffb38a,'🍑'],['Pineapple Panic',0xffe04a,'🍍'],['Banana Incident',0xfff07a,'🍌'],['Gas Station Sushi',0xff9a7a,'🍣'],['Lemon Subpoena',0xfff04a,'🍋'],['Coconut Alibi',0xf2ead8,'🥥']];
 let flav=FLAV[0];
+/* ================= FLAVORS =================
+   The container is split into per-flavor stock. You pick what you're serving (Q/E, scroll, or tap the panel).
+   Every creature has a craving shown over its head; serving the flavor it craves hooks it instantly and drains a bonus. */
+const STOCK=FLAV.map(()=>0);let fi=0;
+function fillStock(n){for(let i=0;i<n;i++)STOCK[i<FLAV.length?i:ri(FLAV.length)]++}
+const CRAVE={worker:[0,1,11,13],grandma:[8,7,12,2],gym:[4,12,9,3],kid:[1,5,6,7],baby:[10,5,8],cop:[13,2,0],jogger:[12,3,4],tuba:[6,9],dog:[11,10],cat:[11,13],pigeon:[10,9],chicken:[5,3],cow:[3,5,10]};
+function setFlav(i,quiet){if(!STOCK.some(s=>s>0))return;let k=0;while(STOCK[i]<=0&&k++<FLAV.length)i=(i+1)%FLAV.length;fi=i;flav=FLAV[fi];vapeMat.color.setHex(flav[1]);labelMat.color.setHex(flav[1]);flavHUD();if(!quiet)beep(660,.05,'triangle',.03)}
+function cycleFlav(d){if(mode!=='play')return;let i=fi;for(let k=0;k<FLAV.length;k++){i=(i+d+FLAV.length)%FLAV.length;if(STOCK[i]>0)break}setFlav(i)}
+function flavHUD(){$('flavor').textContent=flav[2]+' '+flav[0];$('stock').textContent=STOCK[fi].toLocaleString()+' left'}
+function craveFor(n){const L=CRAVE[n.type]||[ri(FLAV.length)];let c=pick(L),k=0;while(STOCK[c]<=0&&k++<20)c=ri(FLAV.length);return c}
+function setCrave(n){n.crave=craveFor(n);if(!n.cb){n.cb=new T.Sprite(new T.SpriteMaterial({transparent:true,depthWrite:false,fog:false}));n.cb.scale.set(.55,.55,1);scene.add(n.cb)}n.cb.material.map=emoTex(FLAV[n.crave][2]);n.cb.material.needsUpdate=true}
+
 /* first-person viewmodel: cel-shaded (three hard light bands) with ink outlines */
 const TOON={},toon=c=>TOON[c]||(TOON[c]=new T.MeshToonMaterial({color:c,gradientMap:GRAD}));
 function tk(geo,p,w,h,d,c,x,y,z,th){const m=mk(geo,p,w,h,d,typeof c==='number'?toon(c):c,x,y,z);if(th!==0){const o=new T.Mesh(m.geometry,INK),q=th||.011;o.scale.set(1+q/w,1+q/h,1+q/d);m.add(o)}return m}
@@ -471,14 +485,14 @@ let FAB=null;
 /* ================= STATE + INPUT ================= */
 let slow=0,holdN=0,tut=0,tutT=0,mode='intro',px=0,pz=5,yaw=0,pitch=0,pvx=0,pvz=0,stun=0,count=5000,used=0,charge=1,combo=0,comboT=0,best=1,lungs=0,time=0,heat=0,twist=false,tgt=null,held=null,hold=false,bob=0,dingT=0,newsI=0,fr=0;
 const keys={};let locked=false,drag=false,mvx=0,mvz=0;
-addEventListener('keydown',e=>{keys[e.code]=1;if(e.code==='KeyM'&&!e.repeat)setMute(!muted);if(mode==='play'&&/Space|Arrow/.test(e.code))e.preventDefault()});
+addEventListener('keydown',e=>{keys[e.code]=1;if(!e.repeat&&(e.code==='KeyQ'||e.code==='KeyE'))cycleFlav(e.code==='KeyQ'?-1:1);if(e.code==='KeyM'&&!e.repeat)setMute(!muted);if(mode==='play'&&/Space|Arrow/.test(e.code))e.preventDefault()});
 addEventListener('keyup',e=>{keys[e.code]=0});
 cv.addEventListener('mousedown',()=>{if(mode!=='play')return;drag=true;hold=true;if(!locked&&cv.requestPointerLock){try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}});
 addEventListener('mouseup',()=>{drag=false;hold=false});
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv});
 addEventListener('mousemove',e=>{if(mode!=='play'||!(locked||drag))return;yaw-=e.movementX*.0024;pitch=clamp(pitch-e.movementY*.0024,-1.2,1.2)});
 let stId=null,lkId=null,sx=0,sy=0,lx=0,ly=0;const stick=$('stick'),nub=$('nub'),vbtn=$('vbtn');
-game.addEventListener('touchstart',e=>{if(mode!=='play')return;e.preventDefault();for(const t of e.changedTouches){if(t.target===vbtn){hold=true;continue}
+game.addEventListener('touchstart',e=>{if(mode!=='play')return;e.preventDefault();for(const t of e.changedTouches){if(t.target.closest&&t.target.closest('#vape')){cycleFlav(1);continue}if(t.target===vbtn){hold=true;continue}
   if(t.clientX<game.clientWidth/2&&stId===null){stId=t.identifier;sx=t.clientX;sy=t.clientY}else if(lkId===null){lkId=t.identifier;lx=t.clientX;ly=t.clientY}}},{passive:false});
 game.addEventListener('touchmove',e=>{if(mode!=='play')return;e.preventDefault();for(const t of e.changedTouches){
   if(t.identifier===stId){mvx=clamp((t.clientX-sx)/45,-1,1);mvz=clamp((t.clientY-sy)/45,-1,1);nub.style.transform=`translate(${mvx*30}px,${mvz*30}px)`}
@@ -494,27 +508,29 @@ const bubs=[];for(let i=0;i<14;i++){const d=document.createElement('div');d.clas
 function say(n,s,d){let b=bubs.find(b=>b.n===n)||bubs.find(b=>!b.n)||bubs[0];b.n=n;b.t=d||2.2;b.d.textContent=s}
 function mouth(n,o){const ry=n.g.rotation.y;return o.set(n.g.position.x+Math.sin(ry)*n.hz,n.g.position.y+n.hy,n.g.position.z+Math.cos(ry)*n.hz)}
 const mult=()=>Math.min(5,1+combo*.25)*(act.boost>0?2:1)*(act.dual>0?2:1);
-function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;flav=pick(FLAV);vapeMat.color.setHex(flav[1]);labelMat.color.setHex(flav[1]);$('flavor').textContent=flav[2]+' '+flav[0];toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
+function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;if(STOCK[fi]>0)STOCK[fi]--;emit('vape',fi);if(STOCK[fi]<=0&&count>0){const was=flav[0];setFlav(fi,1);toast('OUT OF '+was.toUpperCase()+' — NOW '+flav[0].toUpperCase(),1.6)}else if(fr%4===0)flavHUD();toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
   if(newsI<NEWS.length&&count<=NEWS[newsI][0]){newsEl.textContent='BREAKING: '+NEWS[newsI++][1];newsEl.classList.add('on');newsT=6}
-  if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);voice('twist',1);if(!clip('sfx/slam',{vol:.9}))beep(120,.8,'sawtooth',.08)}
+  if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);for(let i=0;i<1500;i++)STOCK[ri(FLAV.length)]++;flavHUD();toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);voice('twist',1);if(!clip('sfx/slam',{vol:.9}))beep(120,.8,'sawtooth',.08)}
   if(count<=0){count=0;win()}}
 const whiteC=new T.Color(1,1,1),fireC=new T.Color(0xff7a1a);
-function release(n,kind){if(held===n)held=null;const f=n.inh/n.t.cap;n.state='exhale';n.exI=clamp(f,.3,1.15)*n.t.cloud;n.ex=.8+Math.min(n.inh,n.t.cap)*.8;n.times++;lungs++;n.ringT=0;n.side=Math.random()<.5?-1:1;heat=Math.min(1,heat+.05);
+function release(n,kind){if(held===n)held=null;const match=kind!=='passive'&&n.crave===fi;const f=n.inh/n.t.cap;n.state='exhale';n.exI=clamp(f,.3,1.15)*n.t.cloud;n.ex=.8+Math.min(n.inh,n.t.cap)*.8;n.times++;lungs++;n.ringT=0;n.side=Math.random()<.5?-1:1;heat=Math.min(1,heat+.05);
   if(kind==='perfect'){combo+=2;toast('PERFECT RIP',1);slow=.12;try{$('fx').animate([{background:'rgba(255,255,255,.4)'},{background:'rgba(255,255,255,0)'}],{duration:260})}catch(e){}if(tut===1)tut=2;sfx(1);voice('perfect');if(!BUF['sfx/perfect_sting']){beep(880,.1,'triangle',.05);beep(1320,.18,'triangle',.05,.09)}drain(n.t.rate*mult()*n.t.cap*.5)}
   else if(kind==='over'){combo=Math.floor(combo/2);toast('TOO MUCH — COUGHING FIT',1.4);sfx(0);voice('over');n.ex+=1.2;n.exI*=1.3;if(!BUF['sfx/fail_sting'])beep(110,.4,'sawtooth',.07)}
   else{combo++;if(kind==='ok'&&Math.random()<.3)voice('ok')}
   if(tut===0)tut=1;if(kind!=='passive'&&holdN>0){const ge=$('gain');ge.textContent='−'+holdN.toLocaleString()+' vapes';ge.classList.remove('go');void ge.offsetWidth;ge.classList.add('go');holdN=0}
   comboT=7;best=Math.max(best,mult());n.col.setHex(act.boost>0?0xff7a1a:flav[1]).lerp(whiteC,act.boost>0?.25:.5);n.emo=act.boost>0?'🔥':flav[2];
   say(n,pick(n.t.say),2.6);hit(n,kind);if(n.type==='tuba'&&!BUF['sfx/tuba'])beep(58,.7,'sawtooth',.09);setTimeout(()=>call(n,0),420);
+  if(match){toast('CRAVING MATCHED '+flav[2],1.3);combo+=2;drain(n.t.rate*mult()*n.t.cap*.6);for(let i=0;i<6;i++){const m=mouth(n,v3);emo('😍',m.x,m.y+.3,m.z,rand(-1,1),rand(1,2),rand(-1,1),.45)}if(!n.hooked)n.times=Math.max(n.times,n.t.hook);beep(990,.08,'triangle',.05);beep(1480,.12,'triangle',.05,.07)}
+  setCrave(n);emit('release',n,kind,match);
   if(!n.hooked&&n.times>=n.t.hook){n.hooked=true;for(const wm of n.H.Wh)wm.material=M(0xffc4c4);if(kind!=='passive'){say(n,'…ok I love it',2.6);if(Math.random()<.5)voice('hooked')}}}
 function soak(n,k,dt){n.inh+=dt*k;drain(n.t.rate*mult()*dt*.5);if(mode==='play'&&n.inh>=n.t.cap*.85)release(n,'passive')}
 const soakable=n=>n.state!=='held'&&n.state!=='exhale'&&n.cool<=0;
-function win(){mode='won';hold=false;held=null;voice('win',1);clip('sfx/fanfare',{vol:.7});updMusic();if(document.exitPointerLock)document.exitPointerLock();$('hud').hidden=true;$('win').hidden=false;
+function win(){mode='won';emit('win');hold=false;held=null;voice('win',1);clip('sfx/fanfare',{vol:.7});updMusic();if(document.exitPointerLock)document.exitPointerLock();$('hud').hidden=true;$('win').hidden=false;
   const m=Math.floor(time/60),s=Math.floor(time%60);$('stats').textContent=`${lungs.toLocaleString()} lungs visited · ${npcs.filter(n=>n.hooked).length} townsfolk hooked · ${m}:${String(s).padStart(2,'0')} · best combo x${best}`;try{const bt=+localStorage.getItem('tmv_best')||0;if(!bt||time<bt)localStorage.setItem('tmv_best',String(Math.round(time)));const b2=bt&&bt<time?bt:Math.round(time);$('stats').textContent+=` · fastest ${Math.floor(b2/60)}:${String(Math.floor(b2%60)).padStart(2,'0')}`}catch(e){}}
-function start(){mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();toast('GET RID OF THEM',2.5);updMusic();clip('sfx/slam',{vol:.5});setTimeout(()=>{if(BUF['vo/start'])voice('start',1)},700)}
-function reset(){px=0;pz=5;yaw=pitch=0;count=5000;used=0;charge=1;combo=0;best=1;lungs=0;time=0;heat=0;twist=false;newsI=0;for(const k in act)act[k]=0;
+function start(){if(!STOCK.some(s=>s>0)){fillStock(count);setFlav(ri(FLAV.length),1)}for(const n of npcs)if(n.crave==null)setCrave(n);mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();toast('GET RID OF THEM',2.5);emit('start');updMusic();clip('sfx/slam',{vol:.5});setTimeout(()=>{if(BUF['vo/start'])voice('start',1)},700)}
+function reset(){px=0;pz=5;yaw=pitch=0;count=5000;STOCK.fill(0);for(const n of npcs)n.crave=null;used=0;charge=1;combo=0;best=1;lungs=0;time=0;heat=0;twist=false;newsI=0;for(const k in act)act[k]=0;
   for(const n of npcs){n.state='wander';n.times=0;n.hooked=n.type==='gym';n.cool=0;n.inh=0;n.fl=0;for(const wm of n.H.Wh)wm.material=M(0xffffff);n.g.position.set(n.hx,0,n.hzz)}seedPicks();start()}
-$('go').onclick=start;$('again').onclick=reset;
+$('go').onclick=start;$('vape').addEventListener('click',()=>cycleFlav(1));$('again').onclick=reset;
 if(touch)$('how').textContent='Left thumb moves, right thumb looks. Walk up to anything alive and hold VAPE to push it into its mouth. Let go in the green for a perfect rip. Grab the glowing crates.';
 const rc=$('radar').getContext('2d');
 function radar(){const S=208,h=104,sc=h/62,sn=Math.sin(yaw),cs=Math.cos(yaw);rc.clearRect(0,0,S,S);rc.fillStyle='rgba(20,15,28,.72)';rc.beginPath();rc.arc(h,h,h,0,7);rc.fill();
@@ -567,7 +583,7 @@ function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,
   if(want){arms=n.A.length?2:0;if(d>1.7+n.r){go(n,px,pz,ty.speed*.85,dt);mv=1}else n.g.rotation.y=Math.atan2(-dx,-dz);
     n.sayT-=dt;if(n.sayT<0){n.sayT=rand(4,10);if(d<12){say(n,pick(ty.want),2);call(n,0)}}}
   else if(n.type==='cop'&&heat>.3&&d<48&&n.state!=='flee'){if(copT<=0&&d<30)clip('sfx/whistle',{vol:.35*(1-d/30)});copT=2;go(n,px,pz,ty.speed,dt);mv=1;n.sayT-=dt;if(n.sayT<0){n.sayT=rand(3,6);say(n,pick(['STOP! VAPE POLICE!','DROP THE MANGO','HANDS OFF THE PIGEON']),1.6)}
-    if(d<1.4&&n.bust<=0&&stun<=0&&held!==n){n.bust=7;combo=Math.floor(combo/2);stun=.5;pvx=-dx/d*16;pvz=-dz/d*16;if(held)release(held,'ok');toast('BUSTED — HALF YOUR COMBO CONFISCATED',1.8);sfx(0);voice('busted',1);if(!clip('sfx/whistle',{vol:.55})){beep(200,.3,'sawtooth',.08);beep(150,.4,'sawtooth',.08,.15)}}}
+    if(d<1.4&&n.bust<=0&&stun<=0&&held!==n){n.bust=7;combo=Math.floor(combo/2);stun=.5;pvx=-dx/d*16;pvz=-dz/d*16;if(held)release(held,'ok');toast('BUSTED — HALF YOUR COMBO CONFISCATED',1.8);emit('bust',n);sfx(0);voice('busted',1);if(!clip('sfx/whistle',{vol:.55})){beep(200,.3,'sawtooth',.08);beep(150,.4,'sawtooth',.08,.15)}}}
   else if(n.state==='flee'){n.tm-=dt;arms=1;face=3;let fx=dx/d,fz=dz/d;if(ty.zig){const w=Math.sin(t*5+n.ph)*.7;fx+=-dz/d*w;fz+=dx/d*w}
     if(Math.abs(p.x)>B-8||Math.abs(p.z)>B-8){fx=-p.x;fz=-p.z}
     n.fl+=dt;go(n,p.x+fx*5,p.z+fz*5,ty.speed*Math.max(.5,1-.12*n.times)*Math.max(.6,1-n.fl*.07),dt);mv=1;if(n.fl>5&&Math.random()<dt*.4)say(n,pick(['*wheeze*','ok… ok…','my lungs']),1.2);if(ty.hop)p.y=Math.abs(Math.sin(t*11+n.ph))*.6;if(n.tm<0&&d>alertR+4){n.state='wander';n.tm=0}}
@@ -591,7 +607,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
     const holding=(hold||keys.Space)&&stun<=0;
     fwd.set(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch));
     tgt=null;if(!held){let bestA=9;for(const n of npcs){if(n.state==='exhale'||n.cool>0)continue;mouth(n,tmp).sub(cam.position);const d=tmp.length();if(d>(touch?5:4.3)+n.r)continue;const a=tmp.angleTo(fwd)-n.r/d*.6;if(a<(touch?.8:.55)+(d<2.6?.6:0)&&a<bestA){bestA=a;tgt=n}}}
-    if(holding&&!held&&tgt){held=tgt;held.state='held';held.inh=0;holdN=0}
+    if(holding&&!held&&tgt){held=tgt;held.state='held';held.inh=0;holdN=0;emit('grab',held)}
     const lg=$('lung');
     if(held){const n=held,fq=n.inh/n.t.cap;lg.classList.toggle('zone',fq>=.7&&fq<=1);lg.classList.toggle('over',fq>1);$('lungv').style.width=clamp(fq/1.25,0,1)*100+'%';$('lungt').textContent=fq>1?'TOO MUCH!!':fq>=.7?'LET GO NOW':'LET GO IN THE GREEN';
       if(!holding)release(n,fq>=.7?'perfect':'ok');else if(fq>=1.25)release(n,'over');else{n.inh+=dt;if(fq<1)drain(n.t.rate*mult()*dt);
@@ -603,7 +619,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
     ext=lerp(ext,held||(act.fog>0&&holding)?1:0,Math.min(1,dt*14));{const suck=!!(held||(act.fog>0&&holding));if(BUF['sfx/inhale']){if(suck&&!inS){inS=clip('sfx/inhale',{loop:true,vol:held?.45:.3,rate:rand(.95,1.1)})}else if(!suck&&inS){fadeStop(inS,.06);inS=null}if(inG)inG.gain.value=0}else if(inG)inG.gain.value=lerp(inG.gain.value,suck?.07:0,.08)}
     pickT-=dt;if(pickT<0){pickT=7;spawnPick()}
     for(let i=picks.length-1;i>=0;i--){const p=picks[i];p.cr.rotation.y+=dt*2;p.cr.rotation.x+=dt;p.g.position.y=1.2+Math.sin(t*3+i)*.2;
-      if(Math.hypot(p.g.position.x-px,p.g.position.z-pz)<1.8){act[p.k]=PW[p.k].dur;toast(PW[p.k].msg,2.4);if(tut===2){tut=3;tutT=8}voice(p.k,1);scene.remove(p.g);picks.splice(i,1);if(p.k==='boost')clip('sfx/fire',{vol:.6});if(!clip('sfx/pickup',{vol:.55}))[440,660,880].forEach((q,j)=>beep(q,.15,'triangle',.05,j*.08))}}
+      if(Math.hypot(p.g.position.x-px,p.g.position.z-pz)<1.8){act[p.k]=PW[p.k].dur;toast(PW[p.k].msg,2.4);emit('pickup',p.k);if(tut===2){tut=3;tutT=8}voice(p.k,1);scene.remove(p.g);picks.splice(i,1);if(p.k==='boost')clip('sfx/fire',{vol:.6});if(!clip('sfx/pickup',{vol:.55}))[440,660,880].forEach((q,j)=>beep(q,.15,'triangle',.05,j*.08))}}
     for(const k in act){const on=act[k]>0;if(on)act[k]-=dt;if(pwEl[k].hidden===on)pwEl[k].hidden=!on;if(on)pwEl[k].lastChild.style.width=act[k]/PW[k].dur*100+'%'}
     armL.visible=act.dual>0;const bz=act.boost>0;$('fx').classList.toggle('boost',bz);glow.intensity=bz?1.5+Math.sin(t*20)*.5:0;
     vapeMat.emissive.setHex(bz?0xff4a00:0);vapeMat.emissiveIntensity=bz?.7+Math.sin(t*25)*.3:0;labelMat.emissive.copy(vapeMat.emissive);labelMat.emissiveIntensity=vapeMat.emissiveIntensity;
@@ -613,14 +629,14 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
     dingT-=dt;lT-=dt;tossT-=dt;copT-=dt;if(fr%20===0)updMusic();heat=Math.max(0,heat-dt*.012);alertR=3+13*heat;
     if(count!==shown||fr%6===0)drawLCD();if(count!==shown){shown=count;numEl.textContent=count.toLocaleString();numEl.classList.toggle('bump',!!held)}
     $('multv').textContent='x'+(Math.round(mult()*10)/10);$('charge').style.width=clamp(charge,0,1)*100+'%';$('panicv').style.width=heat*100+'%';
-    const pr=$('prompt');pr.hidden=!(tgt&&!held);if(tgt&&!held)pr.textContent=(touch?'Hold VAPE':'Hold click')+' to vape the '+tgt.t.name;lg.hidden=!held;if(touch)vbtn.style.opacity=tgt||held?1:.6;
+    const pr=$('prompt');pr.hidden=!(tgt&&!held);if(tgt&&!held)pr.textContent=(touch?'Hold VAPE':'Hold click')+' to vape the '+tgt.t.name+(tgt.crave!=null?(tgt.crave===fi?' — '+FLAV[tgt.crave][2]+' CRAVING MATCH!':' — craves '+FLAV[tgt.crave][2]):'');lg.hidden=!held;if(touch)vbtn.style.opacity=tgt||held?1:.6;
     if(fr%3===0)radar();voxN=Math.max(0,voxN-dt*6);ambient(dt);
     if(tut===3){tutT-=dt;if(tutT<0)tut=4}
     {const hs=['Walk up to anyone and hold '+(touch?'VAPE':'click')+' on their face','Let go while the bar is green for a PERFECT RIP','Grab a glowing crate for a power-up','Radar, top right: white dots are fresh lungs, green are hooked',''][Math.min(tut,4)],he=$('hint');if(he.textContent!==hs){he.textContent=hs;he.hidden=!hs}}
     if(newsT>0){newsT-=dt;if(newsT<=0)newsEl.classList.remove('on')}
   }
   if(toastT>0){toastT-=dt;if(toastT<=0)toastEl.classList.remove('on')}
-  for(const n of npcs)think(n,dt,t);
+  for(const n of npcs){think(n,dt,t);if(n.cb){const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz),on=mode==='play'&&d<18&&n.state!=='held';n.cb.visible=on;if(on)n.cb.position.set(n.g.position.x,n.g.position.y+n.hy+(n.r>.55?1.2:.85)+Math.sin(t*3+n.ph)*.06,n.g.position.z)}}
   waterM.map.offset.x=t*.03;for(const c of clouds){c.position.x+=dt*1.5;if(c.position.x>280)c.position.x=-280}
   for(const p of puffs){if(p.life<=0)continue;p.life-=dt;if(p.life<=0){p.s.visible=false;continue}const k=1-p.life/p.max,sc=p.a+(p.b-p.a)*k;p.s.scale.set(sc,sc,1);p.s.material.opacity=.7*(1-k)*Math.min(1,k*8);
     p.s.position.x+=p.vx*dt;p.s.position.y+=p.vy*dt;p.s.position.z+=p.vz*dt;const dm=1-1.6*dt;p.vx*=dm;p.vz*=dm;p.vy=p.vy*dm+.25*dt}
@@ -637,9 +653,22 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
   for(const b of bubs){if(!b.n){if(!b.d.hidden)b.d.hidden=true;continue}b.t-=dt;if(b.t<=0||mode!=='play'){b.n=null;b.d.hidden=true;continue}
     tmp.copy(b.n.g.position);tmp.y+=b.n.hy+.6;const dist=tmp.distanceTo(cam.position);tmp.project(cam);
     if(tmp.z>1||dist>34){b.d.hidden=true;continue}b.d.hidden=false;b.d.style.transform=`translate(${(tmp.x*.5+.5)*w}px,${(-tmp.y*.5+.5)*h}px) translate(-50%,-100%)`}
+  if(mode==='play')emit('frame',dt,t);emit('prerender',dt,t);
   R.render(scene,cam);
 }
 requestAnimationFrame(frame);
+/* ================= MOD API =================
+   Features live in js/<name>.js and talk to the game only through window.TMV (state getters/setters, helpers, events).
+   Events: start, win, frame(dt,t) during play, prerender(dt,t) every frame, grab(n), release(n,kind,match), vape(flavorIndex), pickup(kind), bust(cop). */
+const HOOKS={};function on(e,f){(HOOKS[e]=HOOKS[e]||[]).push(f)}function emit(e,a,b,c){const L=HOOKS[e];if(L)for(const f of L)try{f(a,b,c)}catch(err){console.error('[mod '+e+']',err)}}
+window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,AMB,cols,picks,puffs,armR,armL,grab,vapeMat,labelMat,touch,LINES,B,
+  on,emit,$,rand,ri,pick,clamp,lerp,spawn,spawnPick,setCrave,setFlav,cycleFlav,clip,voice,toast,say,beep,slide,puff,emo,emoTex,drain,release,mouth,inkify,toon,tk,seg,mk,box,ball,cyl,cone,dome,M,TM,TX,solid,collide,roadPt,building,container,tree,car,sign,arch,human,quad,eyeHead,hair,pose,think,win,start,
+  setRes(n){RES=n;size()},get RES(){return RES},
+  get mode(){return mode},set mode(v){mode=v},get count(){return count},set count(v){count=v},get used(){return used},get px(){return px},set px(v){px=v},get pz(){return pz},set pz(v){pz=v},
+  get yaw(){return yaw},set yaw(v){yaw=v},get pitch(){return pitch},set pitch(v){pitch=v},get heat(){return heat},set heat(v){heat=v},get combo(){return combo},set combo(v){combo=v},
+  get held(){return held},get tgt(){return tgt},get time(){return time},get lungs(){return lungs},get best(){return best},get stun(){return stun},set stun(v){stun=v},get fi(){return fi},get flav(){return flav},
+  get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
+['campaign','mobile','crowds','world','juice'].forEach(n=>{const s=document.createElement('script');s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
 if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!labelMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
 })();
 </script>
