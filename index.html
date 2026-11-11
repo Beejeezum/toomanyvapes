@@ -737,7 +737,6 @@ for(const k in PW){act[k]=0;const d=document.createElement('div');d.className='p
 function spawnPick(k,x,z){if(picks.length>=7)return;k=k||pick(Object.keys(PW));const P=PW[k],g=new T.Group(),m=new T.MeshToonMaterial({gradientMap:GRAD,color:P.c,emissive:P.c,emissiveIntensity:.55});
   const cr=new T.Group();box(cr,.8,.8,.8,m,0,0,0);box(cr,.86,.14,.86,0x2a2433,0,0,0);box(cr,.14,.86,.86,0x2a2433,0,0,0);g.add(cr);
   const s=new T.Sprite(new T.SpriteMaterial({map:emoTex(P.e),transparent:true,depthWrite:false}));s.position.y=1.15;s.scale.set(1,1,1);g.add(s);
-  cyl(g,.9,60,.9,new T.MeshBasicMaterial({color:P.c,transparent:true,opacity:.16,depthWrite:false}),0,30,0);
   if(x===undefined)[x,z]=roadPt();g.position.set(x,1.2,z);scene.add(g);picks.push({g,cr,k})}
 function seedPicks(){while(picks.length)scene.remove(picks.pop().g);spawnPick('boost',-3,1);spawnPick('fog');spawnPick('dual');spawnPick('chain');spawnPick('rush')}
 seedPicks();

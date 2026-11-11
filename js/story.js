@@ -496,8 +496,8 @@ function uiStep(dt,t){const n=st.ch,live=X.mode==='play'&&st.phase==='play'&&!se
   let cv=0,cx=0,cy=0,cr=0;const c=!outside&&live?ui.near:null;
   if(c&&c.g){const p=c.g.position,d=Math.hypot(p.x-X.px,p.z-X.pz),hy=headY(c)+(c.boss?1.6:.9);camSpace(p.x,hy,p.z);
     VP.set(p.x,hy,p.z).project(X.cam);const on=VC.z<0&&Math.abs(VP.x)<.92&&Math.abs(VP.y)<.88;
-    if(on&&(d>TAG_R||c.boss)){cv=1;cx=(VP.x*.5+.5)*GW0;cy=(-VP.y*.5+.5)*GH0+Math.sin(t*5)*3;cr=0}
-    else if(!on){cv=.9;const b=Math.atan2(VC.x,-VC.z);[cx,cy]=edgePos(b);cr=b+PI}}
+    // no floating marker over people (user): only an edge pointer when the target is off screen
+    if(!on){cv=.9;const b=Math.atan2(VC.x,-VC.z);[cx,cy]=edgePos(b);cr=b+PI}}
   ui.chev+=clamp(cv-ui.chev,-dt*6,dt*4);
   if(ui.chev*ui.a>.01&&(cx||cy))setUI(chev,cx,cy,cr,ui.chev*ui.a);else if(ui.tick&&chev.style.opacity!=='0')chev.style.opacity='0';
   // paper tags over eligible creatures within ~20 m
@@ -506,6 +506,7 @@ function uiStep(dt,t){const n=st.ch,live=X.mode==='play'&&st.phase==='play'&&!se
     if(tg.n!==cn){tg.n=cn;tg.a=0}
     if(!cn||!elig(cn,n)){tg.a=Math.max(0,tg.a-dt*5);if(tg.a<=0){tg.s.visible=false;continue}}
     else{const d=Math.hypot(cn.g.position.x-X.px,cn.g.position.z-X.pz),want=clamp((TAG_R+2-d)/6,0,1);tg.a+=clamp(want-tg.a,-dt*5,dt*3)}
+    tg.s.visible=false;continue;// no floating tags over people (user)
     if(!tg.n||tg.a<=.01){tg.s.visible=false;continue}
     const p=tg.n.g.position;if(tg.m.map!==tex){tg.m.map=tex;tg.m.needsUpdate=true}
     tg.s.position.set(p.x,headY(tg.n)+Math.sin(t*3.2+tg.ph)*.09+.15,p.z);{const k=1+Math.hypot(p.x-X.px,p.z-X.pz)/28;tg.s.scale.set(.56*k,.7*k,1)}tg.m.opacity=qa(tg.a*ui.a)*.95;tg.s.visible=tg.m.opacity>.01}}
