@@ -763,7 +763,7 @@ const GC=new T.Vector3(),GB=new T.Vector3(),GL=new T.Vector3(),GU=new T.Vector3(
   GCU=[[.4,.6,.5],[.4,.6,.5],[.4,.6,.5],[.4,.6,.5]];let gs=1,gr=.25,gth=-.3;
 // the relaxed left hand: palm down at the lower left, fingers pointing forward-right and loosely curled
 {GD.set(.3,-.95,.05).normalize();GF.set(.42,-.1,-.9);GF.addScaledVector(GD,-GF.dot(GD)).normalize();GZ.crossVectors(GD,GF);GM.makeBasis(GD,GF,GZ);IQ.setFromRotationMatrix(GM);GQ.copy(IQ)}
-function grabPose(dt,t){const on=mode==='play'&&act.dual<=0&&armR.visible;grab.visible=on;if(!on){gk=0;return}
+function grabPose(dt,t){const on=false;/* the old 3D grab hand is retired: only the clay right hand (js/hands.js) is ever on screen */grab.visible=on;if(!on){gk=0;return}
   gk=lerp(gk,held?1:0,Math.min(1,dt*(held?11:7)));
   const af=clamp(cam.aspect/1.6,.3,1.1);IP.set(-.3*af+Math.sin(t*.8)*.006,-.33+Math.sin(t*1.9)*.006-clamp((1-cam.aspect)*.45,0,.22),-.62+Math.sin(t*1.1)*.006);
   if(held){cam.updateMatrixWorld();held.H.h.updateMatrixWorld();held.H.h.getWorldPosition(GC);cam.worldToLocal(GC);
@@ -1129,7 +1129,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
     for(let i=picks.length-1;i>=0;i--){const p=picks[i];if(!RMQ.matches){const q=Math.floor(t*12)/12;p.cr.rotation.y=q*1.4+p.g.id*1.7;p.g.position.y=1.12+Math.sin(q*2.6+p.g.id)*.12} /* turned a notch at a time, on twos */
       if(Math.hypot(p.g.position.x-px,p.g.position.z-pz)<1.8){act[p.k]=PW[p.k].dur;toast(PW[p.k].msg,2.4);emit('pickup',p.k);if(tut===2){tut=3;tutT=8}voice(p.k,1);scene.remove(p.g);picks.splice(i,1);if(p.k==='boost')clip('sfx/fire',{vol:.6});if(!clip('sfx/pickup',{vol:.55}))[440,660,880].forEach((q,j)=>beep(q,.15,'triangle',.05,j*.08))}}
     for(const k in act){const on=act[k]>0;if(on)act[k]-=dt;if(pwEl[k].hidden===on)pwEl[k].hidden=!on;if(on)pwEl[k].lastChild.style.width=act[k]/PW[k].dur*100+'%'}
-    armL.visible=act.dual>0;const bz=act.boost>0;$('fx').classList.toggle('boost',bz);glow.intensity=bz?1.5+Math.sin(t*20)*.5:0;
+    armL.visible=false;const bz=act.boost>0;$('fx').classList.toggle('boost',bz);glow.intensity=bz?1.5+Math.sin(t*20)*.5:0;
     vapeMat.emissive.setHex(bz?0xff4a00:0);vapeMat.emissiveIntensity=bz?.7+Math.sin(t*25)*.3:0;labelMat.emissive.copy(vapeMat.emissive);labelMat.emissiveIntensity=vapeMat.emissiveIntensity;
     if(bz&&Math.random()<dt*24){cam.localToWorld(tmp.set(.3-ext*.2,-.25,-.9));puff(tmp.x,tmp.y,tmp.z,rand(-.3,.3),rand(.8,1.6),rand(-.3,.3),fireC,.6,.08,.4)}
     const fv=act.rush>0?90:75;if(Math.abs(cam.fov-fv)>.1){cam.fov=lerp(cam.fov,fv,.1);cam.updateProjectionMatrix()}

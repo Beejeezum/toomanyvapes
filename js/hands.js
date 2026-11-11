@@ -58,12 +58,12 @@ function aimAt(useStraw){tgt.ok=false;const n=X.held||held;if(!n||!V||!X.mouth)r
 /* straw: while held, their actual mouth (H.m) is pinned to one fixed point in front of the lens (centre, at the vape tip's depth),
    re-pinned every frame after the camera moves, and the core's lip-lock target (the invisible armR.tip) is parked on the same point,
    so neither the mouth nor the clay pod's white tip jiggles: they sip from it like a straw. */
-const S=X.T?new X.T.Vector3():null,SW=X.T?new X.T.Vector3():null,SM=X.T?new X.T.Vector3():null;let sOn=null,tipRest=null,fCur='out';
+const S=X.T?new X.T.Vector3():null,SW=X.T?new X.T.Vector3():null,SM=X.T?new X.T.Vector3():null;let sOn=null,tipRest=null,fCur='out';const STRAW=[.5,.52];// where on screen (0..1) the straw point sits
 function straw(){const n=X.held,tip=X.armR&&X.armR.tip,cam=X.cam;if(!tip||!S)return false;if(!tipRest)tipRest=tip.position.clone();
   if(!n||!n.H||!n.H.m||!n.g||X.mode!=='play'){if(sOn){tip.position.copy(tipRest);sOn=null}return false}
   cam.updateMatrixWorld();
   if(sOn!==n){sOn=n;tip.position.copy(tipRest);tip.parent.updateMatrixWorld(true);tip.getWorldPosition(SW);cam.worldToLocal(SW);
-    const d=Math.max(.7,Math.min(1.3,-SW.z));S.set(0,-.03*d,-d)}
+    const d=Math.max(.7,Math.min(1.3,-SW.z)),th=Math.tan(cam.fov*Math.PI/360);S.set((STRAW[0]*2-1)*d*th*cam.aspect,(1-STRAW[1]*2)*d*th,-d)}
   SW.copy(S);cam.localToWorld(SW);
   n.g.updateMatrixWorld(true);n.H.m.getWorldPosition(SM);n.g.position.x+=SW.x-SM.x;n.g.position.y+=SW.y-SM.y;n.g.position.z+=SW.z-SM.z;n.g.updateMatrixWorld(true);
   tip.parent.updateMatrixWorld(true);SM.copy(SW);tip.parent.worldToLocal(SM);tip.position.copy(SM);return true}
@@ -111,7 +111,7 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   {const fm=M.R.f[f]&&M.R.f[f].mp;if(fm){const px=W,py=H,dmx=W-Wc+fm[0]*Wc-px,dmy=H-Hc+fm[1]*Hc-py,a=rot*Math.PI/180,c=Math.cos(a),s2=Math.sin(a);
     mp.x=px+sc*(dmx*c-dmy*s2)+tx;mp.y=py+sc*(dmx*s2+dmy*c)+ty;mp.ok=true}else mp.ok=false;mp.k=aimK}
   // ---- double-vape: mirrored clay hand + pod bottom-left, moving as the right hand's reflection
-  const dual=!!(X.act&&X.act.dual>0)&&play;
+  const dual=false;// no second (mirrored) hand on screen, even with the double-vape power-up: just the right hand (user)
   if(dual){show('D',FD[f]||FD.out);DV.style.transform=`translate(${(-tx).toFixed(1)}px,${ty.toFixed(1)}px) rotate(${(-rot).toFixed(2)}deg) scale(${sc.toFixed(3)})`}
   else if(cur.D){show('D',null);DV.style.transform='translateY(110%)'}
   // ---- left hand: only while grabbing someone; steps up (open → grip) toward their head, drops after
@@ -127,5 +127,5 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
       const gy=gy0+lift,a0=Math.atan2(gy-H-lift,gx),a1=Math.atan2(tgt.y+H*.04-H-lift,tgt.x-W*.05);
       lr+=Math.max(-24,Math.min(16,(a1-a0)*180/Math.PI))*reach}if(!rm){const j=boilK*1.91;lx+=Math.sin(j*1.3)*W*.001;ly+=Math.cos(j*2.3)*H*.003;lr+=Math.sin(j*2.9)*.4}
     L.style.transform=`translate(${lx.toFixed(1)}px,${ly.toFixed(1)}px) rotate(${lr.toFixed(2)}deg)`}});
-X.hands={wrap,get phase(){return phase},get mp(){return mp}};
+X.hands={wrap,get phase(){return phase},get mp(){return mp},straw:STRAW};
 })();
