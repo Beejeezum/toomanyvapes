@@ -1115,7 +1115,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
   if(swapT>0){swapT-=dt;const sw=Math.sin(Math.max(0,swapT)/.2*PI);armR.position.y-=sw*.13;armR.rotation.z+=sw*.5}
   grabPose(dt,t);salTick(dt,t);
   if(!mark.material.map&&TMV.icons){mark.material.map=TMV.icons.tex('🔻');mark.material.opacity=1;mark.material.needsUpdate=true}
-  if(tgt&&!held&&mode==='play'){mark.visible=true;const q=RMQ.matches?0:Math.floor(t*12);mark.position.set(tgt.g.position.x,tgt.g.position.y+tgt.hy+.8+(q%4<2?.05:-.02),tgt.g.position.z);mark.material.rotation=RMQ.matches?0:[.05,-.04,.02,-.06][q%4]}else mark.visible=false;
+  if(false&&tgt&&!held&&mode==='play'){/* no floating marker over whoever you aim at (user hates floating targets on people) */mark.visible=true;const q=RMQ.matches?0:Math.floor(t*12);mark.position.set(tgt.g.position.x,tgt.g.position.y+tgt.hy+.8+(q%4<2?.05:-.02),tgt.g.position.z);mark.material.rotation=RMQ.matches?0:[.05,-.04,.02,-.06][q%4]}else mark.visible=false;
   cam.updateMatrixWorld();const w=game.clientWidth,h=game.clientHeight;
   for(const b of bubs){if(!b.n){if(!b.d.hidden)b.d.hidden=true;continue}b.t-=dt;if(b.t<=0||mode!=='play'){b.n=null;b.d.hidden=true;continue}
     tmp.copy(b.n.g.position);tmp.y+=b.n.hy+.6;const dist=tmp.distanceTo(cam.position);tmp.project(cam);

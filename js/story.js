@@ -553,7 +553,7 @@ function prep(n){populate(n);audStart(n);
 
 /* ---------- beacon: a tall coloured cotton-cloud column + orbiting vapes over the target district ---------- */
 let bc=null;const SPH=new T.SphereGeometry(1,10,8),VBX=new T.BoxGeometry(.9,1.3,.55);
-function beaconOn(n){beaconOff(true);const P=PLAN[n];if(n===1)return;
+function beaconOn(n){beaconOff(true);return;/* no cloud-column beacon over districts (user: no beacons); the mission panel + edge pointer guide you */const P=PLAN[n];if(n===1)return;
   const g=new T.Group(),m=new T.MeshBasicMaterial({color:P.col,transparent:true,opacity:0,depthWrite:false,fog:false}),
     mw=new T.MeshBasicMaterial({color:0xfff7ea,transparent:true,opacity:0,depthWrite:false,fog:false}),cubes=[];
   for(let i=0;i<15;i++){const s=new T.Mesh(SPH,i%3?m:mw),r=2+i*.12+rand(0,.8);s.scale.set(r,r*1.2,r);s.position.set(rand(-.8,.8),5+i*4.2,rand(-.8,.8));s.userData.y0=s.position.y;s.userData.ph=rand(0,6);g.add(s)}

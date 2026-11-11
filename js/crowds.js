@@ -214,7 +214,7 @@ function spawnBoss(key){const c=BOSS[key];if(!c)return null;if(c.n)return c.n;TM
   n.boss={cfg:c,key,hp:c.goal,dead:0,met:0,sing:2,blow:3,pulse:5,hum:0,hx:TMP.x,hz:TMP.z};n.g.rotation.order='YXZ';n._tilt=0;n._bend=0;n.hooked=false;n.cool=0;n.fem=key==='diva';n.vp=key==='diva'?1.25:key==='prime'?.8:1.05;n.emo=c.emo;
   if(key==='diva')n.g.rotation.y=PI;// facing the benches
   n._ox=TMP.x;n._oz=TMP.z;if(X.setCrave)X.setCrave(n);
-  if(!c.noBar)c.beam=X.cyl(scene,1.6,70,1.6,new T.MeshBasicMaterial({color:c.col,transparent:true,opacity:.15,depthWrite:false}),TMP.x,35,TMP.z);
+  if(false&&!c.noBar)c.beam=X.cyl(/* no translucent light column over bosses (user: no beacons) */scene,1.6,70,1.6,new T.MeshBasicMaterial({color:c.col,transparent:true,opacity:.15,depthWrite:false}),TMP.x,35,TMP.z);
   c.crown=new T.Sprite(new T.SpriteMaterial({map:X.emoTex(key==='diva'?'🎶':'👑'),transparent:true,depthWrite:false,fog:false}));c.crown.scale.set(1.1,1.1,1);scene.add(c.crown);
   c.n=n;c.spawned=1;showCard('',c.name);fanfare();X.emit('boss',n,'spawn');return n}
 function despawn(c){const n=c.n;if(n){scene.remove(n.g);if(n.cb)scene.remove(n.cb);const i=npcs.indexOf(n);if(i>=0)npcs.splice(i,1);if(n.boss&&n.boss.toss)scene.remove(n.boss.toss.g)}if(c.beam)scene.remove(c.beam);if(c.crown)scene.remove(c.crown);c.n=c.beam=c.crown=null;c.spawned=0}
