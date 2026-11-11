@@ -414,8 +414,15 @@ const TORSO=lathe('torso',[[0,-.5],[.36,-.49],[.43,-.42],[.47,-.2],[.49,.05],[.4
 const TXkid=TX(16,(k,n)=>{k.fillStyle='#f6f1e8';k.fillRect(0,0,n,n);k.fillStyle='#d8343a';k.fillRect(0,0,n,8)}),
  TXflor=TX(32,(k,n)=>{k.fillStyle='#f1e2c8';k.fillRect(0,0,n,n);for(let i=0;i<8;i++){const x=ri(n),y=ri(n);k.fillStyle='#6a9a5a';k.fillRect(x+2,y+1,3,2);k.fillStyle=pick(['#e0607a','#d84a5a','#f08aa0']);k.beginPath();k.arc(x,y,2.4,0,7);k.fill()}}),
  TXknit=TX(16,(k,n)=>{k.fillStyle='#fff';k.fillRect(0,0,n,n);k.fillStyle='rgba(0,0,0,.14)';for(let x=0;x<n;x+=4)k.fillRect(x,0,1.5,n)}),
- TXflam=TX(64,(k,n)=>{k.fillStyle='#2bb5a8';k.fillRect(0,0,n,n);const F=(x,y,s)=>{k.fillStyle='#f27fae';k.beginPath();k.ellipse(x,y,7*s,4.5*s,-.3,0,7);k.fill();k.strokeStyle='#f27fae';k.lineWidth=2.4*s;k.beginPath();k.moveTo(x+5*s,y-2*s);k.quadraticCurveTo(x+9*s,y-10*s,x+4*s,y-13*s);k.stroke();
-   k.beginPath();k.arc(x+4*s,y-14*s,2.6*s,0,7);k.fill();k.strokeStyle='#d0607e';k.lineWidth=1.3*s;k.beginPath();k.moveTo(x-1*s,y+4*s);k.lineTo(x-1*s,y+13*s);k.moveTo(x+1*s,y+4*s);k.lineTo(x+3*s,y+9*s);k.stroke()};F(16,24,1);F(46,52,.9);F(48,16,.8);F(14,56,.8)});
+ // Sal's shirt matches the cutscene puppet: turquoise cotton with standing pink flamingos (S-neck, dark-tipped beak, one leg tucked), a few facing each way
+ TXflam=TX(128,(k,n)=>{k.fillStyle='#1d9aa6';k.fillRect(0,0,n,n);k.lineCap=k.lineJoin='round';
+   const F=(x,y,s,f)=>{k.save();k.translate(x,y);k.scale(f*s,s);
+     k.strokeStyle='#d0608e';k.lineWidth=1.6;k.beginPath();k.moveTo(.5,5);k.lineTo(.5,24);k.moveTo(-1,5);k.lineTo(-5,13);k.lineTo(1,15);k.stroke();
+     k.strokeStyle='#c8578a';k.lineWidth=5;k.beginPath();k.moveTo(5,-2);k.bezierCurveTo(12,-9,3,-14,6,-21);k.stroke();k.fillStyle='#c8578a';k.beginPath();k.ellipse(0,0,10.2,7,-.35,0,7);k.fill();k.beginPath();k.arc(6.5,-22,4,0,7);k.fill();
+     k.strokeStyle='#f283b6';k.lineWidth=3.2;k.beginPath();k.moveTo(5,-2);k.bezierCurveTo(12,-9,3,-14,6,-21);k.stroke();k.fillStyle='#f283b6';k.beginPath();k.ellipse(0,0,9,5.9,-.35,0,7);k.fill();k.beginPath();k.arc(6.5,-22,3,0,7);k.fill();
+     k.fillStyle='#e0679c';k.beginPath();k.ellipse(-2.5,.5,5.6,3.2,-.3,0,7);k.fill();k.fillStyle='#2a1a20';k.beginPath();k.arc(7.4,-22.8,.9,0,7);k.fill();
+     k.strokeStyle='#f4e6d6';k.lineWidth=2;k.beginPath();k.moveTo(9,-22);k.lineTo(11.5,-20);k.stroke();k.strokeStyle='#241820';k.beginPath();k.moveTo(11.5,-20);k.lineTo(12,-17);k.stroke();k.restore()};
+   F(24,40,1,1);F(90,34,.95,-1);F(58,98,1,1);F(108,100,.9,-1);F(60,46,.8,1)});
 /* head: skull, two bead eyes (sclera Wh turns pink when hooked; o.bead = solid black bead), dark mouth H.m, two cheek balls H.C that puff out on the inhale */
 function eyeHead(g,d,skin,y,z,o){o=o||{};const h=new T.Group();h.position.set(0,y,z);g.add(h);if(!o.bare)orb(h,d,d*1.04,d*.95,skin,0,0,0);const E=[],Wh=[],es=(o.es||1)*1.1;
   for(const s of[-1,1]){const e=new T.Group();e.position.set(s*d*(o.ex||.21),d*(o.ey||.08),d*(o.ez||.4));if(o.ry)e.rotation.y=s*o.ry;h.add(e);E.push(e);let fz;
@@ -593,12 +600,29 @@ populate();
 /* ================= SAL =================
    The boss, a short stocky clay puppet standing in the Cloud Kingz doorway. Not a creature: never in npcs, never vapable.
    Idles nervously (weight shifting, wiping his head, pointing out at the town). TMV.sal.setMood('scared'|'happy'|'greedy'|null) for the story. */
-const SAL=(()=>{const b=human({w:.74,depth:.56,head:.55,arm:.125,leg:.125,skin:0xc48a5c,hairC:0x3a2616,hair:'fringe',browC:0x3a2616,pants:0xf3f0e8,shirt:TM(TXflam,3,2),sleeve:TM(TXflam,1.5,1),short:1,shoeS:'loafer',shoe:0xf6f3ec,belt:0xe8e2d4,must:2,mustC:0x141012,
-  extra:(U,H,A,b)=>{const d=H.d;
-    // aviators pushed up on the bald head, gold chain on a bit of chest, open teal collar
-    const av=new T.Group();av.position.set(0,d*.44,d*.2);av.rotation.x=-.8;H.h.add(av);for(const s of[-1,1]){orb(av,d*.3,d*.22,d*.06,0x2a2e36,s*d*.17,0,0);hoop(av,d*.32,d*.25,d*.2,0x9a9ca4,s*d*.17,0,0)}tube(av,d*.1,d*.03,d*.03,0x9a9ca4,0,d*.05,0).rotation.z=PI/2;
-    orb(U,.16,.12,.06,b.sk,0,1.4,.2);const ch=arc(U,.22,.2,.3,0xe8c040,0,1.42,.2);ch.rotation.set(-.25,0,PI);for(const s of[-1,1]){const c=orb(U,.16,.05,.14,0x2bb5a8,s*.09,1.45,.14);c.rotation.set(-.5,0,s*.7)}
-    b.smile=keep(arc(H.h,d*.34,d*.24,d*.3,MOUTH,0,-d*.2,d*.44));b.smile.rotation.z=PI}});
+/* modelled on the cutscene puppet (docs/storyboard/img/ref_sal.jpg): warm brown clay, long jowly face with a bulb nose, bald dome with a brown
+   horseshoe fringe, heavy black brows, a big black horseshoe mustache, grey aviators parked on his forehead, turquoise flamingo shirt worn
+   untucked with an open collar and a gold bead chain, white trousers, white loafers */
+const SAL=(()=>{const HC=0x4a2c1a,MC=0x17110f,b=human({w:.74,depth:.56,head:.58,arm:.125,leg:.125,skin:0x9a6040,eye:{es:.84},hairC:HC,hair:'bald',browC:MC,pants:0xf3f0e8,shirt:TM(TXflam,3,1.2),sleeve:TM(TXflam,1.5,1),short:1,shoeS:'loafer',shoe:0xf6f3ec,nobelt:1,
+  extra:(U,H,A,b)=>{const d=H.d,h=H.h,sk=b.sk,shm=TM(TXflam,3,.5);
+    // longer face: stretch the skull, hang heavy jowls under it, a big bulb nose; ears pushed out past the fringe
+    h.children[0].scale.y*=1.08;orb(h,d*.88,d*.62,d*.8,sk,0,-d*.3,0);orb(h,d*.33,d*.29,d*.28,sk,0,-d*.01,d*.5);
+    for(const c of h.children)if(Math.abs(Math.abs(c.position.x)-d*.5)<1e-6&&Math.abs(c.position.y+d*.02)<1e-6){c.position.x*=1.1;c.scale.multiplyScalar(1.15)}
+    // horseshoe fringe: a thick band round the back of the head and over the ears (bald on top), puffed out above each ear
+    orb(h,d*1.09,d*.6,d*1.0,HC,0,-d*.06,-d*.1);for(const s of[-1,1])orb(h,d*.22,d*.28,d*.36,HC,s*d*.5,d*.06,-d*.12);
+    for(const B of H.B)B.children[0].scale.multiplyScalar(1.2);
+    // the big black horseshoe mustache: a bushy chevron over the lip, two fat droops down either side of the mouth to the jaw
+    orb(h,d*.22,d*.15,d*.17,MC,0,-d*.19,d*.5);for(const s of[-1,1]){orb(h,d*.4,d*.18,d*.2,MC,s*d*.16,-d*.22,d*.46).rotation.z=-s*.3;limb(h,d*.21,d*.09,d*.075,MC,s*d*.28,-d*.25,d*.39).rotation.z=s*.1}
+    H.m.position.set(0,-d*.36,d*.41);
+    // grey aviators parked up on the forehead
+    const av=new T.Group();av.position.set(0,d*.45,d*.3);av.rotation.x=-.8;h.add(av);for(const s of[-1,1]){orb(av,d*.32,d*.24,d*.07,0x22262c,s*d*.18,0,0);hoop(av,d*.34,d*.27,d*.22,0x6a6e76,s*d*.18,0,0)}tube(av,d*.1,d*.03,d*.03,0x6a6e76,0,d*.05,0).rotation.z=PI/2;
+    // shirt: untucked hem hanging over the waistband, open collar with lapels, buttons down the front
+    orb(U,b.w*.98,.44,.56,shm,0,.9,0);
+    orb(U,.15,.2,.04,sk,0,1.38,.212);for(const s of[-1,1]){const c=orb(U,.2,.05,.16,0x1d9aa6,s*.1,1.45,.15);c.rotation.set(-.5,0,s*.75)}
+    [[1.3,.262],[1.18,.272],[1.06,.276],[.94,.272]].forEach(([y,z])=>orb(U,.035,.035,.02,0x5cbcc4,0,y,z));
+    // gold bead chain hanging on the bit of chest
+    for(let i=0;i<11;i++){const a=(i/10-.5)*2.3;orb(U,.018,.018,.018,0xd8a830,Math.sin(a)*.085,1.455-Math.cos(a)*.08,.205+Math.cos(a)*.03)}
+    b.smile=keep(arc(h,d*.32,d*.22,d*.3,MOUTH,0,-d*.36,d*.41));b.smile.rotation.z=PI}});
   const g=b.g;g.scale.setScalar(.68);bake(g);const rt=new T.Group();while(g.children.length)rt.add(g.children[0]);g.add(rt);b.rt=rt;b.H.h.userData.p0=b.H.h.position.clone();for(const c of b.H.C)c.userData.s0=c.scale.clone();
   mk('o',g,1.15/.68,1.15/.68,1,shM,0,.08/.68,0).rotation.x=-PI/2;g.position.set(1.75,0,16.45);g.rotation.y=PI;scene.add(g);solid(1.75,16.45,.8,.8);
   return Object.assign(b,{type:'sal',t:{cap:1},inh:0,hooked:false,ph:0,ms:b.H.m.scale.clone(),ts:b.torso.scale.clone(),mood:null,act:0,actT:3,ak:0})})();
