@@ -161,7 +161,7 @@ ${GK}
 #game .pw i{height:6px;margin-top:6px;background:var(--c);border-radius:3px;${CRAY}}
 
 /* ---- "−N": cut-paper numbers that pop and drift ---- */
-#game #gain{display:flex;gap:1px;font-family:var(--display);font-size:clamp(20px,4.4vw,34px);text-shadow:none;color:${C.ink};filter:var(--pp-sh)}
+#game #gain{display:none!important;/* no number popping mid-screen; the counter up top shows it */gap:1px;font-family:var(--display);font-size:clamp(20px,4.4vw,34px);text-shadow:none;color:${C.ink};filter:var(--pp-sh)}
 #game #gain.go{animation:ppgain 1.1s steps(1,end) both}
 #game #gain .pp-l{padding:.1em .1em .04em}
 

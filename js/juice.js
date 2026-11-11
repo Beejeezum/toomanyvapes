@@ -70,7 +70,7 @@ const spSV=paperSVG(speed,'jzps');function spCut(){let h='';for(let i=0;i<26;i++
 const flSV=paperSVG(flash,'jzpf');
 function doFlash(col,a,ms){try{const d=frameVariants(14,1)[0];flSV.querySelector('g').innerHTML=`<path fill-rule="evenodd" d="${d}" fill="${col}"/><path fill-rule="evenodd" d="${d}" fill="url(#jzpf)" style="mix-blend-mode:multiply"/>`;
   flash.animate([{opacity:Math.min(1,a+.2)},{opacity:a*.7,offset:.34},{opacity:0}],{duration:ms||300,easing:'steps(3,end)'});
-  if(rm())return;for(let i=0;i<10;i++){const c=document.createElement('div');c.className='jz-cf';const w=10+Math.random()*16,h=6+Math.random()*12;
+  if(true)return;/* no confetti from the centre (user: no shapes popping mid-screen) */for(let i=0;i<10;i++){const c=document.createElement('div');c.className='jz-cf';const w=10+Math.random()*16,h=6+Math.random()*12;
     c.style.cssText+=`width:${w}px;height:${h}px;background:${i%3?col:'#fff7ea'} url(${PAPER});background-blend-mode:multiply;background-size:40px;clip-path:polygon(${jag([[0,0],[100,0],[100,100],[0,100]],22).split(' ').map(q=>q.split(',').map(v=>v+'%').join(' ')).join(',')})`;
     game.appendChild(c);const an=Math.random()*6.28,dist=120+Math.random()*220,rot=(Math.random()-.5)*540;
     c.animate([{transform:'translate(-50%,-50%) rotate(0deg)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(an)*dist}px),calc(-50% + ${Math.sin(an)*dist+60}px)) rotate(${rot}deg)`,opacity:0}],{duration:650,easing:'steps(8,end)'}).onfinish=()=>c.remove()}}catch(e){}}
