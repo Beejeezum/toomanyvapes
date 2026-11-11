@@ -121,6 +121,12 @@
    },
    "out": [
     {
+     "img": "ch2_out_v2",
+     "vid": "ch2_out_v2",
+     "aud": true,
+     "hold": 5
+    },
+    {
      "img": "ch2_out_1",
      "who": "SAL",
      "vo": "sal_ch2_out_1",
