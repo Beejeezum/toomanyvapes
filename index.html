@@ -1027,8 +1027,9 @@ function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,
   if(n.state!==n._ls){if(n.state==='flee'&&n._ls==='wander')n.startle=.32;else n.startle=0;if(n._ls==='exhale'&&n.hooked)n.slump=1.4;n._ls=n.state}{const iv=d<42;if(n.inkV!==iv){n.inkV=iv;for(const h of n.inks)h.visible=iv}}n.cool-=dt;n.bust-=dt;if(n.state!=='flee')n.fl=Math.max(0,n.fl-dt*.5);
   if(d>130&&n.state!=='exhale')return;
   if(n.state==='held'){const s=Math.sin(yaw),c=Math.cos(yaw),dd=.98+n.hz,k=Math.min(1,dt*12);
-    p.x=lerp(p.x,px-s*dd,k)+Math.sin(t*41)*.014;p.z=lerp(p.z,pz-c*dd,k)+Math.cos(t*37)*.014;p.y=lerp(p.y,ty.lift||0,k);
-    n.g.rotation.y=Math.atan2(px-p.x,pz-p.z)+Math.sin(t*23)*.12;n.g.rotation.z=Math.sin(t*29)*.07;n.vt-=dt;if(n.vt<0){n.vt=BUF['sfx/mmph']?1.3:.5;call(n,2)}pose(n,1,3,1,t,dt);n.ph+=dt*20;
+    p.x=lerp(p.x,px-s*dd,k);p.z=lerp(p.z,pz-c*dd,k);p.y=lerp(p.y,ty.lift||0,k);
+    /* sipping through a straw: a slow, gentle sway round the mouth (the hands mod pins the mouth itself), no buzzing shake */
+    n.g.rotation.y=Math.atan2(px-p.x,pz-p.z)+Math.sin(t*2.1)*.05;n.g.rotation.z=Math.sin(t*1.7)*.035;n.vt-=dt;if(n.vt<0){n.vt=BUF['sfx/mmph']?1.3:.5;call(n,2)}pose(n,1,3,1,t,dt);n.ph+=dt*20;
     // lips lock onto the vape tip: the pose leans them in from the hips so the mouth leads and the body trails away below the view
     n.g.updateMatrixWorld(true);armR.tip.getWorldPosition(LK1);n.H.m.getWorldPosition(LK2);const lk=n.lockT>.25?1:Math.min(1,dt*18);n.lockT=(n.lockT||0)+dt;p.x+=(LK1.x-LK2.x)*lk;p.y+=(LK1.y-LK2.y)*lk;p.z+=(LK1.z-LK2.z)*lk;
     // the mouth is now wherever the tip is: report that through hy/hz (used by mouth()) so the camera's auto-aim doesn't chase a stale offset and drift the view
