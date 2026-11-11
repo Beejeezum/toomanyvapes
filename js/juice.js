@@ -15,11 +15,10 @@ const V=(x,y,z)=>new T.Vector3(x,y,z),WHITE=new T.Color(1,1,1);
 /* ---------- DOM + CSS ---------- */
 const css=document.createElement('style');css.textContent=`
 .jz{position:absolute;pointer-events:none}
-#jz-vig{inset:0;opacity:0;box-shadow:inset 0 0 16vmin 3vmin rgba(224,36,74,.9)}
-#jz-speed{inset:-30%;opacity:0;will-change:transform,opacity;
- background:repeating-conic-gradient(rgba(255,247,234,0) 0deg 6.2deg,rgba(255,247,234,.7) 6.2deg 6.7deg),repeating-conic-gradient(rgba(255,247,234,0) 0deg 9.1deg,rgba(255,247,234,.45) 9.1deg 9.5deg);
- -webkit-mask:radial-gradient(closest-side,transparent 50%,#000 92%);mask:radial-gradient(closest-side,transparent 50%,#000 92%)}
-#jz-flash{inset:0;opacity:0;background:#fff}
+#jz-vig{inset:0;opacity:0}#jz-vig svg,#jz-speed svg{position:absolute;inset:0;width:100%;height:100%}
+#jz-speed{inset:-12%;opacity:0;will-change:transform,opacity}
+#jz-flash{inset:0;opacity:0;pointer-events:none}#jz-flash svg{position:absolute;inset:0;width:100%;height:100%}
+.jz-cf{position:absolute;left:50%;top:50%;pointer-events:none;filter:drop-shadow(2px 3px 0 rgba(0,0,0,.3))}
 .jz-bar{left:0;right:0;height:9vh;background:#000;z-index:5;will-change:transform}
 #jz-bt{top:0;transform:translateY(-100%)}#jz-bb{bottom:0;transform:translateY(100%)}
 #jz-title{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:6}
@@ -44,10 +43,37 @@ const hudEl=$('hud');
 const vig=div('jz-vig','',game,hudEl),speed=div('jz-speed','',game,hudEl),flash=div('jz-flash','',game,hudEl);
 const barT=div('jz-bt','jz-bar',game,$('intro')),barB=div('jz-bb','jz-bar',game,$('intro'));let barK=0,barOn=false;
 const title=div('jz-title','',game,$('intro'));title.innerHTML='<b></b><i></i>';
-const skipEl=div('jz-skip','',game,$('intro'));skipEl.textContent=J.touch?'TAP TO SKIP':'CLICK / ANY KEY TO SKIP';
+const skipEl=div('jz-skip','',game,$('intro'));skipEl.textContent='▸▸';
 const comboEl=div('jz-combo','hud',hudEl);
 function stinger(big,small){title.firstChild.textContent=big;title.lastChild.textContent=small||'';title.classList.remove('go');void title.offsetWidth;title.classList.add('go')}
-function doFlash(col,a,ms){try{flash.style.background=col;flash.animate([{opacity:a},{opacity:0}],{duration:ms||260,easing:'ease-out'})}catch(e){}}
+/* ---------- handmade overlays: every flash, vignette and speed line is cut paper and moves on twos ---------- */
+const PAPER=(()=>{const c=document.createElement('canvas');c.width=c.height=256;const k=c.getContext('2d');const im=k.createImageData(256,256);
+  for(let i=0;i<im.data.length;i+=4){const v=200+Math.random()*55|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}k.putImageData(im,0,0);
+  k.globalAlpha=.18;for(let i=0;i<260;i++){k.strokeStyle=Math.random()<.5?'#fff':'#8a7a66';k.lineWidth=Math.random()*1.2+.3;k.beginPath();const x=Math.random()*256,y=Math.random()*256,a=Math.random()*6.3,l=4+Math.random()*14;k.moveTo(x,y);k.quadraticCurveTo(x+Math.cos(a+1)*l/2,y+Math.sin(a+1)*l/2,x+Math.cos(a)*l,y+Math.sin(a)*l);k.stroke()}
+  return c.toDataURL()})();
+const SVGNS='http://www.w3.org/2000/svg';
+function paperSVG(el,id){const sv=document.createElementNS(SVGNS,'svg');sv.setAttribute('viewBox','0 0 100 100');sv.setAttribute('preserveAspectRatio','none');
+  sv.innerHTML=`<defs><pattern id="${id}" patternUnits="userSpaceOnUse" width="30" height="30"><image href="${PAPER}" width="30" height="30"/></pattern></defs><g></g>`;el.appendChild(sv);return sv}
+const jag=(pts,j)=>pts.map(([x,y])=>`${(x+(Math.random()-.5)*j).toFixed(2)},${(y+(Math.random()-.5)*j).toFixed(2)}`).join(' ');
+// torn frame (outer rect + ragged inner hole), a few pre-cut variants we step between
+function frameVariants(inset,n){const out=[];for(let v=0;v<n;v++){const inner=[];const N=36;for(let i=0;i<N;i++){const t=i/N;let x,y;
+    if(t<.25){x=inset+t*4*(100-2*inset);y=inset}else if(t<.5){x=100-inset;y=inset+(t-.25)*4*(100-2*inset)}else if(t<.75){x=100-inset-(t-.5)*4*(100-2*inset);y=100-inset}else{x=inset;y=100-inset-(t-.75)*4*(100-2*inset)}
+    inner.push([x,y])}out.push(`M-2,-2 L102,-2 L102,102 L-2,102 Z M${jag(inner,inset*.9).split(' ').join(' L')} Z`)}return out}
+const VIGF=frameVariants(9,4);
+const vigSV=paperSVG(vig,'jzpv');vigSV.querySelector('g').innerHTML=`<path fill-rule="evenodd" fill="#e0244a"/><path fill-rule="evenodd" fill="url(#jzpv)" style="mix-blend-mode:multiply" opacity=".9"/>`;
+let vigI=0,vigT=0;function vigStep(){const d=VIGF[vigI=(vigI+1)%VIGF.length];vigSV.querySelectorAll('path').forEach(p=>p.setAttribute('d',d))}vigStep();
+// speed lines: cut cream paper strips radiating from the edges
+const spSV=paperSVG(speed,'jzps');function spCut(){let h='';for(let i=0;i<26;i++){const a=i/26*Math.PI*2+Math.random()*.12,w=.035+Math.random()*.03,r0=34+Math.random()*10,r1=80;
+    const p=(r,aa)=>`${(50+Math.cos(aa)*r).toFixed(1)},${(50+Math.sin(aa)*r).toFixed(1)}`;h+=`<polygon points="${p(r0,a)} ${p(r1,a-w)} ${p(r1,a+w)}" fill="#fff7ea"/>`}
+  spSV.querySelector('g').innerHTML=h+`<rect width="100" height="100" fill="url(#jzps)" style="mix-blend-mode:multiply" opacity=".55"/>`}spCut();
+// flash: a torn paper frame slams in for a few stepped frames, plus cut-paper confetti from the centre
+const flSV=paperSVG(flash,'jzpf');
+function doFlash(col,a,ms){try{const d=frameVariants(14,1)[0];flSV.querySelector('g').innerHTML=`<path fill-rule="evenodd" d="${d}" fill="${col}"/><path fill-rule="evenodd" d="${d}" fill="url(#jzpf)" style="mix-blend-mode:multiply"/>`;
+  flash.animate([{opacity:Math.min(1,a+.2)},{opacity:a*.7,offset:.34},{opacity:0}],{duration:ms||300,easing:'steps(3,end)'});
+  if(rm())return;for(let i=0;i<10;i++){const c=document.createElement('div');c.className='jz-cf';const w=10+Math.random()*16,h=6+Math.random()*12;
+    c.style.cssText+=`width:${w}px;height:${h}px;background:${i%3?col:'#fff7ea'} url(${PAPER});background-blend-mode:multiply;background-size:40px;clip-path:polygon(${jag([[0,0],[100,0],[100,100],[0,100]],22).split(' ').map(q=>q.split(',').map(v=>v+'%').join(' ')).join(',')})`;
+    game.appendChild(c);const an=Math.random()*6.28,dist=120+Math.random()*220,rot=(Math.random()-.5)*540;
+    c.animate([{transform:'translate(-50%,-50%) rotate(0deg)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(an)*dist}px),calc(-50% + ${Math.sin(an)*dist+60}px)) rotate(${rot}deg)`,opacity:0}],{duration:650,easing:'steps(8,end)'}).onfinish=()=>c.remove()}}catch(e){}}
 const cineOn=v=>{barOn=v;game.classList.toggle('jz-cine',v)};
 
 /* ---------- camera shake, zoom punch, kick ---------- */
@@ -200,10 +226,10 @@ J.on('prerender',()=>{const now=performance.now(),rdt=Math.min(.05,(now-lastNow)
   {const k=lerp(barK,barOn?1:0,Math.min(1,rdt*9));if(Math.abs(k-barK)>1e-4||(k!==barK&&(k<1e-3||k>.999))){barK=k<1e-3?0:k>.999?1:k;const y=((1-barK)*100).toFixed(2);barT.style.transform=`translateY(-${y}%)`;barB.style.transform=`translateY(${y}%)`}}
   const play=J.mode==='play';
   // panic vignette, pulsing faster as the town loses it
-  const hv=play?clamp((J.heat-.5)/.5,0,1):0,pul=rm()?.8:.6+.4*Math.sin(clk*(4+J.heat*5)),vo=(hv*pul*.85).toFixed(3);if(vig.style.opacity!==vo)vig.style.opacity=vo;
+  const hv=play?clamp((J.heat-.5)/.5,0,1):0,pul=rm()?.8:.6+.4*Math.sin(clk*(4+J.heat*5)),vo=(hv*pul*.85).toFixed(3);vigT-=rdt;if(vigT<=0){vigT=.1;const q=(Math.round(vo*8)/8).toFixed(3);if(vig.style.opacity!==q)vig.style.opacity=q;if(+q>0&&!rm())vigStep()}
   // nicotine rush speed lines, stronger while moving
   const rush=play&&J.act&&J.act.rush>0;spd=lerp(spd,rush?1:0,Math.min(1,rdt*6));
-  if(spd>.01){sjT-=rdt;if(sjT<=0&&!rm()){sjT=.05;speed.style.transform=`rotate(${rand(0,20).toFixed(1)}deg) scale(${rand(1,1.06).toFixed(3)})`}
+  if(spd>.01){sjT-=rdt;if(sjT<=0&&!rm()){sjT=.083;if(Math.random()<.5)spCut();speed.style.transform=`rotate(${rand(0,20).toFixed(1)}deg) scale(${rand(1,1.06).toFixed(3)})`}
     speed.style.opacity=(spd*(moving?1:.4)*(rm()?.35:.55)).toFixed(3)}
   else if(speed.style.opacity!=='0')speed.style.opacity='0';
   applyCam(rdt)});
