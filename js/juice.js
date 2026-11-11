@@ -90,7 +90,19 @@ function applyCam(dt){
 
 /* ---------- container doors + vape avalanche (intro) ---------- */
 const CX=0,CZ=-6,FZ=CZ+1.3;
-const hole=new T.Mesh(new T.PlaneGeometry(6.1,2.45),new T.MeshBasicMaterial({color:0x1a1220}));hole.position.set(CX,1.35,FZ+.1);scene.add(hole);
+// looking into the container: the inside of a big corrugated card box in shadow (ribbed walls, cartons stacked at the back), not a flat black
+const holeT=(()=>{const c=document.createElement('canvas');c.width=512;c.height=256;const k=c.getContext('2d'),w=512,h=256,bx0=w*.3,bx1=w*.7,by0=h*.26,by1=h*.72;
+  const poly=(pts,col)=>{k.beginPath();for(const[x,y]of pts)k.lineTo(x,y);k.closePath();k.fillStyle=col;k.fill()};
+  poly([[0,0],[w,0],[bx1,by0],[bx0,by0]],'#21160e');poly([[0,h],[w,h],[bx1,by1],[bx0,by1]],'#3b2919');poly([[0,0],[bx0,by0],[bx0,by1],[0,h]],'#2f2015');poly([[w,0],[bx1,by0],[bx1,by1],[w,h]],'#271b12');
+  k.fillStyle='#352417';k.fillRect(bx0,by0,bx1-bx0,by1-by0);k.lineWidth=2;
+  for(let i=0;i<=20;i++){const u=i/20;k.strokeStyle='rgba(12,8,4,.45)';k.beginPath();k.moveTo(bx0+(bx1-bx0)*u,by0);k.lineTo(bx0+(bx1-bx0)*u,by1);k.stroke();
+    k.strokeStyle='rgba(90,65,40,.3)';k.beginPath();k.moveTo(0,h*u);k.lineTo(bx0,by0+(by1-by0)*u);k.moveTo(w,h*u);k.lineTo(bx1,by0+(by1-by0)*u);k.stroke()}
+  const C=['#5a2a40','#4a5a24','#24506a','#3f3060','#6a5a24'];for(let r=0;r<3;r++)for(let i=0;i<9;i++){const bw=(bx1-bx0)/9,x=bx0+i*bw+J.rand(-2,2),y=by1-(r+1)*18+J.rand(-1,1);if(Math.random()<.25)continue;
+    k.fillStyle=J.pick(C);k.fillRect(x+1,y,bw-3,16);k.fillStyle='rgba(255,255,255,.08)';k.fillRect(x+1,y,bw-3,3)}
+  const g=k.createRadialGradient(w/2,h/2,h*.2,w/2,h/2,w*.62);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.55)');k.fillStyle=g;k.fillRect(0,0,w,h);
+  for(let i=0;i<5000;i++){k.fillStyle=`rgba(${Math.random()<.5?'140,105,70':'0,0,0'},.08)`;k.fillRect(J.rand(0,w),J.rand(0,h),J.rand(1,3),1)}
+  const t=new T.CanvasTexture(c);t.anisotropy=4;return t})();
+const hole=new T.Mesh(new T.PlaneGeometry(6.1,2.45),new T.MeshBasicMaterial({map:holeT}));hole.position.set(CX,1.35,FZ+.1);scene.add(hole);
 const doors=[-1,1].map(s=>{const p=new T.Group();p.position.set(CX+s*3.22,0,FZ+.17);scene.add(p);
   J.box(p,3.2,2.6,.08,0xd2452a,-s*1.6,1.35,0);for(let i=0;i<4;i++)J.box(p,.14,2.55,.14,0x8a2a14,-s*(.3+i*.82),1.35,.02);
   for(const x of[2.75,3.05])J.box(p,.07,2.35,.07,0xbfc4c9,-s*x,1.35,.1);J.box(p,.32,.12,.1,0x3a3340,-s*2.9,1.2,.16);
