@@ -484,7 +484,7 @@ const BUF={},AMB={},HUMAN={worker:1,grandma:1,gym:1,kid:1,cop:1,jogger:1,tuba:1}
 function loadClips(){const L=[],add=(dir,spec)=>spec.split(',').forEach(e=>{const[k,n]=e.split(':');if(n)for(let i=1;i<=+n;i++)L.push([dir+'/'+k,`${dir}/${k}_${i}`]);else L.push([dir+'/'+k,dir+'/'+k])});
   add('vo','start:2,perfect:7,ok:3,over:4,busted:3,hooked:2,twist:1,win:2,boost:2,dual:2,free:2,fog:2,chain:2,rush:2');
   add('sfx','inhale:3,exhale:3,cough:4,moo:2,bark:2,meow:2,pigeon:2,chicken:2,yelp_m:2,yelp_f:2,kid:1,grandma:1,baby:2,gym:1,mmph:2,whistle,perfect_sting,fail_sting,pickup,toss,slam,fanfare,tuba,fire,siren_far,crowd_panic');
-  add('amb','town,park,farm');add('music','title,chase,main');
+  add('amb','town,park,farm'); /* music now comes from js/score.js */
   for(const[g,f]of L)fetch('audio/'+f+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,no)=>AC.decodeAudioData(b,ok,no))).then(buf=>{(BUF[g]=BUF[g]||[]).push(buf);if(f!==g)BUF[f]=[buf];if(g.startsWith('music/'))updMusic()}).catch(()=>{})}
 function clip(g,o){o=o||{};const a=BUF[g];if(!AC||!a||!a.length)return null;const s=AC.createBufferSource(),gn=AC.createGain();s.buffer=pick(a);s.loop=!!o.loop;s.playbackRate.value=o.rate||1;gn.gain.value=o.vol==null?1:o.vol;s.connect(gn);
   const out=o.bus||SFXB;if(o.pan&&AC.createStereoPanner){const p=AC.createStereoPanner();p.pan.value=o.pan;gn.connect(p);p.connect(out)}else gn.connect(out);s.start();s.g=gn;return s}
@@ -764,7 +764,7 @@ window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,
   get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
 Object.defineProperty(window.TMV,'slow',{get:()=>slow,set:v=>{slow=v}});
 {const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
-['world','mobile','crowds','juice','story','paper'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
+['world','mobile','crowds','juice','story','paper','score','screen'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
 if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!labelMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
 })();
 </script>

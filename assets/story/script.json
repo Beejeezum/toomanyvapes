@@ -1,66 +1,199 @@
 {
-  "_note": "Story script + shot list. img = assets/story/clay/<img>.jpg, vo = audio/vo/<vo>.mp3 (missing files must be tolerated: fall back to showing the caption for a few seconds). who is the speaker label shown on the subtitle. Captions are subtitles of the spoken line only.",
-  "chapters": [
+ "_note": "Story script + shot list. img = assets/story/clay/<img>.jpg, vo = audio/vo/<vo>.mp3 (missing files must be tolerated: fall back to showing the caption for a few seconds). who is the speaker label shown on the subtitle. Captions are subtitles of the spoken line only.",
+ "chapters": [
+  {
+   "id": 1,
+   "title": "The Typo",
+   "district": "downtown",
+   "in": [
     {
-      "id": 1, "title": "The Typo", "district": "downtown",
-      "in": [
-        {"img": "ch1_in_1", "hold": 3},
-        {"img": "ch1_in_2", "who": "SAL", "vo": "sal_ch1_in_2", "cap": "Fifty. I ordered FIFTY. Who orders five THOUSAND vapes?!"},
-        {"img": "ch1_in_3", "who": "BRO", "vo": "bro_ch1_in_3", "cap": "Duuude. That's like… a lot of vapes."},
-        {"img": "ch1_in_4", "who": "SAL", "vo": "sal_ch1_in_4", "cap": "Invoice is due Friday, kid. Get this town hooked, or I lose the shop."}
-      ],
-      "out": [
-        {"img": "ch1_out_1", "who": "SAL", "vo": "sal_ch1_out_1", "cap": "They're… coming back? They're coming BACK!"}
-      ]
+     "img": "ch1_in_1",
+     "hold": 3,
+     "vid": "ch1_in_1"
     },
     {
-      "id": 2, "title": "Word of Mouth", "district": "park",
-      "in": [
-        {"img": "ch2_in_1", "who": "BRO", "vo": "bro_ch2_in_1", "cap": "Park's full of grandmas, man. Grandmas love me."}
-      ],
-      "out": [
-        {"img": "ch2_out_1", "who": "SAL", "vo": "sal_ch2_out_1", "cap": "Kid! I sold out of mango! I've never sold out of ANYTHING!"}
-      ]
+     "img": "ch1_in_2",
+     "who": "SAL",
+     "vo": "sal_ch1_in_2",
+     "cap": "Fifty. I ordered FIFTY. Who orders five THOUSAND vapes?!",
+     "vid": "ch1_in_2"
     },
     {
-      "id": 3, "title": "Home Turf", "district": "beach",
-      "in": [
-        {"img": "ch3_in_1", "who": "BRO", "vo": "bro_ch3_in_1", "cap": "My beach, bro. Home turf."},
-        {"img": "ch3_in_2", "who": "SAL", "vo": "sal_ch3_in_2", "cap": "Watch out for cops. And the big guy at the gym."}
-      ],
-      "out": [
-        {"img": "ch3_out_1", "who": "SAL", "vo": "sal_ch3_out_1", "cap": "Two chains, kid. TWO. We're franchising."}
-      ]
+     "img": "ch1_in_3",
+     "who": "BRO",
+     "vo": "bro_ch1_in_3",
+     "cap": "Duuude. That's like… a lot of vapes.",
+     "vid": "ch1_in_3"
     },
     {
-      "id": 4, "title": "Fresh Lungs", "district": "farm",
-      "in": [
-        {"img": "ch4_in_1", "who": "SAL", "vo": "sal_ch4_in_1", "cap": "We're out of people, kid. …What about the cows?"},
-        {"img": "ch4_in_2", "who": "BRO", "vo": "bro_ch4_in_2", "cap": "…The cows, dude?"}
-      ],
-      "out": [
-        {"img": "ch4_out_1", "who": "BRO", "vo": "bro_ch4_out_1", "cap": "Can't even see the waves anymore, man."}
-      ]
-    },
-    {
-      "id": 5, "title": "Zero", "district": "square",
-      "in": [
-        {"img": "ch5_in_1", "who": "SAL", "vo": "sal_ch5_in_1", "cap": "Last stretch! EMPTY THE CONTAINER!"}
-      ],
-      "out": []
+     "img": "ch1_in_4",
+     "who": "SAL",
+     "vo": "sal_ch1_in_4",
+     "cap": "Invoice is due Friday, kid. Get this town hooked, or I lose the shop.",
+     "vid": "ch1_in_4"
     }
-  ],
-  "end": [
-    {"img": "end_1", "who": "SAL", "vo": "sal_end_1", "cap": "Zero. You did it, kid… So, uh. I ordered fifty thousand."},
-    {"img": "end_2", "who": "BRO", "vo": "bro_end_2", "cap": "…Bro."}
-  ],
-  "districts": {
-    "_note": "Game-world coordinates (x, z). Ocean is at -z (east on the map). See assets/clay/map_town.png and docs/story-bible.md.",
-    "downtown": {"x0": -62, "x1": 62, "z0": -62, "z1": 62},
-    "park": {"x0": -142, "x1": -66, "z0": -76, "z1": 76},
-    "beach": {"x0": -150, "x1": 150, "z0": -150, "z1": -78},
-    "farm": {"x0": 70, "x1": 134, "z0": -52, "z1": 52},
-    "square": {"x0": -16, "x1": 16, "z0": -16, "z1": 16},
-    "shop": {"x": 0, "z": 22, "_note": "proposed vape shop block, replaces the downtown building at grid (0, +1)"}
+   ],
+   "out": [
+    {
+     "img": "ch1_out_1",
+     "who": "SAL",
+     "vo": "sal_ch1_out_1",
+     "cap": "They're… coming back? They're coming BACK!",
+     "vid": "ch1_out_1"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Word of Mouth",
+   "district": "park",
+   "in": [
+    {
+     "img": "ch2_in_1",
+     "who": "BRO",
+     "vo": "bro_ch2_in_1",
+     "cap": "Park's full of grandmas, man. Grandmas love me.",
+     "vid": "ch2_in_1"
+    }
+   ],
+   "out": [
+    {
+     "img": "ch2_out_1",
+     "who": "SAL",
+     "vo": "sal_ch2_out_1",
+     "cap": "Kid! I sold out of mango! I've never sold out of ANYTHING!",
+     "vid": "ch2_out_1"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "title": "Home Turf",
+   "district": "beach",
+   "in": [
+    {
+     "img": "ch3_in_1",
+     "who": "BRO",
+     "vo": "bro_ch3_in_1",
+     "cap": "My beach, bro. Home turf.",
+     "vid": "ch3_in_1"
+    },
+    {
+     "img": "ch3_in_2",
+     "who": "SAL",
+     "vo": "sal_ch3_in_2",
+     "cap": "Watch out for cops. And the big guy at the gym.",
+     "vid": "ch3_in_2"
+    }
+   ],
+   "out": [
+    {
+     "img": "ch3_out_1",
+     "who": "SAL",
+     "vo": "sal_ch3_out_1",
+     "cap": "Two chains, kid. TWO. We're franchising.",
+     "vid": "ch3_out_1"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "title": "Fresh Lungs",
+   "district": "farm",
+   "in": [
+    {
+     "img": "ch4_in_1",
+     "who": "SAL",
+     "vo": "sal_ch4_in_1",
+     "cap": "We're out of people, kid. …What about the cows?",
+     "vid": "ch4_in_1"
+    },
+    {
+     "img": "ch4_in_2",
+     "who": "BRO",
+     "vo": "bro_ch4_in_2",
+     "cap": "…The cows, dude?",
+     "vid": "ch4_in_2"
+    }
+   ],
+   "out": [
+    {
+     "img": "ch4_out_1",
+     "who": "BRO",
+     "vo": "bro_ch4_out_1",
+     "cap": "Can't even see the waves anymore, man.",
+     "vid": "ch4_out_1"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "title": "Zero",
+   "district": "square",
+   "in": [
+    {
+     "img": "ch5_in_1",
+     "who": "SAL",
+     "vo": "sal_ch5_in_1",
+     "cap": "Last stretch! EMPTY THE CONTAINER!",
+     "vid": "ch5_in_1"
+    }
+   ],
+   "out": []
   }
+ ],
+ "end": [
+  {
+   "img": "end_1",
+   "who": "SAL",
+   "vo": "sal_end_1",
+   "cap": "Zero. You did it, kid… So, uh. I ordered fifty thousand.",
+   "vid": "end_1"
+  },
+  {
+   "img": "end_2",
+   "who": "BRO",
+   "vo": "bro_end_2",
+   "cap": "…Bro.",
+   "vid": "end_2"
+  }
+ ],
+ "districts": {
+  "_note": "Game-world coordinates (x, z). Ocean is at -z (east on the map). See assets/clay/map_town.png and docs/story-bible.md.",
+  "downtown": {
+   "x0": -62,
+   "x1": 62,
+   "z0": -62,
+   "z1": 62
+  },
+  "park": {
+   "x0": -142,
+   "x1": -66,
+   "z0": -76,
+   "z1": 76
+  },
+  "beach": {
+   "x0": -150,
+   "x1": 150,
+   "z0": -150,
+   "z1": -78
+  },
+  "farm": {
+   "x0": 70,
+   "x1": 134,
+   "z0": -52,
+   "z1": 52
+  },
+  "square": {
+   "x0": -16,
+   "x1": 16,
+   "z0": -16,
+   "z1": 16
+  },
+  "shop": {
+   "x": 0,
+   "z": 22,
+   "_note": "proposed vape shop block, replaces the downtown building at grid (0, +1)"
+  }
+ }
 }
