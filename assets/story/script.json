@@ -47,7 +47,7 @@
        "cap": "So get out there. Get this town HOOKED!"
       },
       {
-       "t": 3.3,
+       "t": 4.1,
        "who": "BRO",
        "cap": "Say less, boss. I got you."
       }
@@ -105,7 +105,8 @@
      "who": "BRO",
      "vo": "bro_ch2_in_1",
      "cap": "Park's full of grandmas, man. Grandmas love me.",
-     "vid": "ch2_in_1"
+     "vid": "ch2_in_1",
+     "aud": true
     },
     {
      "img": "ch2_boss",
@@ -137,7 +138,8 @@
      "who": "SAL",
      "vo": "sal_ch2_out_1",
      "cap": "Kid! I sold out of mango! I've never sold out of ANYTHING!",
-     "vid": "ch2_out_1"
+     "vid": "ch2_out_1",
+     "aud": true
     }
    ]
   },
@@ -151,14 +153,16 @@
      "who": "BRO",
      "vo": "bro_ch3_in_1",
      "cap": "My beach, bro. Home turf.",
-     "vid": "ch3_in_1"
+     "vid": "ch3_in_1",
+     "aud": true
     },
     {
      "img": "ch3_in_2",
      "who": "SAL",
      "vo": "sal_ch3_in_2",
      "cap": "Watch out for cops. And the big guy at the gym.",
-     "vid": "ch3_in_2"
+     "vid": "ch3_in_2",
+     "aud": true
     },
     {
      "img": "ch3_boss",
@@ -184,7 +188,8 @@
      "who": "SAL",
      "vo": "sal_ch3_out_1",
      "cap": "Two chains, kid. TWO. We're franchising.",
-     "vid": "ch3_out_1"
+     "vid": "ch3_out_1",
+     "aud": true
     }
    ]
   },
@@ -198,14 +203,16 @@
      "who": "SAL",
      "vo": "sal_ch4_in_1",
      "cap": "We're out of people, kid. …What about the cows?",
-     "vid": "ch4_in_1"
+     "vid": "ch4_in_1",
+     "aud": true
     },
     {
      "img": "ch4_in_2",
      "who": "BRO",
      "vo": "bro_ch4_in_2",
      "cap": "…The cows, dude?",
-     "vid": "ch4_in_2"
+     "vid": "ch4_in_2",
+     "aud": true
     }
    ],
    "call": {
@@ -225,7 +232,8 @@
      "who": "BRO",
      "vo": "bro_ch4_out_1",
      "cap": "Can't even see the waves anymore, man.",
-     "vid": "ch4_out_1"
+     "vid": "ch4_out_1",
+     "aud": true
     }
    ]
   },
@@ -239,7 +247,8 @@
      "who": "SAL",
      "vo": "sal_ch5_in_1",
      "cap": "Last stretch! EMPTY THE CONTAINER!",
-     "vid": "ch5_in_1"
+     "vid": "ch5_in_1",
+     "aud": true
     },
     {
      "img": "ch5_boss",
@@ -268,7 +277,8 @@
    "who": "SAL",
    "vo": "sal_end_1",
    "cap": "Zero. You did it, kid… So, uh. I ordered fifty thousand.",
-   "vid": "end_1"
+   "vid": "end_1",
+   "aud": true
   },
   {
    "img": "end_v2_2",
@@ -280,7 +290,7 @@
      "cap": ""
     },
     {
-     "t": 3.7,
+     "t": 5.4,
      "who": "BRO",
      "cap": "…Bro."
     }
