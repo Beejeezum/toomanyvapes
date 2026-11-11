@@ -480,7 +480,7 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
     for(const a of LINES)for(const b of LINES)sheet(a,b,SR()<.5,XH+srand(-.03,.05),XH+srand(-.03,.05),['torn','torn','torn','torn'],[true,true,true,true],RY[2],tint());
     // zebra crossings: white paint across each arm of the inner crossings
     const WP=new T.Color();for(const a of LINES)for(const b of LINES){if(!ZEB(a)||!ZEB(b))continue;
-      for(const sd of[-1,1])for(const az of[true,false])for(let j=-3;j<=3;j++){const c=(az?b:a)+sd*(XH+1.25),x=(az?a:b)+j*.92+srand(-.04,.04);WP.setHSL(srand(.1,.14),srand(.15,.3),srand(.88,.93));
+      for(const sd of[-1,1])for(const az of[true,false])for(let j=-3;j<=3;j++){const c=(az?b:a)+sd*(XH+1.25),x=(az?a:b)+j*.92+srand(-.04,.04);WP.setHSL(srand(.1,.14),srand(.15,.3),srand(.76,.82));
         paint(az?x:c,az?c:x,az,1.75*srand(.94,1.04),.5*srand(.92,1.06),WP.clone())}}
     const rm=RD.mesh(RDM);if(rm)rm.userData.noCast=1}
   AWB.mesh(AWNM);
@@ -670,7 +670,7 @@ function timeOfDay(){const k=ss(0,1,Math.min(1,typeof X.tod==='number'?X.tod:X.u
   if(Math.abs(k-lastK)>.003){lastK=k;kf(HOR,k,hc);kf(ZEN,k,zc);kf(MID,k,mc);kf(GLOW,k,gc);
     const g=skyK.createLinearGradient(0,0,0,SKH);g.addColorStop(0,hex(zc));g.addColorStop(.36,hex(mc));g.addColorStop(.47,hex(gc));g.addColorStop(.5,hex(hc));g.addColorStop(1,hex(hc));skyK.fillStyle=g;skyK.fillRect(0,0,SKW,SKH);skyK.drawImage(skyP,0,0);skyT.needsUpdate=true;
     if(cloudM)kf(CLD,k,cloudM.color);if(sunBall){kf(SUNC,k,sunBall.material.color);sunBall.position.lerpVectors(sun0,sun1,ss(.1,1,k));sunBall.scale.setScalar(34+16*k)}
-    if(sunL){kf(SUNL,k,sunL.color);sunL.intensity=lerp(.95,.72,ss(.6,1,k));if(sunBall){SUNDIR.copy(sunBall.position).normalize();sunL.position.copy(SUNDIR).multiplyScalar(100)}}
+    if(sunL){kf(SUNL,k,sunL.color);sunL.intensity=lerp(.82,.64,ss(.6,1,k));if(sunBall){SUNDIR.copy(sunBall.position).normalize();sunL.position.copy(SUNDIR).multiplyScalar(100)}}
     if(hemi){kf(HSKY,k,hemi.color);kf(HGND,k,hemi.groundColor);hemi.intensity=lerp(.62,.5,ss(.5,1,k))}kf(SEA,k,seaM.color);
     NIGHT=ss(.58,.95,k);for(const m of WIN)m.emissiveIntensity=NIGHT*.9;pools.visible=halos.visible=NIGHT>.01;pools.material.opacity=.3*NIGHT;halos.material.opacity=.4*NIGHT;
     stars.visible=k>.8;stars.material.opacity=ss(.8,1,k)}

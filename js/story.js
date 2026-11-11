@@ -276,7 +276,7 @@ function filmTick(now){filmRaf=el.hidden?0:requestAnimationFrame(filmTick);if(no
 function filmOn(){if(!filmRaf){filmLast=0;filmRaf=requestAnimationFrame(filmTick)}}
 
 /* ================= VOICE (preloaded per chapter; emits vo true/false so the score can duck) ================= */
-const IMG=n=>'assets/story/clay/'+n+'.jpg',VO=n=>'audio/vo/'+n+'.mp3';
+const IMG=n=>'assets/story/clay/'+n+'.jpg',VO=n=>'audio/vo/'+n+(/\.\w+$/.test(n)?'':'.mp3');
 // a clip name may carry a media fragment ('ch1_v2_5#t=5.3' or '#t=0,2.4'): the browser plays only that span (trims without re-encoding)
 const VID=n=>{const i=n.indexOf('#');return 'assets/story/clay/'+(i<0?n:n.slice(0,i))+'.mp4'+(i<0?'':n.slice(i))};
 const VOA={};
@@ -368,6 +368,11 @@ function trimChk(){const f=curShot();if(!f||!f.vid||trimDone)return;const m=/#t=
   if((vid.currentSrc||vid.src||'').indexOf(clipBase(f))<0)return;// an event from the clip before
   if(vid.currentTime>=+m[1]-.06){trimDone=true;try{vid.pause()}catch(e){}vid.dispatchEvent(new Event('ended'))}}
 vid.addEventListener('loadstart',()=>{trimDone=false;const f=curShot();if(f&&f.mute)vid.muted=true});
+// J-cut: a shot with jIn starts its sound jLead s before the cut, under the end of the shot before (that clip then starts at #t=jLead)
+function jChk(){const s=seq;if(!s)return;const f=curShot(),nx=s.shots[s.i+1];if(!f||!nx||!nx.jIn||s._j===s.i||!vid.duration)return;
+  if((vid.currentSrc||vid.src||'').indexOf(clipBase(f))<0)return;
+  if(vid.currentTime>=vid.duration-(nx.jLead||1.5)){s._j=s.i;if(overH)overH.stop();overH=sound(nx.jIn,()=>{overH=null})}}
+vid.addEventListener('timeupdate',jChk);
 vid.addEventListener('timeupdate',trimChk);vid.addEventListener('pause',trimChk);
 vid.addEventListener('playing',()=>{const f=curShot();if(!f)return;if(f.mute)vid.muted=true;
   if(f.over&&!f._overOn){f._overOn=1;if(overH)overH.stop();overH=sound(f.over,()=>{overH=null})}});
@@ -385,7 +390,7 @@ function showCard(n){const c=CH(n);card.children[0].textContent=(c.day||'');card
    The mission card stamps in under the title card at the start of play (the goal in a few words, with cut-paper icons); the objective panel
    (kraft card, top-left; bottom-left on phones) always says the next thing to do and the live counts, and stamps when the step changes. */
 const SHOPI='<path d="M5.5 18.5h13.2a4.3 4.3 0 0 0 .3-8.6 5.8 5.8 0 0 0-11.2-1.2A4.9 4.9 0 0 0 5.5 18.5Z"/><path class="k" d="M10.2 12.4h3.6v3.4h-3.6Z"/>';
-let mcTm=0;
+let mcTm=0;X.on('grab',()=>{if(mcard.classList.contains('go')){clearTimeout(mcTm);mcard.classList.remove('go')}});// the card gets out of the way the moment you start
 function showMission(n){const c=CH(n),m=c.mission||[];if(!m.length)return;const P=PLAN[n],I=t=>svg('0 0 24 24',ICON[t]||ICON.worker);
   const who=n===2?I('diva')+I('grandma'):n===3?I('prime')+I('gym'):n===5?I('detecto'):I((P.icons||[])[0]);
   mcard.firstChild.innerHTML=n===5?who:who+'<svg class="ar" viewBox="0 0 40 50" aria-hidden="true"><path d="M20 2 38.5 22.5H27.4V47.5H12.6V22.5H1.5Z"/></svg>'+svg('0 0 24 24',SHOPI);

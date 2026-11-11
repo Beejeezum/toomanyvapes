@@ -27,11 +27,13 @@
     },
     {
      "img": "ch1_v2_3",
-     "vid": "ch1_v2_3",
+     "vid": "ch1_v2_3#t=1.5",
      "aud": true,
      "who": "SAL",
      "vo": "sal_ch1_phone",
-     "cap": "Fifty! I said FIFTY! Five, zero! Not five THOUSAND! …Hello? HELLO?!"
+     "cap": "Fifty! I said FIFTY! Five, zero! Not five THOUSAND! …Hello? HELLO?!",
+     "jIn": "sal_ch1_phone_pre.m4a",
+     "jLead": 1.5
     },
     {
      "img": "ch1_kid_v3",
@@ -187,9 +189,8 @@
     },
     {
      "img": "ch3_boss",
-     "vid": "ch3_boss",
+     "vid": "ch3_boss#t=0,4.1",
      "aud": true,
-     "hold": 6,
      "flip": true
     }
    ],

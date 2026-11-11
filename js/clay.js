@@ -157,8 +157,8 @@ function sand(k,n){k.fillStyle='#e4cc98';k.fillRect(0,0,n,n);
     k.fillStyle=C[(Math.random()*C.length)|0];k.fillRect(x,y,r,r);if(r>1.6){k.fillStyle='rgba(255,252,240,.6)';k.fillRect(x,y,r*.45,r*.45)}}
   for(let i=0;i<n/8;i++){const x=rand(0,n),y=rand(0,n),r=rand(2,4.5);k.fillStyle='rgba(90,70,50,.45)';k.beginPath();k.ellipse(x+1,y+1.2,r,r*.75,0,0,PI*2);k.fill();k.fillStyle=pick(['#9c8f84','#b3a089','#7d6f66','#f4ece0','#e9b9a3']);k.beginPath();k.ellipse(x,y,r,r*.75,rand(0,3),0,PI*2);k.fill();k.fillStyle='rgba(255,255,255,.4)';k.fillRect(x-r*.4,y-r*.4,r*.5,r*.35)}}
 // sidewalk: one panel of thick grey card per tile (the shader adds the seams), pulpy mottling, fibres, scuffs, crushed edges
-function tile(k,n){k.fillStyle='#d2ccc1';k.fillRect(0,0,n,n);k.lineCap='round';
-  for(let i=0;i<50;i++){const x=rand(0,n),y=rand(0,n),r=rand(10,40),d=rand(-7,6);blob(k,x,y,r,hsl(36,10,79+d,.45),hsl(36,10,79+d,0))}
+function tile(k,n){k.fillStyle='#bdb6aa';/* mid-grey card (was near-white in sun) */k.fillRect(0,0,n,n);k.lineCap='round';
+  for(let i=0;i<50;i++){const x=rand(0,n),y=rand(0,n),r=rand(10,40),d=rand(-7,6);blob(k,x,y,r,hsl(36,10,71+d,.45),hsl(36,10,71+d,0))}
   for(let i=0;i<n*n/10;i++){const x=rand(0,n),y=rand(0,n),a=rand(0,PI*2),L=rand(1.5,4.5);k.strokeStyle=Math.random()<.5?'rgba(110,95,80,.18)':'rgba(255,252,245,.25)';k.lineWidth=rand(.4,.9);k.beginPath();k.moveTo(x,y);k.lineTo(x+Math.cos(a)*L,y+Math.sin(a)*L);k.stroke()}
   for(let i=0;i<4;i++){let x=rand(0,n),y=rand(0,n);k.strokeStyle='rgba(90,80,70,.22)';k.lineWidth=rand(2,6);k.beginPath();k.moveTo(x,y);k.quadraticCurveTo(x+rand(-30,30),y+rand(-30,30),x+rand(-50,50),y+rand(-50,50));k.stroke()}
   k.strokeStyle='rgba(70,70,90,.18)';k.lineWidth=1;k.beginPath();{const x=rand(30,n-30),y=rand(30,n-30);k.moveTo(x,y);k.lineTo(x+rand(30,70),y+rand(-6,6))}k.stroke();

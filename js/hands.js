@@ -16,27 +16,39 @@ const css=D.createElement('style');css.textContent=`
 #hands .h img{position:absolute;inset:0;width:100%;height:100%;visibility:hidden;filter:drop-shadow(0 4px 6px rgba(20,10,0,.28))}
 #hands .h img.on{visibility:visible}
 #hands .hR{right:0;height:var(--hR,48vh);transform-origin:100% 100%}
+#hands .hD{left:0;height:var(--hR,48vh);transform-origin:0 100%;transform:translateY(110%)}#hands .hD .mir{position:absolute;inset:0;transform:scaleX(-1)}
 #hands .hL{left:0;height:var(--hL,46vh);transform-origin:0 100%;transform:translateY(110%)}
-@media (orientation:portrait){#hands .hR{height:var(--hRp,36vh)}#hands .hL{height:var(--hLp,22vh)}}`;
+@media (orientation:portrait){#hands .hR,#hands .hD{height:var(--hRp,36vh)}#hands .hL{height:var(--hLp,22vh)}}`;
 D.head.appendChild(css);
 
 const wrap=D.createElement('div');wrap.id='hands';
 const hud=D.getElementById('hud');if(hud&&hud.parentNode===X.game)X.game.insertBefore(wrap,hud);else X.game.appendChild(wrap);
-const R=D.createElement('div');R.className='h hR';const L=D.createElement('div');L.className='h hL';wrap.append(L,R);
+const R=D.createElement('div');R.className='h hR';const L=D.createElement('div');L.className='h hL';
+// double-vape power-up: the same clay hand + pod, mirrored, in the bottom-left
+const DV=D.createElement('div');DV.className='h hD';const DVm=D.createElement('div');DVm.className='mir';DV.appendChild(DVm);wrap.append(L,DV,R);
 
-let M=null;const FR={},FL={};
+let M=null;const FR={},FL={},FD={};
 function mk(par,set,map){for(const k in set){const i=new Image();i.decoding='async';i.src='assets/hands/'+set[k].src;i.alt='';par.appendChild(i);map[k]=i}}
 fetch('assets/hands/hands.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.R||!j.R.f)return;M=j;
-  R.style.aspectRatio=j.R.w+'/'+j.R.h;L.style.aspectRatio=j.L.w+'/'+j.L.h;mk(R,j.R.f,FR);mk(L,j.L.f,FL);X.armR.visible=false}).catch(()=>{});
+  R.style.aspectRatio=DV.style.aspectRatio=j.R.w+'/'+j.R.h;L.style.aspectRatio=j.L.w+'/'+j.L.h;mk(R,j.R.f,FR);mk(L,j.L.f,FL);mk(DVm,j.R.f,FD);X.armR.visible=false}).catch(()=>{});
 
-const cur={R:null,L:null};
+const cur={R:null,L:null,D:null};
 function show(side,img){if(cur[side]===img)return;if(cur[side])cur[side].classList.remove('on');cur[side]=img;if(img)img.classList.add('on')}
 
 // --- state ---
 let up=0,acc=0,boilK=0,boilT=0,bobPh=0,lastX=X.px,lastZ=X.pz,sp=0;
 let phase='idle',queue=[],pump=0,recoil=0,aimK=0,lstep=0,held=null;
-const tgt={x:0,y:0,ok:false},V=X.T?new X.T.Vector3():null;
-X.on('grab',n=>{held=n;phase='reach';queue=['hit','tilt']});
+const tgt={x:0,y:0,ok:false},V=X.T?new X.T.Vector3():null,mp={x:0,y:0,ok:false,k:0};
+/* tipSync: the core locks a held person's mouth onto armR.tip (an invisible 3D point). Move that point to wherever the clay pod's
+   mouthpiece is on screen, at the tip's usual depth, so their mouth lands on the vape tip. */
+let tip0=null;const TV=X.T?new X.T.Vector3():null,TV2=X.T?new X.T.Vector3():null;
+function tipSync(){const tip=X.armR&&X.armR.tip;if(!tip||!TV)return;if(!tip0)tip0=tip.position.clone();
+  if(!(mp.ok&&mp.k>0)){tip.position.copy(tip0);return}
+  const cam=X.cam;cam.updateMatrixWorld();tip.position.copy(tip0);tip.parent.updateMatrixWorld(true);tip.getWorldPosition(TV);
+  TV.applyMatrix4(cam.matrixWorldInverse);const zc=Math.min(-.25,TV.z),g=X.game.getBoundingClientRect(),th=Math.tan(cam.fov*Math.PI/360);
+  const nx=mp.x/g.width*2-1,ny=1-mp.y/g.height*2,k=mp.k;TV2.set(nx*-zc*th*cam.aspect,ny*-zc*th,zc);
+  TV.lerp(TV2,k);cam.localToWorld(TV);tip.parent.worldToLocal(TV);tip.position.copy(TV)}
+X.on('grab',n=>{held=n;phase='reach';queue=['out','hit','hit','tilt']});
 X.on('vape',()=>{if(phase==='hold')pump=1});
 X.on('release',(n,kind)=>{if(kind==='passive')return;phase='flick';queue=['hit','out'];recoil=1;held=null});
 
@@ -45,11 +57,12 @@ function aimAt(){tgt.ok=false;const n=X.held||held;if(!n||!V||!X.mouth)return;tr
 
 const STEP=1/12;let lastT=performance.now();
 X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000)||1/60;lastT=now;if(!M)return;
-  X.armR.visible=false;// the 3D arm only provides the vape-tip position now (also hides the old 3D left hand)
+  X.armR.visible=false;if(X.armL)X.armL.visible=false;// the 3D arms only provides the vape-tip position now (also hides the old 3D left hand)
   const play=X.mode==='play'||X.mode==='paused';
   up=Math.max(0,Math.min(1,up+(play?dt/.35:-dt/.2)));
   const v=Math.hypot(X.px-lastX,X.pz-lastZ)/Math.max(1e-3,gdt||dt);lastX=X.px;lastZ=X.pz;if(v<20){sp+=(v-sp)*Math.min(1,dt*8);bobPh+=dt*Math.min(9,sp*1.6)}
   if(phase==='hold'&&!X.held){phase='flick';queue=['hit','out'];recoil=1;held=null}
+  tipSync();
   acc+=dt;if(acc<STEP)return;acc=0;// everything below snaps at ~12 fps (stop-motion)
   const rm=RM.matches;boilT+=STEP;if(boilT>=.125){boilT=0;boilK=(boilK+1+(Math.random()*2|0))%6}
   // ---- right hand frame
@@ -61,23 +74,31 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   // ---- right hand placement
   const g=X.game.getBoundingClientRect(),W=g.width,H=g.height,Wc=R.offsetWidth,Hc=R.offsetHeight;
   const walking=sp>.3&&!rm,bob=walking?Math.abs(Math.sin(bobPh))*H*.016:0,sway=walking?Math.sin(bobPh)*W*.008:0;
-  let tx=sway,ty=(1-up)*Hc*1.05+bob+recoil*H*.05,rot=0;recoil=Math.max(0,recoil-.34);
-  const aiming=(phase==='reach'||phase==='hold')&&X.mode==='play';aimK=Math.max(0,Math.min(1,aimK+(aiming?.34:-.5)));
+  let tx=sway,ty=(1-up)*Hc*1.05+bob+recoil*H*.05,rot=0,sc=1;recoil=Math.max(0,recoil-.34);
+  const aiming=(phase==='reach'||phase==='hold')&&X.mode==='play';aimK=Math.max(0,Math.min(1,aimK+(aiming?.25:-.5)));
   // resting pose: park the pod's mouthpiece at ~68% across, a bit below middle, whatever the screen shape
   {const fm=M.R.f[f]&&M.R.f[f].mp;if(fm&&f==='out'){const mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,k=1-aimK;
     tx+=Math.max(-W*.1,Math.min(Wc*.5,(W*.68-mx)))*k;ty+=Math.max(-H*.1,Math.min(H*.2,(H*.6-my)))*k}}
-  if(aimK>0){aimAt();const fm=M.R.f[f]&&M.R.f[f].mp;
-    if(tgt.ok&&fm){const px=W,py=H,mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc;
-      let th=Math.atan2(tgt.y-py,tgt.x-px)-Math.atan2(my-py,mx-px);th=Math.atan2(Math.sin(th),Math.cos(th));
-      th=Math.max(-.32,Math.min(.32,th))*aimK;rot+=th*180/Math.PI;
-      // after rotating, nudge the pod part of the way toward the mouth
-      const c=Math.cos(th),s=Math.sin(th),rx=px+(mx-px)*c-(my-py)*s,ry=py+(mx-px)*s+(my-py)*c;
-      tx+=Math.max(-W*.08,Math.min(W*.04,(tgt.x-rx)*.3*aimK));ty+=Math.max(-H*.1,Math.min(H*.05,(tgt.y-ry)*.3*aimK))}}
-  if(pump===1&&!rm){tx-=W*.006;ty-=H*.01}
+  if(aimK>0){aimAt();const fm=M.R.f[f]&&M.R.f[f].mp;const OFF={x:W*.585,y:H*.5};/* the offering point: the game then pulls their mouth onto the pod tip */
+    if(fm){const tgt=OFF;// lock the pod's mouthpiece onto their mouth: rotate + scale round the bottom-right corner (the forearm stays
+      // attached to the screen edge), then a small nudge for what's left
+      const px=W,py=H,mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,dmx=mx-px,dmy=my-py,dtx=tgt.x-px,dty=tgt.y-py;
+      let th=Math.atan2(dty,dtx)-Math.atan2(dmy,dmx);th=Math.atan2(Math.sin(th),Math.cos(th));th=Math.max(-.6,Math.min(.6,th))*aimK;
+      sc=1+(Math.max(.78,Math.min(1.3,Math.hypot(dtx,dty)/Math.max(1,Math.hypot(dmx,dmy))))-1)*aimK;rot+=th*180/Math.PI;
+      const c=Math.cos(th),s=Math.sin(th),rx=px+sc*(dmx*c-dmy*s),ry=py+sc*(dmx*s+dmy*c);
+      tx+=Math.max(-W*.04,Math.min(W*.08,(tgt.x-rx)*aimK));ty+=Math.max(-H*.04,Math.min(H*.08,(tgt.y-ry)*aimK))}}
+  if(pump===1&&!rm){sc*=.97;tx-=W*.004;ty-=H*.006}// each puff: a little shove toward their face
   if(!rm){const j=boilK*1.37;tx+=Math.sin(j*2.1)*W*.0012;ty+=Math.cos(j*1.7)*H*.003;rot+=Math.sin(j*3.3)*.35}
-  R.style.transform=`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) rotate(${rot.toFixed(2)}deg)`;
+  R.style.transform=`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+  // where the pod's mouthpiece is on screen right now (for tipSync)
+  {const fm=M.R.f[f]&&M.R.f[f].mp;if(fm){const px=W,py=H,dmx=W-Wc+fm[0]*Wc-px,dmy=H-Hc+fm[1]*Hc-py,a=rot*Math.PI/180,c=Math.cos(a),s2=Math.sin(a);
+    mp.x=px+sc*(dmx*c-dmy*s2)+tx;mp.y=py+sc*(dmx*s2+dmy*c)+ty;mp.ok=true}else mp.ok=false;mp.k=aimK}
+  // ---- double-vape: mirrored clay hand + pod bottom-left, moving as the right hand's reflection
+  const dual=!!(X.act&&X.act.dual>0)&&play;
+  if(dual){show('D',FD[f]||FD.out);DV.style.transform=`translate(${(-tx).toFixed(1)}px,${ty.toFixed(1)}px) rotate(${(-rot).toFixed(2)}deg) scale(${sc.toFixed(3)})`}
+  else if(cur.D){show('D',null);DV.style.transform='translateY(110%)'}
   // ---- left hand: only while grabbing someone; steps up (open → grip) toward their head, drops after
-  const want=(phase==='reach'||phase==='hold')&&X.mode==='play'&&up>.9;
+  const want=(phase==='reach'||phase==='hold')&&X.mode==='play'&&up>.9&&!dual;
   lstep=want?Math.min(3,lstep+1):Math.max(0,lstep-1);
   if(lstep===0){L.style.transform='translateY(110%)';show('L',null)}
   else{show('L',lstep<2?FL.rest:FL.grab);const Wl=L.offsetWidth;
