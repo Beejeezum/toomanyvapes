@@ -764,7 +764,7 @@ window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,
   get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
 Object.defineProperty(window.TMV,'slow',{get:()=>slow,set:v=>{slow=v}});
 {const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
-['world','mobile','crowds','juice','story'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
+['world','mobile','crowds','juice','story','paper'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
 if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!labelMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
 })();
 </script>
