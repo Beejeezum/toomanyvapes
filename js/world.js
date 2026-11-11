@@ -11,7 +11,10 @@ const ss=(a,b,v)=>{v=clamp((v-a)/(b-a),0,1);return v*v*(3-2*v)};
 const VCM=new T.MeshToonMaterial({gradientMap:GRAD,vertexColors:true});
 const GEO={b:new T.BoxGeometry(1,1,1),s:new T.SphereGeometry(.5,8,6),c:new T.CylinderGeometry(.5,.5,1,8),k:new T.ConeGeometry(.5,1,8),p:new T.ConeGeometry(.5,1,4),t:new T.TorusGeometry(.4,.15,6,12)};
 // u: paper cup (wide top), r: bottle cap with a crimped edge
-GEO.u=new T.CylinderGeometry(.5,.34,1,12);GEO.r=(()=>{const g=new T.CylinderGeometry(.5,.5,1,24),P=g.attributes.position;for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i);if(Math.hypot(x,z)<.49)continue;const k=1+.07*Math.cos(Math.atan2(z,x)*12);P.setX(i,x*k);P.setZ(i,z*k)}g.computeVertexNormals();return g})();
+GEO.u=new T.CylinderGeometry(.5,.34,1,12);
+// rb: a rounded box (rolled plasticine), slightly lumpy
+GEO.rb=(()=>{const g=new T.BoxGeometry(1,1,1,3,4,3),p=g.attributes.position,nn=g.attributes.normal,v=new T.Vector3(),c=new T.Vector3(),r=.2,h=.5-r;
+  for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);c.set(clamp(v.x,-h,h),clamp(v.y,-h,h),clamp(v.z,-h,h));v.sub(c).normalize();nn.setXYZ(i,v.x,v.y,v.z);v.multiplyScalar(r*(1+.08*Math.sin(c.y*17+c.x*9))).add(c);p.setXYZ(i,v.x,v.y,v.z)}return g})();GEO.r=(()=>{const g=new T.CylinderGeometry(.5,.5,1,24),P=g.attributes.position;for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i);if(Math.hypot(x,z)<.49)continue;const k=1+.07*Math.cos(Math.atan2(z,x)*12);P.setX(i,x*k);P.setZ(i,z*k)}g.computeVertexNormals();return g})();
 for(const k in GEO)GEO[k]=GEO[k].toNonIndexed();
 const _m=new T.Matrix4(),_m2=new T.Matrix4(),_q=new T.Quaternion(),_e=new T.Euler(),_e2=new T.Euler(),_p=new T.Vector3(),_s=new T.Vector3(),_v=new T.Vector3(),_c=new T.Color(),_n3=new T.Matrix3(),ID=new T.Matrix4();
 const WG=new T.Group();scene.add(WG);
@@ -39,6 +42,9 @@ const stickT=craftTex(128,128,(k,n)=>{k.fillStyle='#f4ece0';k.fillRect(0,0,n,n);
     for(const o of[-n,0,n]){k.beginPath();for(let x=-2;x<=n+2;x+=4)k.lineTo(x,y+o+Math.sin(x/n*PI*2*f+ph)*a);k.stroke()}}
   for(let i=0;i<500;i++){k.fillStyle=Math.random()<.5?'rgba(160,120,80,.12)':'rgba(255,255,255,.14)';k.fillRect(rand(0,n),rand(0,n),rand(2,7),1)}});
 const FLUTEM=craftMat(fluteT,'flute'),KRAFTM=craftMat(kraftT,'kraft',true),STICKM=craftMat(stickT,'stick',true);
+// plasticine pressed into shape by hand: deeper thumbprints than the town's smooth clay (clay mod kind 'thumb')
+const THUMBM=new T.MeshToonMaterial({gradientMap:GRAD,vertexColors:true});THUMBM.userData.clayKind='thumb';
+const CLAYLEG=0x5a5368,TK=Kit(false,THUMBM);
 const wrapDraw=(n,x,y,r,f)=>{for(const i of[-n,0,n])for(const j of[-n,0,n])if(x+i>-r&&x+i<n+r&&y+j>-r&&y+j<n+r)f(x+i,y+j)};
 // kitchen sponge: pale foam full of irregular pores (tinted per disc by vertex colour)
 const spongeT=craftTex(128,128,(k,n)=>{k.fillStyle='#efefef';k.fillRect(0,0,n,n);for(let i=0;i<300;i++){const x=rand(0,n),y=rand(0,n),r=Math.random()<.8?rand(.8,2.6):rand(2.6,5),a=rand(0,3),e=rand(.5,1);
@@ -88,7 +94,7 @@ function stickOne(gb,m4,w,h,d,col){const D=[w,h,d],L=D.indexOf(Math.max(w,h,d)),
     gb.tri4(ids,s<0)}}
 
 /* ---------- kit: collect parts, merge into one vertex-coloured mesh + one ink hull ---------- */
-function Kit(wood){const P=[],I=[];let base=ID;const k={
+function Kit(wood,mat){const P=[],I=[];let base=ID;const k={
   at(x,z,ry,y){base=new T.Matrix4().compose(_p.set(x,y||0,z),_q.setFromEuler(_e.set(0,ry||0,0,'XYZ')),_s.set(1,1,1));return k},
   reset(){base=ID;return k},
   add(g,w,h,d,col,x,y,z,rx,ry,rz,ink){const p={g,w,h,d,col,x,y,z,rx:rx||0,ry:ry||0,rz:rz||0,base};if(wood&&g==='b'&&WOODC.has(col)&&Math.min(w,h,d)>=.06)p.wood=true;P.push(p);if(ink!==false&&Math.max(w,h,d)>.25&&Math.min(w,h,d)>.04)I.push(p);return k},
@@ -96,7 +102,7 @@ function Kit(wood){const P=[],I=[];let base=ID;const k={
   /* textured box (signs): its own mesh, placed through the current base transform; its outline joins the merged hull */
   tex(mat,w,h,d,x,y,z,ry,par){const m=new T.Mesh(GEO.b,mat);_m.compose(_p.set(x,y,z),_q.setFromEuler(_e.set(0,ry||0,0,'XYZ')),_s.set(w,h,d));_m2.multiplyMatrices(base,_m);_m2.decompose(m.position,m.quaternion,m.scale);(par||WG).add(m);k.hull(w,h,d,x,y,z,0,ry);return m},
   // wooden parts become one popsicle-stick mesh beside the vertex-coloured one
-  build(par){const W0=P.filter(p=>p.wood),m=new T.Mesh(merge(P.filter(p=>!p.wood),0),VCM);(par||WG).add(m);
+  build(par){const W0=P.filter(p=>p.wood),m=new T.Mesh(merge(P.filter(p=>!p.wood),0),mat||VCM);(par||WG).add(m);
     if(W0.length){const gb=GB();for(const p of W0){_m.compose(_p.set(p.x,p.y,p.z),_q.setFromEuler(_e.set(p.rx,p.ry,p.rz,'XYZ')),_s.set(p.w,p.h,p.d));stickBox(gb,new T.Matrix4().multiplyMatrices(p.base,_m),p.w,p.h,p.d,p.col)}gb.mesh(STICKM,par)}
     return m}};return k}
 function merge(parts,th){let n=0;for(const p of parts)n+=GEO[p.g].attributes.position.count;
@@ -155,7 +161,7 @@ X.box(WG,4,.3,35,X.TM(plankT,2,18),PIERX,.25,-132.5);BK.hull(4,.3,35,PIERX,.25,-
 for(let z=-126;z>=-150;z-=4)for(const s of[-1,1])BK.add('c',.45,1.6,.45,0xd9b88a,PIERX+s*1.8,-.4,z,0,0,0,false);
 for(let z=-117;z>=-150;z-=3)for(const s of[-1,1])BK.add('b',.16,1,.16,0xfff7ea,PIERX+s*1.88,.9,z);
 for(const s of[-1,1]){BK.add('b',.14,.14,34,0xfff7ea,PIERX+s*1.88,1.4,-133);BK.add('b',.1,.1,34,0xfff7ea,PIERX+s*1.88,.95,-133,0,0,0,false)}
-BK.add('b',2.4,.12,.6,0x9a6a48,PIERX,.85,-148.5);BK.add('b',2.4,.6,.1,0x9a6a48,PIERX,1.2,-148.8);BK.add('b',.12,.5,.5,0x333333,PIERX-1,.6,-148.5,0,0,0,false);BK.add('b',.12,.5,.5,0x333333,PIERX+1,.6,-148.5,0,0,0,false);
+BK.add('b',2.4,.12,.6,0x9a6a48,PIERX,.85,-148.5);BK.add('b',2.4,.6,.1,0x9a6a48,PIERX,1.2,-148.8);TK.add('rb',.13,.5,.5,CLAYLEG,PIERX-1,.6,-148.5,0,0,0,false);TK.add('rb',.13,.5,.5,CLAYLEG,PIERX+1,.6,-148.5,0,0,0,false);
 solid(PIERX,-148.6,2.4,.8);
 BK.add('c',.18,2.6,.18,0x444444,PIERX-2.4,1.3,-117);BK.tex(signMat('NO VAPING OFF THE PIER'),3.4,.85,.12,PIERX-2.4,2.6,-117);
 // lifeguard tower
@@ -178,8 +184,22 @@ spots.forEach(([x,z],i)=>{const c=UMB[i%UMB.length],tl=rand(-.12,.12);BK.add('c'
 {const x=10,z=-119;BK.add('b',2.2,.9,2.2,0xe8cd8e,x,.45,z);for(const sx of[-1,1])for(const sz of[-1,1]){BK.add('c',.7,1.4,.7,0xe8cd8e,x+sx*1.1,.7,z+sz*1.1);BK.add('k',.8,.6,.8,0xdcbf80,x+sx*1.1,1.7,z+sz*1.1,0,0,0,false)}
   BK.add('c',.9,1.8,.9,0xe8cd8e,x,1.3,z);BK.add('k',1,.8,1,0xdcbf80,x,2.6,z);BK.add('b',.18,.7,.12,0xff3fa4,x,3.3,z,0,0,.2);BK.add('b',.06,.3,.3,0xb6ff3c,x+.1,3.6,z+.2,0,0,0,false)}
 // food carts
+/* a paper cocktail umbrella: pleated paper panels folded between the spokes (ridges at the spokes, a sag mid-panel, a pinked edge),
+   in the cart's colour and a paler fold, printed with fan lines; a toothpick for a pole */
+const umbT=craftTex(128,128,(k,n)=>{k.fillStyle='#f7f3ea';k.fillRect(0,0,n,n);k.lineCap='round';
+  for(let i=0;i<9;i++){const u=(i+.5)/9*n;k.strokeStyle='rgba(120,90,80,.18)';k.lineWidth=1.2;k.beginPath();k.moveTo(n/2,0);k.lineTo(u,n);k.stroke()}
+  k.strokeStyle='rgba(255,255,255,.55)';k.lineWidth=3;k.beginPath();k.moveTo(n/2,0);k.lineTo(n/2,n);k.stroke();
+  for(const u of[1.5,n-1.5]){k.strokeStyle='rgba(90,60,40,.45)';k.lineWidth=2.4;k.beginPath();k.moveTo(n/2,0);k.lineTo(u,n);k.stroke()}
+  k.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<n;i+=8){k.beginPath();k.moveTo(i,n);k.lineTo(i+4,n-6);k.lineTo(i+8,n);k.fill()}
+  for(let i=0;i<500;i++){k.fillStyle=Math.random()<.5?'rgba(255,255,255,.18)':'rgba(90,60,40,.08)';k.fillRect(rand(0,n),rand(0,n),rand(1,3),1)}});
+const UMBM=craftMat(umbT,'paper',true);UMBM.side=T.DoubleSide;
+function umbrella(x,z,col){const gb=GB(),N=16,R=1.55,H=.5,y0=3.38,c1=new T.Color(col),c2=new T.Color(col).lerp(new T.Color(0xffffff),.45);
+  for(let i=0;i<N;i++){const a0=i/N*PI*2,a1=(i+1)/N*PI*2,am=(a0+a1)/2,c=i%2?c2:c1;
+    const A=gb.v(x,y0+H,z,0,1,0,.5,0,c),r0=gb.v(x+Math.cos(a0)*R,y0,z+Math.sin(a0)*R,0,1,0,0,1,c),m=gb.v(x+Math.cos(am)*R*.95,y0-.09,z+Math.sin(am)*R*.95,0,1,0,.5,1,c),r1=gb.v(x+Math.cos(a1)*R,y0,z+Math.sin(a1)*R,0,1,0,1,1,c);
+    gb.tri(A,m,r0);gb.tri(A,r1,m)}
+  const g=gb.geo().toNonIndexed();g.computeVertexNormals();const msh=new T.Mesh(g,UMBM);WG.add(msh);return msh}
 function cart(K,x,z,ry,text,c1,c2){K.at(x,z,ry);K.add('b',2.4,1,1.2,c1,0,.95,0);K.add('b',2.44,.22,1.24,0xfff7ea,0,1.15,0,0,0,0,false);for(const s of[-.75,.75])K.add('r',.75,.15,.75,0xa9adb5,s,.4,.64,PI/2,0,0);
-  K.add('b',.1,.1,1.4,0x777777,-1.45,1.3,0,0,0,0,false);K.add('c',.08,2.4,.08,0xfff7ea,0,2.5,0,0,0,0,false);K.add('k',3,.8,3,c2,0,3.7,0);K.add('s',.25,.25,.25,0xfff7ea,0,4.15,0,0,0,0,false);
+  K.add('b',.1,.1,1.4,0x777777,-1.45,1.3,0,0,0,0,false);K.add('c',.07,2.6,.07,0xe2c48e,0,2.45,0,0,0,0,false);K.add('s',.2,.2,.2,c1,0,3.92,0,0,0,0,false);umbrella(x,z,c2);
   K.add('b',.7,.25,.5,0xffd98a,.4,1.58,0,0,0,0,false);K.add('b',.12,.6,.12,0xff3fa4,-.5,1.75,.2,0,0,.3,false);
   const sm=signMat(text,'#fff7ea','#e0244a','#e0244a');K.tex(sm,2.4,.55,.1,0,2.2,.62);K.tex(sm,2.4,.55,.1,0,2.2,-.62,PI);K.reset();solid(x,z,ry?1.4:2.6,ry?2.6:1.4)}
 cart(BK,-12,-106,0,'SAND-WICHES (CRUNCHY)',0x5fd4ff,0xffd23c);
@@ -199,10 +219,10 @@ for(const a of LINES)for(const b of LINES){if(Math.random()<.35)continue;const x
 // traffic signal poles (lamps are an instanced mesh below)
 const SIGL=[];for(const[a,b]of signals){const x=a+4,z=b-4;PK.add('c',.14,4.8,.14,0x8a8f98,x,2.4,z);PK.add('c',.3,1.5,.3,0x1b1a20,x,4.55,z);for(const y of[3.82,5.27])PK.add('c',.33,.1,.33,0xd9b02a,x,y,z,0,0,0,false);PK.add('s',.3,.2,.3,0x1b1a20,x,5.33,z,0,0,0,false);SIGL.push([x,z]);solid(x,z,.3,.3)}
 // benches mid-block, facing the road
-for(let i=0;i<10;i++){const a=pick(LINES),b=pick(LINES.slice(0,5))+11,s=pick([-1,1]),x=a+s*4.05,z=b+rand(-2,2);PK.at(x,z,s>0?-PI/2:PI/2);PK.add('b',2.2,.12,.6,0x9a6a48,0,.55,0);PK.add('b',2.2,.6,.1,0x9a6a48,0,.9,-.3);PK.add('b',.12,.55,.5,0x333333,-.9,.27,0,0,0,0,false);PK.add('b',.12,.55,.5,0x333333,.9,.27,0,0,0,0,false);PK.reset()}
+for(let i=0;i<10;i++){const a=pick(LINES),b=pick(LINES.slice(0,5))+11,s=pick([-1,1]),x=a+s*4.05,z=b+rand(-2,2);PK.at(x,z,s>0?-PI/2:PI/2);PK.add('b',2.2,.12,.6,0x9a6a48,0,.55,0);PK.add('b',2.2,.6,.1,0x9a6a48,0,.9,-.3);TK.at(x,z,s>0?-PI/2:PI/2);TK.add('rb',.13,.55,.5,CLAYLEG,-.9,.27,0,0,0,0,false);TK.add('rb',.13,.55,.5,CLAYLEG,.9,.27,0,0,0,0,false);TK.reset();PK.reset()}
 // bus stop (the bus never comes)
 {const x=-22,z=61;PK.at(x,z,0);PK.add('b',5,.15,2,0x3a3340,0,2.7,0);PK.add('b',5,2.4,.1,0x9adcff,0,1.45,.95);for(const s of[-1,1]){PK.add('b',.15,2.7,.15,0x3a3340,s*2.4,1.35,.9);PK.add('b',.15,2.7,.15,0x3a3340,s*2.4,1.35,-.9);PK.add('b',.08,2.2,1.7,0x9adcff,s*2.45,1.4,0,0,0,0,false)}
-  PK.add('b',3.4,.14,.6,0x9a6a48,0,.6,.5);PK.add('b',.14,.6,.14,0x333333,-1.4,.3,.5,0,0,0,false);PK.add('b',.14,.6,.14,0x333333,1.4,.3,.5,0,0,0,false);
+  PK.add('b',3.4,.14,.6,0x9a6a48,0,.6,.5);TK.at(x,z,0);TK.add('rb',.15,.6,.15,CLAYLEG,-1.4,.3,.5,0,0,0,false);TK.add('rb',.15,.6,.15,CLAYLEG,1.4,.3,.5,0,0,0,false);TK.reset();
   PK.tex(adMat('#a070ff','#ffd23c','VAPE-FREE DAYCARE','WE ONLY LOSE SOME KIDS','now enrolling'),3.2,1.6,.12,0,1.5,.85);
   PK.add('c',.14,3.2,.14,0x666666,-3.2,1.6,-.6);PK.tex(signMat('BUS STOP · BUS: NEVER','#3c8cff','#fff7ea','#fff7ea'),2.6,.7,.1,-3.2,3,-.6);PK.reset();solid(x,z+.95,5,.3);solid(x-2.4,z,.3,2);solid(x+2.4,z,.3,2)}
 cart(PK,-4.5,1.5,0,'HOT DOGS (NOT VAPES)',0xe0244a,0xffd23c);
@@ -213,7 +233,7 @@ const ADS=[[-40,-76,0,'#ff3fa4','#ffd23c','LUNGS R US','TWO FOR ONE! YOU HAVE TW
   [-58,74,Math.atan2(58,-74),'#ff7a1a','#2a2433','MATTRESS KINGDOM','NOW ALSO 2ND MATTRESS KINGDOM','the kingdom is just mattresses']];
 for(const[x,z,ry,bg,fg,l1,l2,l3]of ADS){PK.at(x,z,ry);for(const s of[-1,1])PK.add('b',.4,7,.4,0x3a3340,s*4.5,3.5,-.3);PK.add('b',12.6,.2,1,0x3a3340,0,5.25,-.1);for(const s of[-4,0,4])PK.add('b',.2,.6,.2,0x3a3340,s,11.3,.3,0,0,0,false);
   PK.tex(adMat(bg,fg,l1,l2,l3),12,5.6,.35,0,8.2,0);PK.reset();solid(x,z,1.2,1.2)}
-PK.build(WG);
+PK.build(WG);TK.build(WG);
 /* =================== CRAFT SET DRESSING ===================
    Cardboard-model details for the core town, all merged into a handful of meshes (fewer draw calls than before):
    fluted card edges on building corners, roof boards and building bases; raw kraft roofs; card kerbs with a corrugated face where
@@ -288,7 +308,7 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
      kitchen-sponge trees on twigs, button-and-pin flowers, pom-pom hedges, pipe-cleaner crops, thimble hydrants, paperclip street lamps,
      tin-can water towers on chopsticks, a doily gazebo on straws, felt lily pads, a shoebox barn, a loo-roll silo, clothespin fence posts.
      Each family is merged into one mesh: PR = painted clay/metal (vertex colour), SP = sponge, FZ = pipe-cleaner / pom-pom / felt fuzz */
-  const PR=[],SP=[],FZ=[],UP=new T.Vector3(0,1,0),_d=new T.Vector3(),_a=new T.Vector3(),_b=new T.Vector3();
+  const PR=[],SP=[],FZ=[],TH=[],UP=new T.Vector3(0,1,0),_d=new T.Vector3(),_a=new T.Vector3(),_b=new T.Vector3();
   const mx=(x,y,z,sx,sy,sz,rx,ry,rz)=>new T.Matrix4().compose(_p.set(x,y,z),_q.setFromEuler(_e.set(rx||0,ry||0,rz||0,'XYZ')),_s.set(sx,sy,sz));
   const put=(L,g,col,x,y,z,sx,sy,sz,rx,ry,rz)=>L.push([g,mx(x,y,z,sx,sy,sz,rx,ry,rz),col]);
   const rod=(L,g,col,a,b,r)=>{_d.subVectors(b,a);const len=_d.length();_q.setFromUnitVectors(UP,_d.normalize());L.push([g,new T.Matrix4().compose(_p.addVectors(a,b).multiplyScalar(.5),_q,_s.set(r*2,len,r*2)),col])};
@@ -296,6 +316,14 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
     gCup=new T.CylinderGeometry(.5,.36,1,14),gPad=new T.CylinderGeometry(.5,.5,1,18,1,false,.35,PI*2-.7),gRing=new T.TorusGeometry(.5,.12,5,18);
   const ribbed=(seg,hs,f)=>{const g=new T.CylinderGeometry(.5,.5,1,seg,hs),P=g.attributes.position;for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i);if(Math.hypot(x,z)<.49)continue;const k=f(Math.atan2(z,x),P.getY(i));P.setX(i,x*k);P.setZ(i,z*k)}g.computeVertexNormals();return g};
   const gCap=ribbed(28,1,a=>1+.06*Math.cos(a*14)),gCan=ribbed(18,16,(a,y)=>1+.03*Math.cos(y*PI*16));
+  // a rolled clay bar (lumpy along its length) and a clay plate: a puck with a soft rounded rim and a pressed-in centre
+  const gRoll=ribbed(10,12,(a,y)=>1+.07*Math.sin(y*19+a*2)),gPlate=new T.LatheGeometry([[.12,-.5],[.36,-.5],[.46,-.42],[.5,-.2],[.5,.2],[.46,.42],[.36,.5],[.2,.46],[.12,.5]].map(([r,y])=>new T.Vector2(r,y)),18);
+  // monument paint: grey stone gouache for the plinth, a white wash (tinted pink) for the vape, a paper label printed with a band
+  const stoneT=craftTex(128,128,(k,n)=>{k.fillStyle='#b4aeb4';k.fillRect(0,0,n,n);for(let i=0;i<260;i++){const x=rand(0,n),y=rand(0,n);k.strokeStyle=Math.random()<.5?'rgba(255,255,255,.12)':'rgba(60,50,60,.12)';k.lineWidth=rand(1,3);k.beginPath();k.moveTo(x,y);k.lineTo(x+rand(8,26),y+rand(-2,2));k.stroke()}
+    for(let i=0;i<40;i++){k.fillStyle=`rgba(${Math.random()<.5?'80,70,80':'230,226,230'},.25)`;k.beginPath();k.arc(rand(0,n),rand(0,n),rand(.6,2),0,PI*2);k.fill()}});
+  const gouT=craftTex(128,128,(k,n)=>{k.fillStyle='#f4f0ea';k.fillRect(0,0,n,n);for(let i=0;i<300;i++){const x=rand(0,n),y=rand(0,n);k.strokeStyle=Math.random()<.5?'rgba(255,255,255,.35)':'rgba(120,80,90,.13)';k.lineWidth=rand(1,3);k.beginPath();k.moveTo(x,y);k.lineTo(x+rand(-1.5,1.5),y+rand(10,30));k.stroke()}});
+  const labelT=craftTex(128,64,(k,w,h)=>{k.fillStyle='#fbf3e3';k.fillRect(0,0,w,h);k.fillStyle='#e8508f';k.fillRect(0,h*.38,w,h*.24);k.fillStyle='#6cc9bf';k.fillRect(0,h*.14,w,h*.07);k.fillRect(0,h*.79,w,h*.07);
+    for(let i=0;i<300;i++){k.fillStyle=Math.random()<.5?'rgba(255,255,255,.25)':'rgba(80,55,35,.12)';k.fillRect(rand(0,w),rand(0,h),rand(1,2),1)}});
   const strands=[0,1,2].map(v=>new T.TubeGeometry(new T.CatmullRomCurve3([[0,0,0],[.04,.28,0],[.16+v*.06,.52,0],[.3+v*.08,.62-v*.06,0]].map(a=>new T.Vector3(...a))),8,.055,5));
   /* shop awnings: striped card (painted stripes with wobbly edges and brush streaks) with a scalloped valance hanging off the front,
      all merged into one mesh (they were ~100 separate boxes); the stripes run down the slope */
@@ -368,9 +396,29 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
     else if(t==='CylinderGeometry'&&c===0xd9c79a&&s.x===27.5)o.material=new T.MeshToonMaterial({gradientMap:GRAD,color:0xb7c2cc}); // the mirror's bevelled edge
     else if(t==='SphereGeometry'&&c===0xb0b0b0&&s.x===3.4)o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,color:0xe6dfd2}),{userData:{clayKind:'paper'}});
     else if(img&&img===(TXS.plank&&TXS.plank.image)&&s.x===10&&s.y===6)barn=o;
-    else if(t==='BoxGeometry'&&c===0x6e1f1f)o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:kraftT,color:0x7a6e66}),{userData:{clayKind:'kraft'}}); // barn lid: stained kraft card
+    else if(t==='BoxGeometry'&&c===0x6e1f1f){o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:kraftT,color:0x7a6e66}),{userData:{clayKind:'kraft'}});o.scale.z=7.9;o.updateMatrix()} // barn lid: stained kraft card (tucked inside the box's ends, so it no longer covers the door)
     else if(t==='BoxGeometry'&&c===0x8a3a3a&&s.x===28){const tx=fuzzT.clone();tx.repeat.set(9,6);tx.needsUpdate=true;o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:tx,color:0xb04a48}),{userData:{clayKind:'fuzz'}})}
     else if(t==='BoxGeometry'&&c===0xe8d49a&&s.x===8&&sandT){const tx=sandT.clone();tx.repeat.set(2,2);tx.needsUpdate=true;o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:tx}),{userData:{clayKind:'sand'}})}
+    // the plaza's monument to the vape: a painted card box on a card plinth, a paper label round it, a felt mouthpiece
+    else if(t==='BoxGeometry'&&Math.abs(P.x-7)<.2&&Math.abs(P.z-4)<.2&&[0xaaa6b0,0x8a8690,0xff3fa4,0xfff7ea,0x222222].includes(c)){
+      if(c===0xaaa6b0){o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:stoneT}),{userData:{clayKind:'paint'}});corners(P.x,P.z,s.x,s.z,s.y,.02)}
+      else if(c===0x8a8690){o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:kraftT,color:0x9c958d}),{userData:{clayKind:'kraft'}});const w=s.x/2,y0=P.y-s.y/2;
+        for(const sd of[-1,1]){flute([P.x-w,y0,P.z+sd*(w+.004)],[2*w,0,0],[0,s.y,0],[0,0,sd],1,2*w);flute([P.x+sd*(w+.004),y0,P.z-w],[0,0,2*w],[0,s.y,0],[sd,0,0],1,2*w)}}
+      else if(c===0xff3fa4)o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:gouT,color:0xff4fa8}),{userData:{clayKind:'paint'}});
+      else if(c===0xfff7ea)o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:labelT}),{userData:{clayKind:'paper'}});
+      else o.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:fuzzT,color:0x3a3046}),{userData:{clayKind:'fuzz'}})}
+    // barn door: popsicle-stick planks painted red, a white stick frame and cross brace
+    else if(t==='BoxGeometry'&&c===0xfff7ea&&Math.abs(s.x-3)<.01&&Math.abs(s.y-3.6)<.01){gone.push(o);const z=P.z+.05;
+      stickBox(WS,mx(P.x,P.y,z,2.9,3.5,.07),2.9,3.5,.07,0xb53c34);
+      for(const sy of[-1,1])stickBox(WS,mx(P.x,P.y+sy*1.66,z+.06,3.1,.22,.06),3.1,.22,.06,0xf4ede0);for(const sx of[-1,1])stickBox(WS,mx(P.x+sx*1.44,P.y,z+.06,.22,3.5,.06),.22,3.5,.06,0xf4ede0);
+      const ang=Math.atan2(2.66,3.1);for(const sd of[-1,1])stickBox(WS,mx(P.x,P.y,z+.1,.2,Math.hypot(2.66,3.1),.05,0,0,sd*ang),.2,Math.hypot(2.66,3.1),.05,0xf4ede0)}
+    // bench legs (park) and the muscle-beach kit: hand-rolled plasticine with thumbprints
+    else if(t==='BoxGeometry'&&c===0x333333&&Math.abs(s.x-.12)<.01&&Math.abs(s.y-.55)<.01){gone.push(o);put(TH,GEO.rb,CLAYLEG,P.x,P.y,P.z,.13,s.y,s.z)}
+    else if(Math.abs(P.z+89)<2.5&&Math.abs(P.x)<12&&(t==='BoxGeometry'&&(c===0x444444||c===0x2a2433)||t==='CylinderGeometry'&&(c===0xcccccc||c===0x222222))){gone.push(o);o.updateMatrix();
+      if(c===0x444444)put(TH,GEO.rb,CLAYLEG,P.x,P.y,P.z,s.x*1.1,s.y,s.z*1.1);
+      else if(c===0x2a2433)put(TH,GEO.rb,0x3e3754,P.x,P.y,P.z,s.x,s.y,s.z);
+      else if(c===0xcccccc)TH.push([gRoll,o.matrix.clone(),0xb7bac4]);
+      else TH.push([gPlate,o.matrix.clone(),pick([0x4a4458,0x3f5a7a,0x8a3b3b])])}
     // benches and fences: popsicle sticks; fence posts are clothespins clipped onto the rails
     else if(m===WOOD&&t==='BoxGeometry'){gone.push(o);o.updateMatrix();
       if(Math.abs(s.x-.3)<.01&&Math.abs(s.y-1.3)<.01){const zr=Math.abs(Math.abs(P.z)-52)<.1;for(const sd of[-1,1]){const w=zr?.3:.11,d=zr?.11:.3;
@@ -439,13 +487,18 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
   {const PC=Kit();for(const g of W.children){const b=g.isGroup&&g.children[0];if(!b||!b.isMesh||b.scale.x!==1.9||b.scale.z!==4.1)continue;gone.push(g);PC.at(g.position.x,g.position.z,g.rotation.y);matchbox(PC,b.material.color.getHex(),1.9,4.1);PC.reset()}PC.build(WG)}
   for(const o of gone)if(o.parent)o.parent.remove(o);
   if(silo)silo.material=craftMat(tubeT,'kraft');
-  if(barn)barn.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,color:0xc93a34}),{userData:{clayKind:'wall'}});
+  // barn: a shoebox painted barn red in gouache, boards ruled in pencil, white-painted corner trim (the card's corrugation shows through)
+  if(barn)barn.material=Object.assign(new T.MeshToonMaterial({gradientMap:GRAD,map:craftTex(256,256,(k,n)=>{k.fillStyle='#c63a33';k.fillRect(0,0,n,n);k.lineCap='round';
+      for(let i=0;i<500;i++){const x=rand(0,n),y=rand(0,n);k.strokeStyle=Math.random()<.5?'rgba(255,220,200,.09)':'rgba(70,10,10,.12)';k.lineWidth=rand(1,3.5);k.beginPath();k.moveTo(x,y);k.lineTo(x+rand(-1.5,1.5),y+rand(10,40));k.stroke()}
+      for(let i=1;i<12;i++){const x=i/12*n+rand(-1.5,1.5);k.strokeStyle='rgba(60,15,15,.45)';k.lineWidth=1.3;k.beginPath();k.moveTo(x,0);k.lineTo(x+rand(-2,2),n);k.stroke();k.strokeStyle='rgba(255,210,190,.12)';k.beginPath();k.moveTo(x+1.6,0);k.lineTo(x+1.6,n);k.stroke()}
+      for(const[x,y,w,h]of[[0,0,n,9],[0,n-9,n,9],[0,0,9,n],[n-9,0,9,n]]){k.fillStyle='#f3ece0';k.fillRect(x,y,w,h)}
+      for(let i=0;i<120;i++){k.fillStyle='rgba(198,58,51,.6)';k.fillRect(rand(0,n),Math.random()<.5?rand(0,10):rand(n-10,n),rand(2,6),1)}})}),{userData:{clayKind:'wall'}});
   if(gazebo){const N=64,RG=8,RR=5.8,gb=GB();for(let i=0;i<=RG;i++)for(let j=0;j<=N;j++){const r=i/RG*RR,a=j/N*PI*2,x=Math.cos(a)*r,z=Math.sin(a)*r;gb.v(gazebo[0]+x,6.05-2.2*Math.pow(r/RR,.9),gazebo[1]+z,0,1,0,x/(2*RR)+.5,z/(2*RR)+.5)}
     for(let i=0;i<RG;i++)for(let j=0;j<N;j++){const a=i*(N+1)+j,b=a+N+1;gb.tri4([a,a+1,b+1,b],true)}const g=gb.geo();g.computeVertexNormals();WG.add(new T.Mesh(g,DOILYM))}
   // one mesh per family per district (park / farm / beach / downtown) so frustum culling still drops what's behind you
   const mk=(L,mat)=>{const B=new Map();for(const e of L){const x=e[1].elements[12],z=e[1].elements[14],k=x<-62?0:x>62?1:z<-62?2:z>62?3:4;let b=B.get(k);if(!b)B.set(k,b=[]);b.push(e)}
     for(const b of B.values())WG.add(new T.Mesh(mergeIdx(b),mat))};
-  mk(PR,VCM);mk(SP,SPONGEM);mk(FZ,FUZZM);
+  mk(PR,VCM);mk(SP,SPONGEM);mk(FZ,FUZZM);mk(TH,THUMBM);
   FL.mesh(FLUTEM);KR.mesh(KRAFTM);WS.mesh(STICKM);
   const kt=sideMat&&KT.mesh(sideMat);if(kt)kt.userData.noCast=1;
   const dm=DS.mesh(PAINTM);if(dm)dm.userData.noCast=1;
@@ -542,16 +595,28 @@ function drive(c,dt,t){const p=c.g.position,dx=c.tx-p.x,dz=c.tz-p.z;if(Math.hypo
   if(c.truck&&X.mode==='play'){c.jing-=dt;const d=Math.hypot(X.px-p.x,X.pz-p.z);if(c.jing<0&&d<34){c.jing=9;const v=.035*(1-d/34);JING.forEach((f,k)=>X.beep(f,.2,'triangle',v,k*.17))}}}
 
 /* =================== BIRDS: crows over town, gulls over the beach =================== */
-const NC=9,NG=12,NB=NC+NG,wingG=new T.BoxGeometry(1,.05,.42);wingG.translate(.5,0,0);
-const wings=new T.InstancedMesh(wingG,new T.MeshToonMaterial({gradientMap:GRAD,side:T.DoubleSide}),NB*2),bodies=new T.InstancedMesh(new T.BoxGeometry(.26,.24,.8),new T.MeshToonMaterial({gradientMap:GRAD}),NB);
-const birds=[];for(let i=0;i<NB;i++){const gull=i>=NC,col=gull?0xfdfdfd:0x2a2433;birds.push({gull,r:rand(gull?14:12,gull?26:22),w:rand(.09,.16)*(Math.random()<.5?-1:1),ph:rand(0,PI*2),y:rand(-2,2),s:gull?rand(.8,1):rand(.6,.75),fp:rand(0,6),last:new T.Vector3()});
-  wings.setColorAt(i*2,_c.setHex(col));wings.setColorAt(i*2+1,_c.setHex(col));bodies.setColorAt(i,_c.setHex(gull?0xeeeeee:0x2a2433))}
+/* paper birds: a body folded from one sheet (a ridge along the back, a keel underneath, a fanned tail), wings cut from the same paper
+   with snipped feather tips; the wings hold one of four drawn poses at a time (up, mid, down, mid), like replacement animation */
+const NC=9,NG=12,NB=NC+NG;
+const wingG=(()=>{const sh=new T.Shape([[0,.2],[.3,.21],[.62,.14],[1,-.02],[.9,-.1],[.84,-.05],[.74,-.16],[.64,-.09],[.52,-.2],[.4,-.12],[.26,-.22],[0,-.2]].map(([x,y])=>new T.Vector2(x,y)));
+  const g=new T.ShapeGeometry(sh);g.rotateX(PI/2);const P=g.attributes.position,U=g.attributes.uv;for(let i=0;i<P.count;i++){const x=P.getX(i);P.setY(i,Math.sin(x*PI)*.05);U.setXY(i,P.getX(i)*.9,P.getZ(i)*.9+.5)}g.computeVertexNormals();return g})();
+const bodyG=(()=>{const N=[0,0,.42],Tl=[0,.03,-.38],Tp=[0,.12,.04],K=[0,-.08,.02],L=[-.12,.01,0],Rr=[.12,.01,0],F1=[-.15,.06,-.6],F2=[.15,.06,-.6],F0=[0,.02,-.55];
+  const tri=[N,Tp,L, N,Rr,Tp, Tl,L,Tp, Tl,Tp,Rr, N,L,K, N,K,Rr, Tl,K,L, Tl,Rr,K, Tl,F1,F0, Tl,F0,F2];const g=new T.BufferGeometry();
+  g.setAttribute('position',new T.Float32BufferAttribute(tri.flat(),3));g.setAttribute('uv',new T.Float32BufferAttribute(tri.flatMap(v=>[v[0]+.5,v[2]+.5]),2));g.computeVertexNormals();return g})();
+const birdT=craftTex(64,64,(k,n)=>{k.fillStyle='#f2efe8';k.fillRect(0,0,n,n);k.lineCap='round';for(let i=0;i<260;i++){const x=rand(0,n),y=rand(0,n),a=rand(0,PI*2),l=rand(1,3.5);k.strokeStyle=Math.random()<.5?'rgba(255,255,255,.5)':'rgba(70,60,50,.2)';k.lineWidth=rand(.4,.9);k.beginPath();k.moveTo(x,y);k.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);k.stroke()}
+  k.strokeStyle='rgba(60,50,40,.3)';k.lineWidth=1;for(let i=0;i<4;i++){k.beginPath();k.moveTo(rand(0,n),0);k.lineTo(rand(0,n),n);k.stroke()}});
+const birdM=(side)=>{const m=new T.MeshToonMaterial({gradientMap:GRAD,map:birdT,side});m.userData.clayKind='paper';return m};
+const wings=new T.InstancedMesh(wingG,birdM(T.DoubleSide),NB*2),bodies=new T.InstancedMesh(bodyG,birdM(T.DoubleSide),NB);
+const FLAP=[.62,.16,-.36,.16];
+const birds=[];for(let i=0;i<NB;i++){const gull=i>=NC,col=gull?0xfdfdfd:0x3a3446;birds.push({gull,r:rand(gull?14:12,gull?26:22),w:rand(.09,.16)*(Math.random()<.5?-1:1),ph:rand(0,PI*2),y:rand(-2,2),s:gull?rand(.8,1):rand(.6,.75),fp:rand(0,6),last:new T.Vector3()});
+  wings.setColorAt(i*2,_c.setHex(col));wings.setColorAt(i*2+1,_c.setHex(col));bodies.setColorAt(i,_c.setHex(gull?0xf2f0ea:0x3a3446))}
 wings.frustumCulled=bodies.frustumCulled=false;scene.add(wings,bodies);
 const _bp=new T.Vector3();
 function flock(t){const cx=Math.sin(t*.02)*40,cz=Math.cos(t*.015)*35,gx=Math.sin(t*.03)*55,gz=-114+Math.sin(t*.07)*6;
   birds.forEach((b,i)=>{const a=b.ph+t*b.w;_bp.set((b.gull?gx:cx)+Math.cos(a)*b.r,(b.gull?13:28)+b.y+Math.sin(t*.35+b.fp)*.8,(b.gull?gz:cz)+Math.sin(a)*b.r);
     const yaw=Math.atan2(_bp.x-b.last.x,_bp.z-b.last.z);b.last.copy(_bp);
-    const flap=b.gull?.12+Math.max(0,Math.sin(t*2.2+b.fp))*.5*Math.sin(t*9+b.fp):.08+Math.max(0,Math.sin(t*1.6+b.fp))*.45*Math.sin(t*7+b.fp),bank=-Math.sign(b.w)*(b.gull?.35:.25);
+    // bursts of flapping between glides; while flapping, step through the four drawn poses (gulls a little slower)
+    const flapping=Math.sin(t*(b.gull?2.2:1.6)+b.fp)>.15,flap=flapping?FLAP[Math.floor(t*(b.gull?9:12)+b.fp*4)%4]:(b.gull?.12:.08),bank=-Math.sign(b.w)*(b.gull?.35:.25);
     _q.setFromEuler(_e2.set(0,yaw,bank,'YXZ'));_m.compose(_bp,_q,_s.set(b.s,b.s,b.s));bodies.setMatrixAt(i,_m);
     for(const side of[0,1]){_q.setFromEuler(_e2.set(0,yaw,bank+(side?-flap:flap),'YXZ'));_s.set(side?-b.s*1.1:b.s*1.1,b.s,b.s);_m.compose(_bp,_q,_s);wings.setMatrixAt(i*2+side,_m)}});
   wings.instanceMatrix.needsUpdate=bodies.instanceMatrix.needsUpdate=true}

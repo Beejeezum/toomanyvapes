@@ -51,7 +51,7 @@ const CLAYT=(()=>{const n=256,a=clayHeight(n),b=paperGrain(n),d=new Uint8Array(n
    e = sheets: each map tile is one sheet of felt / card (seam width in tile units, per-sheet colour shift, random turn/flip, soft raised edges)
    r = (corrugation ridges per unit, ridge depth, fuzzy felt sheen at grazing angles, per-sheet warp) */
 const KIND={
-  clay:[.04,1.15,0,1,0,.24], vc:[.036,1.15,0,.8,0,.22], cloth:[.026,1.4,0,.5,.3,.15],
+  clay:[.04,1.15,0,1,0,.24], thumb:[.085,1.3,0,.9,0,.22], vc:[.036,1.15,0,.8,0,.22], cloth:[.026,1.4,0,.5,.3,.15],
   felt:[.07,2,.75,0,1,.1, .0045,.14,1,.9, 0,0,.2,.5], feltHill:[.07,2,.75,0,1,.1, .006,.11,1,.6, 0,0,.2,.3],
   sand:[.05,2,1,.15,1,.08], cpaper:[.03,2.2,.7,0,1,.05], paint:[.05,2,.9,.7,1,.04], tile:[.04,1.6,.55,.15,1,.08, .007,.09,1,1, 0,0,0,4], wood:[.035,1.5,.7,.35,1,.08],
   leaf:[.06,1.3,.8,.6,0,.12], water:[.03,1,.65,1.2,0,.06], paper:[.018,2.5,.3,.1,1,.1], corr:[.045,1,.85,.3,1,.08], hay:[.06,2,.9,0,1,.1],

@@ -4,7 +4,7 @@
    Runs after the core think() each frame ('frame' event) and post-corrects positions/poses; positions are
    snapshotted in 'prerender' so a frozen or conga NPC can undo the core's movement for that frame. */
 (()=>{const X=window.TMV;if(!X){console.warn('[crowds] window.TMV missing');return}
-const {T,npcs,cols,scene,rand,pick,clamp,lerp}=X,PI=Math.PI;
+const {T,npcs,cols,scene,rand,pick,clamp,lerp}=X,PI=Math.PI,RMQ=matchMedia('(prefers-reduced-motion: reduce)');
 const V1=new T.Vector3(),V2=new T.Vector3(),TMP={x:0,z:0},L1=[],L2=[];
 let now=0,fc=0;
 const isHuman=n=>n.A&&n.A.length===2&&n.A[0].k&&n.A[1].k;
@@ -43,8 +43,8 @@ function react(n,r,staring){const p=n.g.position;let sN=0,eN=0;
     else if(canGawk(o)){if(SKIT[o.type]&&!staring){o.state='flee';o.tm=rand(2,3.5);o._pt=now;o._pg=2;continue}gawk(o,p.x,p.z,staring?6:rand(.35,1.1),1,n);fresh=true}
     else continue;
     const m=X.mouth(o,V1),y=m.y+.55;
-    if(staring){if(fresh&&eN<3){eN++;X.emo('👀',m.x,y,m.z,0,.6,0,.38)}if(fresh&&sN<1&&Math.random()<.5){sN++;X.say(o,pick(STARE),1.8)}}
-    else{if(eN<6){eN++;X.emo(o.type==='cop'?'🚨':'❗',m.x,y,m.z,0,1.2,0,.5)}if(sN<2&&Math.random()<.6){sN++;X.say(o,pick(GASP[o.type]||GASP._),2)}
+    if(staring){if(fresh&&eN<2){eN++;X.emo('👀',m.x,y,m.z,0,.6,0,.38)}if(fresh&&sN<1&&Math.random()<.5){sN++;X.say(o,pick(STARE),1.8)}}
+    else{if(eN<3){eN++;X.emo(o.type==='cop'?'🚨':'❗',m.x,y,m.z,0,1.2,0,.5)}if(sN<2&&Math.random()<.6){sN++;X.say(o,pick(GASP[o.type]||GASP._),2)}
       if(o.type==='cop')X.heat=Math.min(1,X.heat+.02)}}}
 function doGawk(n,dt,t){const c=n._cw;if(n.state!=='wander'||n.hooked||n===X.held){n._cw=null;return false}
   back(n);n.g.position.y=0;turn(n,c.x,c.z,dt*8);pose(n,0,0,3,t,dt);
@@ -57,7 +57,7 @@ function spread(){let eN=0;for(const n of npcs){if(n.state!=='flee'||n.boss||n.h
   if(!n._pt||now-n._pt>6){n._pt=now;n._pg=X.heat>.4?2:3}
   if(n._pg>=3||now-n._pt>2.5)continue;const p=n.g.position;
   for(const o of near(p.x,p.z,6,L2)){if(!canGawk(o)||now-(o._pt||-99)<8||Math.random()>.55)continue;
-    gawk(o,p.x,p.z,rand(.25,.6),n._pg+1,null);if(eN<4){eN++;const m=X.mouth(o,V1);X.emo('❓',m.x,m.y+.5,m.z,0,1,0,.4)}if(Math.random()<.12)X.say(o,pick(WHAT),1.5)}}}
+    gawk(o,p.x,p.z,rand(.25,.6),n._pg+1,null);if(eN<2){eN++;const m=X.mouth(o,V1);X.emo('❓',m.x,m.y+.5,m.z,0,1,0,.4)}if(Math.random()<.12)X.say(o,pick(WHAT),1.5)}}}
 
 /* ================= STEERING (post-correct the core's move) =================
    A feeler ahead of each moving NPC (checked every 3rd frame, round-robin) looks up the obstacle grid;
@@ -231,8 +231,7 @@ function bossHit(n,kind){const b=n.boss,c=b.cfg;n.times=0;if(kind==='passive')re
   if(good){b.hp--;sneeze(n);if(b.hp<=0)defeat(n);return}
   if(kind==='over')pulse(n)}
 // Prime's rep: plate clank, the ring of bros chants
-function repFx(n){X.beep(98,.25,'sawtooth',.06);X.beep(65,.4,'sawtooth',.06,.1);for(let i=0;i<3;i++){X.beep(150,.12,'sawtooth',.04,.35+i*.32);X.beep(190,.12,'sawtooth',.03,.5+i*.32)}
-  const m=X.mouth(n,V1);for(let i=0;i<5;i++)X.emo('💪',m.x,m.y+.4,m.z,rand(-2,2),rand(1.5,3),rand(-2,2),.55)}
+function repFx(n){X.beep(98,.25,'sawtooth',.06);X.beep(65,.4,'sawtooth',.06,.1);for(let i=0;i<3;i++){X.beep(150,.12,'sawtooth',.04,.35+i*.32);X.beep(190,.12,'sawtooth',.03,.5+i*.32)}}// (no icons: he's right in front of you)
 // Detecto's sensor fills: a sneeze-beep and a cough of smoke out of his head
 function sneeze(n){X.slide(700,1700,.3,'square',.03);for(let i=0;i<3;i++)X.beep(2600+i*300,.07,'square',.035,.38+i*.09);n.H.h.getWorldPosition(V1);
   for(let i=0;i<22;i++){const a=i/22*PI*2;X.puff(V1.x,V1.y+.6,V1.z,Math.cos(a)*3,rand(1,3),Math.sin(a)*3,whiteC,rand(1.2,2),.3,1.1)}}
@@ -246,7 +245,7 @@ function defeat(n){const b=n.boss,c=b.cfg,p=n.g.position;if(b.dead)return;b.dead
     n.chain.updateMatrixWorld(true);const g=n.chain.clone();n.chain.getWorldPosition(V1);g.position.copy(V1);g.quaternion.copy(n.g.quaternion);g.scale.setScalar(n.g.scale.x);n.chain.visible=false;scene.add(g);b.toss={g,t:0,x:V1.x,y:V1.y,z:V1.z}}
   line(c.vo.won,6000);
   if(!X.clip('sfx/fanfare',{vol:.6}))[523,659,784,1046].forEach((f,i)=>X.beep(f,.3,'triangle',.05,i*.1));
-  const m=X.mouth(n,V1);for(let i=0;i<14;i++)X.emo(pick(c.mode==='sensor'?['💤','✨']:['🎉','✨',c.emo]),m.x,m.y,m.z,rand(-3,3),rand(1,4),rand(-3,3),.6);
+  // no burst of icons: you're face to face with the boss when this lands
   c.drops.forEach((k,i)=>{const a=i/c.drops.length*PI*2+.4;X.spawnPick(k,p.x+Math.cos(a)*3.5,p.z+Math.sin(a)*3.5)});
   X.combo+=5;X.drain(c.reward);X.emit('boss',n,'defeat')}
 // her high C: big cotton rings rolling out of her mouth toward you and up over the gazebo
@@ -263,7 +262,7 @@ function bossHeld(n,dt){const p=n.g.position,g=n.g,b=n.boss;X.armR.tip.getWorldP
   if(n._hy0===undefined){n._hy0=n.hy;n._hz0=n.hz}n.hy=Math.min(V1.y,1.7)-p.y;n.hz=Math.max(.2,(V1.x-p.x)*fx+(V1.z-p.z)*fz);
   // the duet: her note climbs with your inhale and tops out at high C right in the green
   if(b.key==='diva'){b.hum-=dt;if(b.hum<0){b.hum=.2;const fq=clamp(n.inh/n.t.cap,0,1.25);X.beep(392*Math.pow(2,fq*1.4),.22,'triangle',.032)}}
-  if(Math.random()<dt*3)X.emo(b.cfg.emo,V2.x,V2.y+.6,V2.z,rand(-1,1),1.5,rand(-1,1),.5)}
+}
 function unTilt(n,dt){if(n._hy0!==undefined){const k=Math.min(1,dt*6);n.hy=lerp(n.hy,n._hy0,k);n.hz=lerp(n.hz,n._hz0,k)}if(n._tilt>.001){n._tilt=lerp(n._tilt,0,Math.min(1,dt*6));n.g.rotation.x=n._tilt}n._bend=lerp(n._bend||0,0,Math.min(1,dt*6))}
 // hold a boss on its spot (the core's wander would walk it off)
 function home(n,dt){const b=n.boss,p=n.g.position;back(n);p.x=lerp(p.x,b.hx,Math.min(1,dt*3));p.z=lerp(p.z,b.hz,Math.min(1,dt*3));n.state='wander';n.tx=b.hx;n.tz=b.hz}
@@ -335,7 +334,7 @@ X.on('frame',(dt,t)=>{now+=dt;fc++;if(cgN!==cols.length)buildCG();ngT-=dt;if(ngT
   cardT-=dt});
 X.on('prerender',t=>{for(const n of npcs){n._ox=n.g.position.x;n._oz=n.g.position.z}
   const tt=performance.now()/1000;
-  for(const k in BOSS){const c=BOSS[k],n=c.n;if(!n)continue;const p=n.g.position;if(c.beam&&c.beam.visible)c.beam.position.set(p.x,35,p.z);if(c.crown&&c.crown.visible)c.crown.position.set(p.x,p.y+n.hy+1.9+Math.sin(tt*3)*.15,p.z);
+  for(const k in BOSS){const c=BOSS[k],n=c.n;if(!n)continue;const p=n.g.position;if(c.beam&&c.beam.visible)c.beam.position.set(p.x,35,p.z);if(c.crown&&c.crown.visible)c.crown.position.set(p.x,p.y+n.hy+1.9+(RMQ.matches?0:Math.sin(Math.floor(tt*12)/4)*.12),p.z);// a paper crown bobbing on twos
     if(n.led)n.led.material.color.setHex(!n.boss.dead&&Math.sin(tt*(n.state==='held'?30:6))>0?0xff2020:0x401010)}
   bossUI();radarMark()});
 X.on('win',()=>{bar.hidden=true});
