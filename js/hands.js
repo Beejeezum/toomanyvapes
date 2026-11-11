@@ -42,15 +42,15 @@ const tgt={x:0,y:0,ok:false},V=X.T?new X.T.Vector3():null,mp={x:0,y:0,ok:false,k
 /* tipSync: the core locks a held person's mouth onto armR.tip (an invisible 3D point). Move that point to wherever the clay pod's
    mouthpiece is on screen, at the tip's usual depth, so their mouth lands on the vape tip. */
 let tip0=null;const TV=X.T?new X.T.Vector3():null,TV2=X.T?new X.T.Vector3():null;
-function tipSync(){const tip=X.armR&&X.armR.tip;if(!tip||!TV)return;if(!tip0)tip0=tip.position.clone();
+/* (unused: the user wants the vape to travel to them, not them pulled to the vape) */function tipSync(){const tip=X.armR&&X.armR.tip;if(!tip||!TV)return;if(!tip0)tip0=tip.position.clone();
   if(!(mp.ok&&mp.k>0)){tip.position.copy(tip0);return}
   const cam=X.cam;cam.updateMatrixWorld();tip.position.copy(tip0);tip.parent.updateMatrixWorld(true);tip.getWorldPosition(TV);
   TV.applyMatrix4(cam.matrixWorldInverse);const zc=Math.min(-.25,TV.z),g=X.game.getBoundingClientRect(),th=Math.tan(cam.fov*Math.PI/360);
   const nx=mp.x/g.width*2-1,ny=1-mp.y/g.height*2,k=mp.k;TV2.set(nx*-zc*th*cam.aspect,ny*-zc*th,zc);
   TV.lerp(TV2,k);cam.localToWorld(TV);tip.parent.worldToLocal(TV);tip.position.copy(TV)}
-X.on('grab',n=>{held=n;phase='reach';queue=['out','hit','hit','tilt']});
+X.on('grab',n=>{held=n;phase='reach';queue=['out','reach1','reach1','reach2']});// stop-motion reach: the vape travels out to their face
 X.on('vape',()=>{if(phase==='hold')pump=1});
-X.on('release',(n,kind)=>{if(kind==='passive')return;phase='flick';queue=['hit','out'];recoil=1;held=null});
+X.on('release',(n,kind)=>{if(kind==='passive')return;phase='flick';queue=['reach1','out'];recoil=1;held=null});
 
 function aimAt(){tgt.ok=false;const n=X.held||held;if(!n||!V||!X.mouth)return;try{X.mouth(n,V);V.project(X.cam);if(V.z>1)return;
   const g=X.game.getBoundingClientRect();tgt.x=(V.x+1)/2*g.width;tgt.y=(1-V.y)/2*g.height;tgt.ok=true}catch(e){}}
@@ -61,14 +61,13 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   const play=X.mode==='play'||X.mode==='paused';
   up=Math.max(0,Math.min(1,up+(play?dt/.35:-dt/.2)));
   const v=Math.hypot(X.px-lastX,X.pz-lastZ)/Math.max(1e-3,gdt||dt);lastX=X.px;lastZ=X.pz;if(v<20){sp+=(v-sp)*Math.min(1,dt*8);bobPh+=dt*Math.min(9,sp*1.6)}
-  if(phase==='hold'&&!X.held){phase='flick';queue=['hit','out'];recoil=1;held=null}
-  tipSync();
+  if(phase==='hold'&&!X.held){phase='flick';queue=['reach1','out'];recoil=1;held=null}
   acc+=dt;if(acc<STEP)return;acc=0;// everything below snaps at ~12 fps (stop-motion)
   const rm=RM.matches;boilT+=STEP;if(boilT>=.125){boilT=0;boilK=(boilK+1+(Math.random()*2|0))%6}
   // ---- right hand frame
   let f;
   if(queue.length){f=queue.shift();if(!queue.length){if(phase==='reach')phase='hold';else if(phase==='flick')phase='idle'}}
-  else if(phase==='hold'){f=pump>0?'hit':'tilt';if(pump>0)pump--}
+  else if(phase==='hold'){f=pump>0?'squeeze':'reach2';if(pump>0)pump--}
   else f=sp>4.5?'rest':'out';
   show('R',FR[f]||FR.out||FR.rest);
   // ---- right hand placement
@@ -79,12 +78,12 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   // resting pose: park the pod's mouthpiece at ~68% across, a bit below middle, whatever the screen shape
   {const fm=M.R.f[f]&&M.R.f[f].mp;if(fm&&f==='out'){const mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,k=1-aimK;
     tx+=Math.max(-W*.1,Math.min(Wc*.5,(W*.68-mx)))*k;ty+=Math.max(-H*.1,Math.min(H*.2,(H*.6-my)))*k}}
-  if(aimK>0){aimAt();const fm=M.R.f[f]&&M.R.f[f].mp;const OFF={x:W*.585,y:H*.5};/* the offering point: the game then pulls their mouth onto the pod tip */
-    if(fm){const tgt=OFF;// lock the pod's mouthpiece onto their mouth: rotate + scale round the bottom-right corner (the forearm stays
+  if(aimK>0){aimAt();const fm=M.R.f[f]&&M.R.f[f].mp;/* aim at their actual mouth: they stay put, the vape comes to them */
+    if(fm&&tgt.ok){// lock the pod's mouthpiece onto their mouth: rotate + scale round the bottom-right corner (the forearm stays
       // attached to the screen edge), then a small nudge for what's left
       const px=W,py=H,mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,dmx=mx-px,dmy=my-py,dtx=tgt.x-px,dty=tgt.y-py;
       let th=Math.atan2(dty,dtx)-Math.atan2(dmy,dmx);th=Math.atan2(Math.sin(th),Math.cos(th));th=Math.max(-.6,Math.min(.6,th))*aimK;
-      sc=1+(Math.max(.78,Math.min(1.3,Math.hypot(dtx,dty)/Math.max(1,Math.hypot(dmx,dmy))))-1)*aimK;rot+=th*180/Math.PI;
+      sc=1+(Math.max(.78,Math.min(1.75,Math.hypot(dtx,dty)/Math.max(1,Math.hypot(dmx,dmy))))-1)*aimK;rot+=th*180/Math.PI;
       const c=Math.cos(th),s=Math.sin(th),rx=px+sc*(dmx*c-dmy*s),ry=py+sc*(dmx*s+dmy*c);
       tx+=Math.max(-W*.04,Math.min(W*.08,(tgt.x-rx)*aimK));ty+=Math.max(-H*.04,Math.min(H*.08,(tgt.y-ry)*aimK))}}
   if(pump===1&&!rm){sc*=.97;tx-=W*.004;ty-=H*.006}// each puff: a little shove toward their face
@@ -110,5 +109,5 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
       const gy=gy0+lift,a0=Math.atan2(gy-H-lift,gx),a1=Math.atan2(tgt.y+H*.04-H-lift,tgt.x-W*.05);
       lr+=Math.max(-24,Math.min(16,(a1-a0)*180/Math.PI))*reach}if(!rm){const j=boilK*1.91;lx+=Math.sin(j*1.3)*W*.001;ly+=Math.cos(j*2.3)*H*.003;lr+=Math.sin(j*2.9)*.4}
     L.style.transform=`translate(${lx.toFixed(1)}px,${ly.toFixed(1)}px) rotate(${lr.toFixed(2)}deg)`}});
-X.hands={wrap,get phase(){return phase}};
+X.hands={wrap,get phase(){return phase},get mp(){return mp}};
 })();
