@@ -1,0 +1,50 @@
+{
+ "R": {
+  "w": 885,
+  "h": 571,
+  "f": {
+   "rest": {
+    "src": "r_rest.webp",
+    "mp": [
+     0.6397,
+     0.3135
+    ]
+   },
+   "out": {
+    "src": "r_out.webp",
+    "mp": [
+     0.2493,
+     0.0665
+    ]
+   },
+   "hit": {
+    "src": "r_hit.webp",
+    "mp": [
+     0.3771,
+     0.1068
+    ]
+   },
+   "tilt": {
+    "src": "r_tilt.webp",
+    "mp": [
+     0.3014,
+     0.0
+    ]
+   }
+  }
+ },
+ "L": {
+  "w": 542,
+  "h": 429,
+  "f": {
+   "rest": {
+    "src": "l_rest.webp",
+    "mp": null
+   },
+   "grab": {
+    "src": "l_grab.webp",
+    "mp": null
+   }
+  }
+ }
+}
