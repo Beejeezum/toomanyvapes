@@ -1,11 +1,11 @@
 /* world mod: an actual beach past Muscle Beach, traffic, birds, a blimp, street props, vape haze,
    and a sky that slides from noon to a pink sunset (then dusk, streetlights, lit windows, stars) as the vapes run out.
-   Built only on window.TMV. Static props are merged into a few vertex-coloured meshes (plus one merged ink hull each) to keep draw calls low.
-   Exposes TMV.world = {k (0..1 time of day), night (0..1), cars, blimp}. */
+   Built only on window.TMV. Static props are merged into a few vertex-coloured meshes to keep draw calls low (no ink hulls: the clay mod
+   gives everything a plasticine/cardboard surface instead). Exposes TMV.world = {k (0..1 time of day), night (0..1), cars, blimp, sunDir, tex}. */
 (()=>{const X=window.TMV;if(!X||X.world)return;
 const T=X.T,{scene,W,LINES,rand,ri,pick,clamp,lerp}=X,PI=Math.PI,GRAD=X.M(0xffffff).gradientMap;
 const ss=(a,b,v)=>{v=clamp((v-a)/(b-a),0,1);return v*v*(3-2*v)};
-const INKM=new T.MeshBasicMaterial({color:0x15101d,side:T.BackSide}),VCM=new T.MeshToonMaterial({gradientMap:GRAD,vertexColors:true});
+const VCM=new T.MeshToonMaterial({gradientMap:GRAD,vertexColors:true});
 const GEO={b:new T.BoxGeometry(1,1,1),s:new T.SphereGeometry(.5,8,6),c:new T.CylinderGeometry(.5,.5,1,8),k:new T.ConeGeometry(.5,1,8),p:new T.ConeGeometry(.5,1,4),t:new T.TorusGeometry(.4,.15,6,12)};
 for(const k in GEO)GEO[k]=GEO[k].toNonIndexed();
 const _m=new T.Matrix4(),_m2=new T.Matrix4(),_q=new T.Quaternion(),_e=new T.Euler(),_e2=new T.Euler(),_p=new T.Vector3(),_s=new T.Vector3(),_v=new T.Vector3(),_c=new T.Color(),_n3=new T.Matrix3(),ID=new T.Matrix4();
@@ -19,7 +19,7 @@ function Kit(){const P=[],I=[];let base=ID;const k={
   hull(w,h,d,x,y,z,rx,ry,rz){I.push({g:'b',w,h,d,x,y,z,rx:rx||0,ry:ry||0,rz:rz||0,base});return k},
   /* textured box (signs): its own mesh, placed through the current base transform; its outline joins the merged hull */
   tex(mat,w,h,d,x,y,z,ry,par){const m=new T.Mesh(GEO.b,mat);_m.compose(_p.set(x,y,z),_q.setFromEuler(_e.set(0,ry||0,0,'XYZ')),_s.set(w,h,d));_m2.multiplyMatrices(base,_m);_m2.decompose(m.position,m.quaternion,m.scale);(par||WG).add(m);k.hull(w,h,d,x,y,z,0,ry);return m},
-  build(par,th){const m=new T.Mesh(merge(P,0),VCM);(par||WG).add(m);if(I.length)m.add(new T.Mesh(merge(I,th||.075),INKM));return m}};return k}
+  build(par){const m=new T.Mesh(merge(P,0),VCM);(par||WG).add(m);return m}};return k}
 function merge(parts,th){let n=0;for(const p of parts)n+=GEO[p.g].attributes.position.count;
   const pos=new Float32Array(n*3),nor=new Float32Array(n*3),col=th?null:new Float32Array(n*3);let o=0;
   for(const p of parts){const G=GEO[p.g],a=G.attributes.position,b=G.attributes.normal;
@@ -35,14 +35,14 @@ function signMat(text,bg,fg,bd){const c=document.createElement('canvas');c.width
 function adMat(bg,fg,l1,l2,l3){const c=document.createElement('canvas');c.width=256;c.height=128;const k=c.getContext('2d');k.fillStyle=bg;k.fillRect(0,0,256,128);k.fillStyle='rgba(255,255,255,.12)';for(let i=-128;i<256;i+=24){k.beginPath();k.moveTo(i,128);k.lineTo(i+60,0);k.lineTo(i+72,0);k.lineTo(i+12,128);k.fill()}
   k.fillStyle=fg;k.fillRect(0,0,256,7);k.fillRect(0,121,256,7);k.textAlign='center';k.textBaseline='middle';fit(k,l1,240,40);k.fillStyle='#15101d';k.fillText(l1,130,42);k.fillStyle=fg;k.fillText(l1,128,40);
   k.fillStyle='#fff7ea';fit(k,l2,236,20);k.fillText(l2,128,80);k.font='bold 11px sans-serif';k.fillStyle=fg;k.fillText(l3,128,106);return toonTex(c)}
-const tx=(n,fn)=>{const t=X.TX(n,fn);t.magFilter=T.NearestFilter;return t};
+const tx=(n,fn)=>X.TX(n,fn); // repainted as sand grains / painted sea / popsicle sticks by the clay mod
 const solid=X.solid;
 
 /* =================== THE ACTUAL BEACH (north, just past Muscle Beach) =================== */
 const SHORE=-125,PIERX=30;
 const sandT=tx(32,(k,n)=>{k.fillStyle='#f3dca2';k.fillRect(0,0,n,n);for(let i=0;i<200;i++){k.fillStyle=pick(['#e8cd8e','#fbe8b8','#dcbf80','#fff3cf']);k.fillRect(ri(n),ri(n),1+ri(2),1)}});
-X.box(WG,380,.1,27,X.TM(sandT,60,5),0,.03,-112.5);
-X.box(WG,380,.06,3,X.TM(sandT,60,1,0xd8b97a),0,.062,SHORE+.6); // wet sand
+X.box(WG,380,.1,27,X.TM(sandT,120,9),0,.03,-112.5);
+X.box(WG,380,.06,3,X.TM(sandT,120,1,0xd8b97a),0,.062,SHORE+.6); // wet sand
 const seaT=tx(32,(k,n)=>{k.fillStyle='#2f8fd8';k.fillRect(0,0,n,n);k.fillStyle='#4aa8ea';for(let i=0;i<n;i+=8)k.fillRect(0,i+ri(3),n,2);k.fillStyle='#bfeaff';for(let i=0;i<10;i++)k.fillRect(ri(n),ri(n),3+ri(5),1)});
 const seaM=X.TM(seaT,48,20),seaG=new T.PlaneGeometry(760,300,38,15);seaG.rotateX(-PI/2);seaG.translate(0,.24,SHORE-150);
 const sea=new T.Mesh(seaG,seaM);sea.userData.noInk=true;scene.add(sea);const seaP=seaG.attributes.position,seaY0=Float32Array.from(seaP.array);
@@ -217,16 +217,22 @@ const ZEN=P([0x2a62d8,0x3a5ec4,0x4a3c9c,0x22184c]),MID=P([0x6fb6ff,0x9cc6ee,0xd7
   CLD=P([0xffffff,0xfff4e0,0xffc6a6,0xd890c0]),SUNC=P([0xfff2a0,0xfff0a0,0xffb060,0xff6a4a]),SUNL=P([0xfff2d0,0xffe8c0,0xffb070,0xff8a78]),
   HSKY=P([0xffffff,0xfff6e8,0xffd6c4,0xc8b0e8]),HGND=P([0x7aa06a,0x7aa06a,0x8a7a6a,0x5a5a8a]),SEA=P([0xffffff,0xfff0dc,0xffc0b0,0xd0a0d8]);
 function kf(arr,k,out){let i=0;while(i<KS.length-2&&k>KS[i+1])i++;return out.copy(arr[i]).lerp(arr[i+1],clamp((k-KS[i])/(KS[i+1]-KS[i]),0,1))}
-const skyC=document.createElement('canvas');skyC.width=2;skyC.height=64;const skyK=skyC.getContext('2d'),skyT=new T.CanvasTexture(skyC);
+const skyC=document.createElement('canvas');skyC.width=256;skyC.height=128;const skyK=skyC.getContext('2d'),skyT=new T.CanvasTexture(skyC);
+// painted cardboard backdrop: loose brush strokes and the seams between board panels, laid over the time-of-day gradient
+const skyP=document.createElement('canvas');skyP.width=256;skyP.height=128;{const k=skyP.getContext('2d');k.lineCap='round';
+  for(let i=0;i<220;i++){const y=rand(2,70),x=rand(-30,256),L=rand(25,90),lw=rand(3,11),c=Math.random()<.6?'255,255,255':'20,40,110';k.strokeStyle=`rgba(${c},${rand(.05,.14).toFixed(3)})`;k.lineWidth=lw;
+    for(const o of[0,256]){k.beginPath();k.moveTo(x-o,y);k.bezierCurveTo(x-o+L*.3,y+rand(-4,4),x-o+L*.7,y+rand(-4,4),x-o+L,y+rand(-3,3));k.stroke()}}
+  for(let i=0;i<4;i++){const x=i*64+rand(-6,6);k.fillStyle='rgba(40,30,60,.10)';k.fillRect(x,0,1.4,128);k.fillStyle='rgba(255,255,255,.10)';k.fillRect(x+1.4,0,1,128)}
+  for(let i=0;i<900;i++){k.fillStyle=`rgba(${Math.random()<.5?'255,255,255':'60,50,90'},.05)`;k.fillRect(rand(0,256),rand(0,128),rand(1,3),1)}}
 const zc=new T.Color(),mc=new T.Color(),hc=new T.Color(),gc=new T.Color(),hex=c=>'#'+c.getHexString();
 if(dome){dome.material.map=skyT;dome.material.needsUpdate=true}
-const sun0=new T.Vector3(150,150,-220),sun1=new T.Vector3(-40,45,-330);let K=0,NIGHT=0,lastK=-1;
+const sun0=new T.Vector3(150,150,-220),sun1=new T.Vector3(-40,45,-330),SUNDIR=sun0.clone().normalize();let K=0,NIGHT=0,lastK=-1;
 function timeOfDay(){const k=ss(0,1,Math.min(1,X.used/5000));K=k;
   if(Math.abs(k-lastK)>.003){lastK=k;kf(HOR,k,hc);kf(ZEN,k,zc);kf(MID,k,mc);kf(GLOW,k,gc);
-    const g=skyK.createLinearGradient(0,0,0,64);g.addColorStop(0,hex(zc));g.addColorStop(.36,hex(mc));g.addColorStop(.47,hex(gc));g.addColorStop(.5,hex(hc));g.addColorStop(1,hex(hc));skyK.fillStyle=g;skyK.fillRect(0,0,2,64);skyT.needsUpdate=true;
+    const g=skyK.createLinearGradient(0,0,0,128);g.addColorStop(0,hex(zc));g.addColorStop(.36,hex(mc));g.addColorStop(.47,hex(gc));g.addColorStop(.5,hex(hc));g.addColorStop(1,hex(hc));skyK.fillStyle=g;skyK.fillRect(0,0,256,128);skyK.drawImage(skyP,0,0);skyT.needsUpdate=true;
     if(cloudM)kf(CLD,k,cloudM.color);if(sunBall){kf(SUNC,k,sunBall.material.color);sunBall.position.lerpVectors(sun0,sun1,ss(.1,1,k));sunBall.scale.setScalar(34+16*k)}
-    if(sunL){kf(SUNL,k,sunL.color);sunL.intensity=lerp(.55,.42,ss(.6,1,k));if(sunBall)sunL.position.copy(sunBall.position).normalize().multiplyScalar(100)}
-    if(hemi){kf(HSKY,k,hemi.color);kf(HGND,k,hemi.groundColor);hemi.intensity=lerp(.78,.6,ss(.5,1,k))}kf(SEA,k,seaM.color);
+    if(sunL){kf(SUNL,k,sunL.color);sunL.intensity=lerp(.95,.72,ss(.6,1,k));if(sunBall){SUNDIR.copy(sunBall.position).normalize();sunL.position.copy(SUNDIR).multiplyScalar(100)}}
+    if(hemi){kf(HSKY,k,hemi.color);kf(HGND,k,hemi.groundColor);hemi.intensity=lerp(.62,.5,ss(.5,1,k))}kf(SEA,k,seaM.color);
     NIGHT=ss(.58,.95,k);for(const m of WIN)m.emissiveIntensity=NIGHT*.9;pools.visible=halos.visible=NIGHT>.01;pools.material.opacity=.3*NIGHT;halos.material.opacity=.4*NIGHT;
     stars.visible=k>.8;stars.material.opacity=ss(.8,1,k)}
   // the core lerps sky/fog toward pink haze each frame; this runs after it (prerender) and replaces it with the sunset palette
@@ -244,5 +250,5 @@ X.on('prerender',(dt,t)=>{timeOfDay();
   flock(t);
   const ba=t*.042;blimp.position.set(Math.cos(ba)*105,52+Math.sin(t*.4)*1.2,-10+Math.sin(ba)*105);blimp.rotation.set(0,Math.atan2(-Math.sin(ba),Math.cos(ba)),Math.sin(t*.3)*.04);banner(dt);
   drift(dt,t,K)});
-X.world={get k(){return K},get night(){return NIGHT},cars,blimp};
+X.world={get k(){return K},get night(){return NIGHT},cars,blimp,sunDir:SUNDIR,tex:{sand:sandT,sea:seaT,plank:plankT}};
 })();
