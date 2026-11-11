@@ -135,7 +135,7 @@ html.tmvT #stob .tg,html.tmvT #stob .ct{display:none!important}
  html.tmvT #game #bossbar{top:calc(max(4px,env(safe-area-inset-top,0px)) + 40px);width:min(200px,24vw);padding:3px 8px 5px}
  html.tmvT #game #bossbar .bn{font-size:9px}html.tmvT #game #bossbar .bb{height:6px;margin-top:2px}html.tmvT #game #bossbar small{display:none}
  /* hold-to-vape meter, combo stamp, direction scraps, clear stamp */
- html.tmvT #game #lung{top:63%;width:min(210px,32vw);padding:5px 7px}html.tmvT #game #lung .bar{height:12px}
+ html.tmvT #game #lung{top:22%;width:min(210px,32vw);padding:5px 7px}html.tmvT #game #lung .bar{height:12px}
  html.tmvT #game #lung .bar::after{width:16px;height:8px;top:-7px;left:calc(68% - 8px)}
  html.tmvT #game #jz-combo{top:37%;right:calc(max(10px,env(safe-area-inset-right,0px)) + 8px)}html.tmvT #game #jz-combo b{font-size:28px}
  html.tmvT #game #starw{width:26px;height:33px;margin:-16px 0 0 -13px}html.tmvT #game #starw::after{width:18px;height:7px;margin-left:-9px}

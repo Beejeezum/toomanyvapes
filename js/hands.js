@@ -48,7 +48,7 @@ let tip0=null;const TV=X.T?new X.T.Vector3():null,TV2=X.T?new X.T.Vector3():null
   TV.applyMatrix4(cam.matrixWorldInverse);const zc=Math.min(-.25,TV.z),g=X.game.getBoundingClientRect(),th=Math.tan(cam.fov*Math.PI/360);
   const nx=mp.x/g.width*2-1,ny=1-mp.y/g.height*2,k=mp.k;TV2.set(nx*-zc*th*cam.aspect,ny*-zc*th,zc);
   TV.lerp(TV2,k);cam.localToWorld(TV);tip.parent.worldToLocal(TV);tip.position.copy(TV)}
-X.on('grab',n=>{held=n;phase='reach';queue=['out','reach1','reach1','reach2']});// stop-motion reach: the vape travels out to their face
+X.on('grab',n=>{held=n;phase='reach';queue=['out','reach1','reach2','sip']});// stop-motion reach: the vape travels out to their face
 X.on('vape',()=>{if(phase==='hold')pump=1});
 X.on('release',(n,kind)=>{if(kind==='passive')return;phase='flick';queue=['reach1','out'];recoil=1;held=null});
 
@@ -58,7 +58,7 @@ function aimAt(useStraw){tgt.ok=false;const n=X.held||held;if(!n||!V||!X.mouth)r
 /* straw: while held, their actual mouth (H.m) is pinned to one fixed point in front of the lens (centre, at the vape tip's depth),
    re-pinned every frame after the camera moves, and the core's lip-lock target (the invisible armR.tip) is parked on the same point,
    so neither the mouth nor the clay pod's white tip jiggles: they sip from it like a straw. */
-const S=X.T?new X.T.Vector3():null,SW=X.T?new X.T.Vector3():null,SM=X.T?new X.T.Vector3():null;let sOn=null,sT=0,tipRest=null,fCur='out';const STRAW=[.5,.5];// where on screen (0..1) the straw point sits
+const S=X.T?new X.T.Vector3():null,SW=X.T?new X.T.Vector3():null,SM=X.T?new X.T.Vector3():null;let sOn=null,sT=0,tipRest=null,fCur='out',puffing=false;const STRAW=[.5,.5];// where on screen (0..1) the straw point sits
 function straw(){const n=X.held,tip=X.armR&&X.armR.tip,cam=X.cam;if(!tip||!S)return false;if(!tipRest)tipRest=tip.position.clone();
   if(!n||!n.H||!n.H.m||!n.g||X.mode!=='play'){if(sOn){tip.position.copy(tipRest);sOn=null}return false}
   cam.updateMatrixWorld();
@@ -68,6 +68,7 @@ function straw(){const n=X.held,tip=X.armR&&X.armR.tip,cam=X.cam;if(!tip||!S)ret
   const age=(performance.now()-sT)/1000,k=age<.33?Math.min(1,.12+age*2.2):1;// they lean in to meet the vape over ~1/3 s, then stay locked
   n.g.updateMatrixWorld(true);n.H.m.getWorldPosition(SM);n.g.position.x+=(SW.x-SM.x)*k;n.g.position.y+=(SW.y-SM.y)*k;n.g.position.z+=(SW.z-SM.z)*k;n.g.updateMatrixWorld(true);
   tip.parent.updateMatrixWorld(true);SM.copy(SW);tip.parent.worldToLocal(SM);tip.position.copy(SM);return true}
+const FSC={sip:.74};// the sip photo was shot with the hand closer: shrink it so it reads as an outstretched arm
 const STEP=1/12;let lastT=performance.now();
 X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000)||1/60;lastT=now;if(!M)return;
   X.armR.visible=false;if(X.armL)X.armL.visible=false;// the 3D arms only provides the vape-tip position now (also hides the old 3D left hand)
@@ -81,8 +82,8 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   if(stepped){boilT+=STEP;if(boilT>=.125){boilT=0;boilK=(boilK+1+(Math.random()*2|0))%6}
   // ---- right hand frame
   let f;
-  if(queue.length){f=queue.shift();if(!queue.length){if(phase==='reach')phase='hold';else if(phase==='flick')phase='idle'}}
-  else if(phase==='hold'){f=pump>0?'squeeze':'reach2';if(pump>0)pump--}
+  puffing=false;if(queue.length){f=queue.shift();if(!queue.length){if(phase==='reach')phase='hold';else if(phase==='flick')phase='idle'}}
+  else if(phase==='hold'){f=FR.sip?'sip':(pump>0?'squeeze':'reach2');puffing=pump>0;if(pump>0)pump--}// sip: pod tipped forward, mouthpiece pointing into their mouth like a straw
   else f=sp>4.5?'rest':'out';
   fCur=f;show('R',FR[f]||FR.out||FR.rest);
   const aiming=(phase==='reach'||phase==='hold')&&X.mode==='play';aimK=Math.max(0,Math.min(1,aimK+(aiming?.25:-.5)))}
@@ -100,7 +101,7 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
     /* the arm EXTENDS out to the middle and they meet it there: the clay frames are cut from full first-person photos (1376x768) in which
        the reach already sits mid-frame with the forearm rising from the bottom edge. So the reach grows to the photo's own size (no
        rotation) and slides down/right until the white tip is on the straw point; the forearm stays cut off by the bottom of the screen. */
-    if(fm&&tgt.ok){const k0=Math.max(W/1376,H/768)*M.R.h/Math.max(1,Hc);sc=1+(k0-1)*aimK;
+    if(fm&&tgt.ok){const k0=Math.max(W/1376,H/768)*M.R.h/Math.max(1,Hc);sc=(1+(k0*(FSC[f]||1)-1)*aimK)*(pin&&puffing&&!rm?1.025:1);// a puff: the hand swells round the pinned tip
       const px=W,py=H,mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,rx=px+sc*(mx-px),ry=py+sc*(my-py);
       if(pin){tx+=tgt.x-rx;ty+=tgt.y-ry}// held: the tip lands exactly on the mouth, no slack
       else{tx+=(tgt.x-rx)*aimK;ty+=(tgt.y-ry)*aimK}}}
