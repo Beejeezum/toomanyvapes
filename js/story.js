@@ -24,19 +24,21 @@ const DIST=k=>(S.districts&&S.districts[k])||{x0:-1e9,x1:1e9,z0:-1e9,z1:1e9};
 const inD=(k,x,z)=>{const d=DIST(k);return x>=d.x0&&x<=d.x1&&z>=d.z0&&z<=d.z1};
 fetch('assets/story/script.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.chapters)&&j.chapters.length>=5){S=j;preload()}}).catch(()=>{});
 
-/* ================= TUNING =================
-   goal: townsfolk to hook in the district. floor: the container can't drop below this during the chapter
-   (so ch1-4 can't accidentally empty it). cap: on chapter clear the count drops to at most this
-   ("they're coming back" - word of mouth sells the rest through the shop). Ch5 drains at mult× and
-   everything nearby swarms you. Count path ≈ 5000 → 4400 → 3600 → 2800 → 2000 → 0. */
+/* ================= TUNING (target: ~15 min run = ~2-3 min play per chapter + ~2 min of cutscenes) =================
+   goal: townsfolk to hook in the district (one good rip usually hooks: grabbing auto-serves the craved flavour).
+   Vape use follows the goal, not raw rips: each chapter walks the count from where it started down to its cap
+   in step with goal progress (rips that run ahead are partly refunded, rips that lag take a bit extra), so a
+   boss's huge lungs can't eat the next chapter's stock. floor is a hard safety net; on clear the count drops to
+   at most cap (word of mouth sells the rest through the shop). Count path ≈ 5000 → 4400 → 3600 → 2800 → 2000 → 0.
+   Ch5 runs on a clock instead: ~2 min of frantic vaping (everyone swarms you) to reach 250, then Detecto takes the rest. */
 const PLAN={
- 1:{goal:8, boss:null,     floor:3700,cap:4400,mood:'scared',col:0xff3fa4,at:[0,0],     extra:[]},
- 2:{goal:10,boss:'diva',   floor:2900,cap:3600,mood:'happy', col:0xb6ff3c,at:[-104,4],  extra:[['grandma',6],['jogger',3],['dog',2]]},
- 3:{goal:10,boss:'prime',  floor:2100,cap:2800,mood:'happy', col:0x5fd4ff,at:[0,-100],  extra:[['gym',3],['jogger',3],['cop',2],['dog',3]]},
- 4:{goal:10,boss:null,     floor:1300,cap:2000,mood:'greedy',col:0xffb02e,at:[102,-6],  extra:[['cat',3],['dog',3],['chicken',2],['cow',1]]},
+ 1:{goal:7, boss:null,     floor:4200,cap:4400,mood:'scared',col:0xff3fa4,at:[0,0],     extra:[]},
+ 2:{goal:8, boss:'diva',   floor:3400,cap:3600,mood:'happy', col:0xb6ff3c,at:[-104,4],  extra:[['grandma',6],['jogger',3],['dog',2]]},
+ 3:{goal:7, boss:'prime',  floor:2600,cap:2800,mood:'happy', col:0x5fd4ff,at:[0,-100],  extra:[['gym',3],['jogger',3],['cop',2],['dog',3]]},
+ 4:{goal:8, boss:null,     floor:1800,cap:2000,mood:'greedy',col:0xffb02e,at:[102,-6],  extra:[['cat',3],['dog',3],['chicken',2],['cow',1]]},
  5:{goal:0, boss:'detecto',floor:0,   cap:0,   mood:'greedy',col:0xff3fa4,at:[0,-6],    extra:[['worker',6],['grandma',3],['kid',3],['dog',2]]}};
 const START=[5000,5000,4400,3600,2800,2000];   // count ceiling when a chapter is entered (debug jumps)
-const DETECTO_FLOOR=250;                         // in ch5 the last 250 only go once Detecto is beaten (his defeat drains 700)
+const DETECTO_FLOOR=250,CH5_SECS=120;                         // in ch5 the last 250 only go once Detecto is beaten (his defeat drains 700)
 
 /* ================= CSS + DOM ================= */
 const css=document.createElement('style');css.textContent=`
@@ -142,7 +144,7 @@ function showCard(n,cb){const c=CH(n);card.firstChild.textContent=n;card.lastChi
 function endCard(){clearTimeout(cardTm);card.classList.remove('go');const f=cardCb;cardCb=null;f&&f()}
 
 /* ================= STATE ================= */
-const st={run:0,ch:0,phase:'idle',goal:0,got:0,c5:0,mult:1,acc:0,mood:null};
+const st={run:0,ch:0,phase:'idle',goal:0,got:0,c0:5000,c5:0,t5:0,acc:0,mood:null};
 let credited=new Set(),onIntro=null,introSeen=false;
 const coreStart=X.start,coreReset=$('again').onclick;
 X.on('introdone',()=>{const f=onIntro;onIntro=null;f&&f()});
@@ -215,7 +217,7 @@ function enter(n){const tok=st.run,P=PLAN[n];st.ch=n;st.phase='in';st.got=0;st.g
   play(CH(n).in,()=>{if(tok!==st.run)return;ensureStarted(n,()=>{if(tok!==st.run)return;
     if(X.mode==='play')X.mode='cutscene';hud();showCard(n,()=>{if(tok===st.run)begin(n)})})},CH(n).district)}
 function begin(n){st.phase='play';if(X.mode==='cutscene'&&!X.cine)X.mode='play';
-  if(n===5){st.c5=Math.max(1,X.count);st.mult=clamp(st.c5/900,1.4,2.4);st.acc=0}
+  st.c0=X.count;st.acc=0;if(n===5){st.c5=Math.max(1,X.count);st.t5=0}
   const k=PLAN[n].boss;if(k&&X.crowds&&X.crowds.spawnBoss)try{X.crowds.spawnBoss(k)}catch(e){console.warn('[story] boss',e)}
   beaconOn(n);X.emit('chapter',n,'play');hud()}
 function clear(){const n=st.ch,tok=st.run;st.phase='out';X.emit('chapter',n,'out');beaconOff();hud();
@@ -232,14 +234,20 @@ X.on('start',()=>{X.twist=true});// the story has its own twist (the end): no su
 X.on('release',n=>{if(st.phase!=='play'||st.ch<1||st.ch>4||n.boss||n.hooked||credited.has(n))return;
   if(!(n.times>=n.t.hook))return;const dk=CH(st.ch).district,p=n.g.position;
   if(!inD(dk,p.x,p.z)&&!inD(dk,X.px,X.pz))return;credited.add(n);st.got++;hud()});
-X.on('vape',()=>{const f=floor();if(X.count<f){X.count=f;X.used=Math.max(0,X.used-1);return}
-  if(st.ch===5&&st.phase==='play'){st.acc+=st.mult-1;while(st.acc>=1&&X.count>f){X.count--;X.used=X.used+1;st.acc--}}});
+// pacing: where the count "should" be right now; ahead of it → refund some vapes, behind → take a few extra
+function expected(){if(st.ch===5){const k=clamp(st.t5/CH5_SECS,0,1);return DETECTO_FLOOR+(st.c5-DETECTO_FLOOR)*(1-k)}
+  const P=PLAN[st.ch];return st.c0-progress()*Math.max(0,st.c0-P.cap)}
+const refund=()=>{X.count=X.count+1;X.used=Math.max(0,X.used-1);if(X.STOCK[X.fi]!=null)X.STOCK[X.fi]++};
+X.on('vape',()=>{const f=floor();if(X.count<f){refund();return}
+  if(st.phase!=='play'||!st.ch)return;const e=expected(),lead=e-X.count,slack=st.ch===5?300:60;
+  if(lead>slack){if(Math.random()<Math.min(.95,(lead-slack)/150))refund();return}
+  if(lead<0){st.acc+=Math.min(st.ch===5?2.5:1,-lead/250);while(st.acc>=1&&X.count>f+1){X.count--;X.used=X.used+1;if(X.STOCK[X.fi]>0)X.STOCK[X.fi]--;st.acc--}}});
 // ch5: free samples for everyone (hide that power-up's icon: it's the chapter, not a pickup)
 let freeEl=null;function freeHide(v){if(!freeEl){const i=Object.keys(X.PW||{}).indexOf('free'),p=$('powers');if(i>=0&&p)freeEl=p.children[i]}if(freeEl)freeEl.style.visibility=v?'hidden':''}
 X.on('frame',(dt)=>{
   if(st.phase==='play'){
     if(st.ch>=1&&st.ch<=4&&st.got>=st.goal&&bossDone(st.ch))clear();
-    if(st.ch===5){X.act.free=Math.max(X.act.free,1.5);freeHide(true)}}
+    if(st.ch===5){st.t5+=dt;X.act.free=Math.max(X.act.free,1.5);freeHide(true)}}
   // spawned roamers (joggers) stay in their district
   for(const n of X.npcs){if(!n._home||n.state!=='wander'||(n.tx===n._sx&&n.tz===n._sz))continue;if(!inD(n._home,n.tx,n.tz)){const[x,z]=spot(n._home);n.tx=x;n.tz=z}n._sx=n.tx;n._sz=n.tz}
   hud()});
@@ -248,7 +256,7 @@ X.on('prerender',(dt,t)=>{beaconStep(Math.min(.05,dt||.016),performance.now()/10
 // ending: after the final-vape slow-mo (juice), the end cutscene, then the win screen
 X.on('win',()=>{const tok=st.run,t0=performance.now();st.phase='end';if(st.ch)X.emit('chapter',st.ch,'out');beaconOff();freeHide(false);hud();
   const wait=()=>{if(tok!==st.run||X.mode!=='won')return;const w=$('win');
-    if(!w.hidden||performance.now()-t0>4600){w.hidden=true;play(S.end||[],()=>{if(tok===st.run&&X.mode==='won')w.hidden=false},'square')}else setTimeout(wait,120)};
+    const el2=performance.now()-t0;if(el2>7000||!X.game.classList.contains('jz-cine')){/* juice's final-vape finish is over (or absent) */w.hidden=true;play(S.end||[],()=>{if(tok===st.run&&X.mode==='won')w.hidden=false},'square')}else setTimeout(wait,120)};
   setTimeout(wait,600)});
 
 /* ================= API ================= */
@@ -263,7 +271,7 @@ if(location.hash==='#dbg')window.tmvs={
   win(){if(st.phase!=='play')return 'not in play';const k=PLAN[st.ch].boss,B=BOSSES();
     if(k&&B&&B[k].n&&!B[k].n.boss.dead&&X.crowds.defeat)X.crowds.defeat(B[k].n);
     if(st.ch<5){st.got=Math.max(st.got,st.goal);return 'ch'+st.ch+' goal met'}
-    if(X.count>0){X.count=1;X.drain(2)}return 'emptied'},
+    st.t5=CH5_SECS;if(X.count>0){X.count=1;X.drain(2)}return 'emptied'},
   skip(){if(seq){finish();return 'cutscene'}if(cardCb){endCard();return 'card'}if(X.cine){dispatchEvent(new KeyboardEvent('keydown',{code:'KeyK'}));return 'intro'}return 'nothing'},
   get s(){return{ch:st.ch,phase:st.phase,got:st.got,goal:st.goal,count:X.count,floor:floor(),mode:X.mode,progress:progress()}}};
 })();
