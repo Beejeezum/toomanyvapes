@@ -223,6 +223,7 @@ const css=document.createElement('style');css.textContent=`
 #stob{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:calc(max(12px,env(safe-area-inset-top,0px)) + 52px);z-index:21;pointer-events:none;width:clamp(200px,27vw,300px);padding:12px 16px 13px;
   background:#d8b585;color:#2b2233;clip-path:var(--cp,none);rotate:-1deg;box-shadow:0 4px 0 rgba(43,34,51,.3)}
 #stob[hidden]{display:none!important}
+html:has(#stmc.go) #stob,html:has(#stt.go) #stob{display:none!important}/* one thing at a time: the panel waits while the title/mission card is up */
 #stob.mini .tg,#stob.mini .st{display:none}#stob.mini{width:auto;padding:5px 8px 6px}#stob.mini .ct{margin-top:0}#stob.mini.tch{display:none}/* after a few seconds the panel tucks away (touch: fully) until the step changes */
 #stob .tg{display:inline-block;font:800 11px/1 system-ui,sans-serif;letter-spacing:.14em;background:#2b2233;color:#fbf5e6;padding:3px 6px 2px;margin-bottom:6px}
 #stob .st{display:block;font-family:var(--display,Impact,sans-serif);font-size:clamp(19px,2.3vw,26px);line-height:1;letter-spacing:.01em}
