@@ -104,6 +104,8 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 #gate .gl{font:700 clamp(16px,3vw,22px)/1.4 system-ui,sans-serif;max-width:26ch}
 #gate .gateNo{color:#fff7ea;opacity:.7;font:600 13px system-ui,sans-serif;margin-top:6px}
 #intro .warn{position:absolute;left:50%;bottom:calc(48px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font:700 11px/1 system-ui,sans-serif!important;letter-spacing:.12em;text-transform:uppercase;color:#fff7ea;opacity:.75;margin:0;white-space:nowrap}
+#intro .logo img{display:block;width:min(760px,86vw,calc(62vh * 2.4));height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));rotate:-1.5deg}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 
 </head>
@@ -134,7 +136,7 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
     <a class="gateNo" href="https://brucepinchbeck.com" rel="noopener">Get me out of here</a>
   </div>
   <div id="intro" class="ov">
-    <h1>Too Many Vapes</h1>
+    <div class="logo"><h1 class="sr">Too Many Vapes</h1><img src="assets/brand/logo.png" alt="Too Many Vapes" width="1100" height="459"></div>
     <p class="loc">Get the whole town hooked</p>
     <button id="go">Play</button>
     <p class="warn">Satire · don't vape · 18+</p>
