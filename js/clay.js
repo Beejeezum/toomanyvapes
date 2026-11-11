@@ -320,7 +320,7 @@ float coc(float a){float id=1./max(8.*a/max(1.-a,.004),.05);return clamp(max(id-
 void main(){vec4 c0=texture2D(tC,vUv);float r0=coc(c0.a);vec3 acc=c0.rgb;float ws=1.;
  if(r0>.6){for(int i=0;i<NT;i++){float fi=float(i)+.5,rr=sqrt(fi/float(NT)),th=fi*2.39996;vec2 o=vec2(cos(th),sin(th))*rr*r0;vec4 s=texture2D(tC,vUv+o*px);
    float w=clamp(coc(s.a)-rr*r0+1.,0.,1.);acc+=s.rgb*w;ws+=w;}}
- vec3 c=acc/ws;float l=dot(c,vec3(.3,.59,.11));c=mix(vec3(l),c,.86)*vec3(1.05,1.,.9);c=mix(c,smoothstep(vec3(-.08),vec3(1.06),c),.55);vec2 q=vUv-.5;c*=1.-vig*dot(q,q)*2.4;gl_FragColor=vec4(c,1.);}`});
+ vec3 c=acc/ws;float l=dot(c,vec3(.3,.59,.11));c=mix(vec3(l),c,.86)*vec3(1.05,1.,.9);c=mix(c,smoothstep(vec3(-.08),vec3(1.06),c),.55);c=mix(c,.82+(c-.82)*.38,step(vec3(.82),c));/* highlight roll-off: whites keep paper/felt detail instead of clipping */vec2 q=vUv-.5;c*=1.-vig*dot(q,q)*2.4;gl_FragColor=vec4(c,1.);}`});
 const postG=new T.BufferGeometry();postG.setAttribute('position',new T.BufferAttribute(new Float32Array([-1,-1,0,3,-1,0,-1,3,0]),3));
 const postQ=new T.Mesh(postG,postM);postQ.frustumCulled=false;const postS=new T.Scene();postS.add(postQ);const postC=new T.OrthographicCamera(-1,1,1,-1,0,1);
 /* focus follows the aim: a creature (or Sal) near the crosshair, else the first wall/prop/ground the view ray meets */

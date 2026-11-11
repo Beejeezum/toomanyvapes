@@ -34,12 +34,6 @@
      "cap": "Fifty! I said FIFTY! Five, zero! Not five THOUSAND! …Hello? HELLO?!"
     },
     {
-     "img": "ch1_v2_4",
-     "vid": "ch1_v2_4#t=0,2.4",
-     "aud": true,
-     "mute": true
-    },
-    {
      "img": "ch1_kid_v3",
      "vid": "ch1_kid_v3",
      "aud": true,
@@ -56,17 +50,12 @@
      "cap": "So get out there. Get this town HOOKED!"
     },
     {
-     "img": "ch1_v2_5_tail",
-     "vid": "ch1_v2_5#t=5.3",
-     "aud": true,
-     "mute": true,
+     "engine": "fly",
+     "hold": 10,
      "over": "bro_ch1_go",
+     "overAt": 0.5,
      "who": "BRO",
      "cap": "Say less, boss. I got you."
-    },
-    {
-     "engine": "fly",
-     "hold": 10
     }
    ],
    "call": {

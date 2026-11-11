@@ -106,7 +106,7 @@ const TAG_R=20,NUDGE_OUT=12,NUDGE_CD=45,SAL_R=3.5,SAL_CD=20,BOSS_DELAY=7.4;// th
    drop-off zone on the Cloud Kingz sidewalk sends carried customers one by one through the door, and only then do they count.
    Every district is a 13-17 s walk from the shop (measured), so all four chapters deliver to the shop itself.
    DROP: ring centre, ring radius, trigger radius round the centre, the path each customer walks in (last leg squeezes past Sal). */
-const DROP={x:.1,z:13.9,r:3.3,trig:3.6,path:[[1.0,15.3],[1.15,16.75]],reach:32};
+const DROP={x:.1,z:13.0,r:3.9,trig:5.6,path:[[1.0,15.3],[1.15,16.75]],reach:80};let dropUntil=0;// generous: trigger is wider than the circle, and stays live a while after you step in
 const DEL_GAP=[.45,.6],BACK_CD=40,BACK_AWAY=5;
 
 /* ================= CUT-PAPER ICONS (24x24 silhouettes; .k = knocked-out detail in the token's paper colour) ================= */
@@ -223,6 +223,7 @@ const css=document.createElement('style');css.textContent=`
 #stob{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:calc(max(12px,env(safe-area-inset-top,0px)) + 52px);z-index:21;pointer-events:none;width:clamp(200px,27vw,300px);padding:12px 16px 13px;
   background:#d8b585;color:#2b2233;clip-path:var(--cp,none);rotate:-1deg;box-shadow:0 4px 0 rgba(43,34,51,.3)}
 #stob[hidden]{display:none!important}
+#stob.mini .tg,#stob.mini .st{display:none}#stob.mini{width:auto;padding:5px 8px 6px}#stob.mini .ct{margin-top:0}#stob.mini.tch{display:none}/* after a few seconds the panel tucks away (touch: fully) until the step changes */
 #stob .tg{display:inline-block;font:800 11px/1 system-ui,sans-serif;letter-spacing:.14em;background:#2b2233;color:#fbf5e6;padding:3px 6px 2px;margin-bottom:6px}
 #stob .st{display:block;font-family:var(--display,Impact,sans-serif);font-size:clamp(19px,2.3vw,26px);line-height:1;letter-spacing:.01em}
 #stob .ct{display:block;margin-top:7px;font:800 clamp(13px,1.5vw,16px)/1.15 system-ui,sans-serif;background:#fbf5e6;padding:4px 7px;rotate:.6deg}
@@ -329,7 +330,10 @@ function next(){const s=seq;if(!s)return;clearTimeout(s.tm);if(au){au.stop();au=
      mod: film dressing only) while the mod films the live world. X.emit('engineShot',name,done,live): done() advances like a clip
      ending; a tap/skip advances as usual (live() turns false and the mod lands at once); if done() never comes, hold + 4 s. */
   el.classList.toggle('eng',!!f.engine);
-  if(f.engine){vid.pause();vid.hidden=true;vid.removeAttribute('src');setCap(f);X.emit('engineShot',f.engine,()=>{if(live())next()},live);
+  if(f.engine){vid.pause();vid.hidden=true;vid.removeAttribute('src');setCap(f);
+    // an engine shot can carry a voice line over it (sound bridge from the scene before); caption clears when it ends
+    if(f.over){const me=s;setTimeout(()=>{if(seq!==me||!live())return;if(overH)overH.stop();overH=sound(f.over,()=>{overH=null;if(seq===me&&live())setCap({})})},(f.overAt||0)*1000)}
+   X.emit('engineShot',f.engine,()=>{if(live())next()},live);
     if(live())s.tm=setTimeout(()=>{if(live())next()},((f.hold||10)+4)*1000);return}
   showStill(f,!!f.vid);vid.pause();vid.hidden=true;vid.oncanplay=vid.onerror=vid.onloadedmetadata=vid.onended=vid.onplaying=null;vid.ontimeupdate=subsTick;
   setCap(f.subs?f.subs[0]:f);
@@ -404,13 +408,13 @@ function objText(){const n=st.ch;if(!n)return null;const dk=CH(n).district,c=car
   if(c>0)return[dS<14?'STEP INTO THE PINK CIRCLE':'HOOK '+(st.goal-st.got-c)+' MORE · OR DROP THEM OFF',cnt];
   if(out)return['GO TO '+DNAME[dk],cnt];
   return['VAPE '+(st.goal-st.got)+' '+WHO[n]+' · LET GO IN THE GREEN',cnt]}
-let obT=0,obLast='';
-function objBump(){obT=0;obLast=''}
+let obT=0,obLast='',obSeen=0;const OB_SHOW=6000;if(X.touch)obj.classList.add('tch');
+function objBump(){obT=0;obLast='';obSeen=performance.now()}
 function objStep(dt){if((obT-=dt)>0)return;obT=.2;const live=st.ch>0&&st.phase!=='idle'&&X.mode!=='intro'&&X.mode!=='won'&&!seq;const t=live?objText():null;
-  if(!t){if(!obj.hidden)obj.hidden=true;return}if(obj.hidden){obj.hidden=false;obj.style.setProperty('--cp',scrapCP(3))}
+  if(!t){if(!obj.hidden)obj.hidden=true;return}if(obj.hidden){obj.hidden=false;obj.style.setProperty('--cp',scrapCP(3));obSeen=performance.now()}
   const c=CH(st.ch),tg=((c.day||'').slice(0,3)+' · '+(c.title||'')).toUpperCase(),key=t[0]+'|'+t[1];
   if(obj.children[0].textContent!==tg)obj.children[0].textContent=tg;if(obj.children[2].textContent!==t[1])obj.children[2].textContent=t[1];obj.children[2].hidden=!t[1];
-  if(obj.children[1].textContent!==t[0]){obj.children[1].textContent=t[0];if(obLast&&!RMq.matches){obj.classList.remove('bump');void obj.offsetWidth;obj.classList.add('bump')}}obLast=key}
+  if(obj.children[1].textContent!==t[0]){obj.children[1].textContent=t[0];obSeen=performance.now();if(obLast&&!RMq.matches){obj.classList.remove('bump');void obj.offsetWidth;obj.classList.add('bump')}}obLast=key;obj.classList.toggle('mini',performance.now()-obSeen>OB_SHOW)}
 
 /* ================= SAL'S CALLS (phone polaroid in a corner, or subtitles only in person) ================= */
 const cl={tok:0,h:null,tm:0,busy:false,live:false};
@@ -653,7 +657,7 @@ function salStep(dt,t){const s=X.sal;if(!s||!s.g)return;const g=s.g,p=g.position
   sal.look=Math.max(0,sal.look-dt);const want=sal.look>0?Math.atan2(X.px-p.x,X.pz-p.z):sal.yaw0;
   let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>.002)g.rotation.y+=da*Math.min(1,dt*6)}
 // talk to Sal on purpose: he turns, perks up (greedy when you've brought customers) and repeats what to do right now
-function salTalk(){const n=st.ch;if(!n)return;const now=performance.now();sal.cd=now+3500;st.salAt=Math.max(st.salAt,now+8000);sal.look=30;
+function salTalk(){const n=st.ch;if(!n)return;const now=performance.now();obSeen=now;sal.cd=now+3500;st.salAt=Math.max(st.salAt,now+8000);sal.look=30;
   st.moodOv=carriedN()?'greedy':'happy';setMood();const my=st.run;setTimeout(()=>{if(st.run===my&&st.moodOv){st.moodOv=null;setMood()}},3200);
   if(!X.muted)try{X.beep(660,.06,'triangle',.03);X.beep(990,.08,'triangle',.03,.06)}catch(e){}
   const L=n<5&&carriedN()?[CALL('back2')]:[GOALCALL(n),n===1?CH(1).why:null].filter(Boolean);
@@ -686,8 +690,11 @@ function callStep(dt){const now=performance.now();
 // at the door: customers peel off the line one at a time (nearest first) and squeeze in past Sal
 let dvNext=0;
 function deliverStep(){if(!st.carry.length||!X.crowds||!X.crowds.walkIn)return;const now=performance.now();
-  if(now<dvNext||Math.hypot(DROP.x-X.px,DROP.z-X.pz)>DROP.trig)return;const p0=DROP.path[0];let best=null,bd=DROP.reach;
-  for(const c of st.carry){if(c===X.held||c.state==='held')continue;const d=Math.hypot(c.g.position.x-p0[0],c.g.position.z-p0[1]);if(d<bd){bd=d;best=c}}
+  if(Math.hypot(DROP.x-X.px,DROP.z-X.pz)<=DROP.trig)dropUntil=now+12000;
+  // a follower standing in the circle counts even if you've stepped out; otherwise the drop stays live 12 s after you were in it
+  let inC=null;for(const c of st.carry){if(c===X.held||c.state==='held')continue;if(Math.hypot(c.g.position.x-DROP.x,c.g.position.z-DROP.z)<=DROP.r+1){inC=c;break}}
+  if(now<dvNext||(now>dropUntil&&!inC))return;const p0=DROP.path[0];let best=inC,bd=DROP.reach;
+  if(!best)for(const c of st.carry){if(c===X.held||c.state==='held')continue;const d=Math.hypot(c.g.position.x-p0[0],c.g.position.z-p0[1]);if(d<bd){bd=d;best=c}}
   if(!best)return;const tok=st.run,n=st.ch;st.carry.splice(st.carry.indexOf(best),1);st.walk.push(best);
   if(!X.crowds.walkIn(best,DROP.path.map(q=>q.slice()),c=>delivered(c,tok,n))){st.walk.pop();st.carry.push(best);return}
   dvNext=now+rand(DEL_GAP[0],DEL_GAP[1])*1000;sal.look=Math.max(sal.look,2.5);if(ind)ind.stamp=3}
@@ -725,7 +732,7 @@ function indBuild(){const g=new T.Group(),mat=(c,kind,fog)=>{const m=new T.MeshT
      chevrons that step in toward the middle, a dashed paper ring that turns in held frames. Walk into it and the line peels off into the shop. */
   const R=new T.Group();R.position.set(DROP.x,.14,DROP.z);g.add(R);const r=DROP.r;
   const flat=(geo,m,y,p)=>{const o=new T.Mesh(geo,m);o.rotation.x=-PI/2;o.position.y=y||0;o.userData.noCast=1;(p||R).add(o);return o};
-  const fillM=mat(0xffd9e8,'felt'),bordM=mat(0xff3fa4,'cpaper'),edgeM=mat(0x2b2233,'cpaper'),chevM=mat(0xffd23c,'cpaper'),dashM=mat(0xfff6ea,'cpaper');
+  const fillM=mat(0xe98fb4,'felt'),bordM=mat(0xd92c86,'cpaper'),edgeM=mat(0x2b2233,'cpaper'),chevM=mat(0xf2c12e,'cpaper'),dashM=mat(0xe6d3b8,'cpaper');// mid-tone felt, not near-white (it read blown out)
   for(const m of[fillM,bordM,edgeM,chevM,dashM]){m.polygonOffset=true;m.polygonOffsetFactor=-2;m.polygonOffsetUnits=-2}
   flat(new T.CircleGeometry(r-.3,48),fillM,0);flat(new T.RingGeometry(r+.04,r+.2,64),edgeM,.004);const bord=flat(new T.RingGeometry(r-.62,r+.06,64),bordM,.01);
   const sh=new T.Shape();sh.moveTo(-.5,-.12);sh.lineTo(0,.38);sh.lineTo(.5,-.12);sh.lineTo(.5,-.38);sh.lineTo(0,.1);sh.lineTo(-.5,-.38);sh.closePath();const shG=new T.ShapeGeometry(sh);
