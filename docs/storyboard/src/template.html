@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Too Many Vapes Storyboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Kalam:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#c7a27b;--bg-hi:#d4b18b;--bg-lo:#b48c63;--card:#fbf6ea;--card2:#f2e8d3;--ink:#2a221d;--muted:#6b5d52;--rule:#ddd0b9;
+  --tape:rgba(238,224,168,.82);--tape-edge:rgba(160,140,80,.25);--shadow:rgba(60,38,18,.28);
+  --keep:#2e7a4c;--revise:#b26d12;--new:#c0265b;--opt:#6b5d52;
+  --c1:#e46a9c;--c2:#7da23a;--c3:#3b8ac4;--c4:#d6951c;--c5:#de4479;
+  --sv-bg:#fbf6ea;--sv-lot:#efe6d3;--sv-road:#cfc6b8;--sv-plaza:#e6dccb;--sv-bld:#d9cbb4;--sv-shop:#f6b9cb;--sv-green:#cfe3b0;--sv-tree:#9cc27a;
+  --sv-sand:#f1deb0;--sv-sea:#a9d3ea;--sv-ink:#2a221d;--sv-mut:#7c6d60;--sv-ctn:#c9542f;--sv-spill:#f2a0c4;--sv-axis:#d0342c;--sv-floor:#f0e3c8;--sv-mat:#ecc3ad;--sv-fov:rgba(42,34,29,.10);
+  --link:#8a2f55;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#2b2119;--bg-hi:#35291f;--bg-lo:#231a13;--card:#362c25;--card2:#2f2620;--ink:#f2e9da;--muted:#bfae9c;--rule:#4d4037;
+  --tape:rgba(170,150,95,.55);--tape-edge:rgba(0,0,0,.2);--shadow:rgba(0,0,0,.5);
+  --keep:#6fcf97;--revise:#f0b04a;--new:#ff7aa8;--opt:#bfae9c;
+  --c1:#f08ab4;--c2:#a5cc5e;--c3:#6db3e8;--c4:#f0b445;--c5:#ff6f9f;
+  --sv-bg:#30271f;--sv-lot:#3a3028;--sv-road:#55493f;--sv-plaza:#463b32;--sv-bld:#5b4d40;--sv-shop:#8a4f62;--sv-green:#3f5530;--sv-tree:#5d7f43;
+  --sv-sand:#6b5a39;--sv-sea:#2f5870;--sv-ink:#f2e9da;--sv-mut:#bfae9c;--sv-ctn:#e0704a;--sv-spill:#b85d86;--sv-axis:#ff6a5f;--sv-floor:#4a3d30;--sv-mat:#6a4a3c;--sv-fov:rgba(242,233,218,.10);
+  --link:#ff9cc4;
+}}
+:root[data-theme="dark"]{
+  --bg:#2b2119;--bg-hi:#35291f;--bg-lo:#231a13;--card:#362c25;--card2:#2f2620;--ink:#f2e9da;--muted:#bfae9c;--rule:#4d4037;
+  --tape:rgba(170,150,95,.55);--tape-edge:rgba(0,0,0,.2);--shadow:rgba(0,0,0,.5);
+  --keep:#6fcf97;--revise:#f0b04a;--new:#ff7aa8;--opt:#bfae9c;
+  --c1:#f08ab4;--c2:#a5cc5e;--c3:#6db3e8;--c4:#f0b445;--c5:#ff6f9f;
+  --sv-bg:#30271f;--sv-lot:#3a3028;--sv-road:#55493f;--sv-plaza:#463b32;--sv-bld:#5b4d40;--sv-shop:#8a4f62;--sv-green:#3f5530;--sv-tree:#5d7f43;
+  --sv-sand:#6b5a39;--sv-sea:#2f5870;--sv-ink:#f2e9da;--sv-mut:#bfae9c;--sv-ctn:#e0704a;--sv-spill:#b85d86;--sv-axis:#ff6a5f;--sv-floor:#4a3d30;--sv-mat:#6a4a3c;--sv-fov:rgba(242,233,218,.10);
+  --link:#ff9cc4;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background-color:var(--bg);color:var(--ink);font:16px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;
+  background-image:radial-gradient(ellipse at 20% 0%,var(--bg-hi),transparent 60%),radial-gradient(ellipse at 90% 100%,var(--bg-lo),transparent 55%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0 0.1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment:fixed;overflow-x:hidden}
+a{color:var(--link)}
+img{max-width:100%;display:block}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+h1,h2{font-family:"Permanent Marker",cursive;font-weight:400;letter-spacing:.5px;line-height:1.15}
+h1{font-size:clamp(34px,7vw,62px);margin:0}
+h2{font-size:clamp(26px,4.4vw,38px);margin:56px 0 14px;display:inline-block;background:var(--card);padding:6px 18px 4px;transform:rotate(-1deg);box-shadow:3px 4px 0 var(--shadow)}
+h3{font-size:22px;margin:4px 0 6px;line-height:1.25}
+h4{margin:0 0 6px;font-size:18px}
+.hand{font-family:Kalam,cursive}
+.card{background:var(--card);border-radius:3px;box-shadow:0 1px 0 var(--rule),3px 5px 14px var(--shadow);padding:18px 20px;position:relative}
+.tape{position:absolute;top:-11px;left:50%;width:110px;height:24px;margin-left:-55px;background:var(--tape);transform:rotate(-2.5deg);box-shadow:0 1px 2px var(--tape-edge);
+  clip-path:polygon(3% 0,97% 4%,100% 50%,96% 100%,2% 96%,0 45%)}
+.mast{padding:46px 0 10px;display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
+.mast .lab{background:var(--card);padding:16px 22px;transform:rotate(-.6deg);box-shadow:4px 6px 0 var(--shadow);position:relative;max-width:640px}
+.mast p{margin:6px 0 0;color:var(--muted)}
+.meta{font-family:Kalam,cursive;font-size:18px;background:var(--card2);padding:10px 16px;transform:rotate(1deg);box-shadow:3px 4px 0 var(--shadow);max-width:100%}
+nav.toc{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(4px);margin:16px -16px 0;padding:8px 16px;
+  display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav.toc a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--card);padding:3px 9px;border-radius:2px;font-size:14px;box-shadow:1px 2px 0 var(--shadow)}
+nav.toc a.sec{background:var(--ink);color:var(--card)}
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.legend .st{margin-right:4px}
+.st{display:inline-block;font:700 12px/1 "Atkinson Hyperlegible",sans-serif;letter-spacing:.8px;padding:4px 7px 3px;border:2px solid currentColor;border-radius:3px;transform:rotate(-3deg);text-transform:uppercase}
+.st-keep{color:var(--keep)}.st-revise{color:var(--revise)}.st-new{color:var(--new)}.st-opt{color:var(--opt);border-style:dashed;margin-left:4px;transform:rotate(2deg)}
+.mt{display:inline-block;font-size:13px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--card2);margin-right:6px}
+.mt.ok{color:var(--keep)}.mt.gen{color:var(--new)}.mt.hid{color:var(--c3)}.mt.eng{color:var(--muted)}.mt.none{color:var(--muted)}
+/* spine */
+.spine{display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));margin-top:16px}
+.spc{background:var(--card);padding:20px 18px 14px;position:relative;box-shadow:3px 5px 12px var(--shadow);border-top:8px solid var(--cc)}
+.spc:nth-child(odd){transform:rotate(-.5deg)}.spc:nth-child(even){transform:rotate(.6deg)}
+.spc h4{font-family:"Permanent Marker",cursive;font-weight:400;font-size:22px}
+.spc h4 span{color:var(--cc)}
+.spc .dd{margin:0 0 8px;color:var(--muted);font-family:Kalam,cursive;font-size:17px}
+.spc dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:15px}
+.spc dt{font-weight:700;color:var(--cc)}
+.spc dd{margin:0}
+/* overview */
+.obar{display:flex;gap:3px;margin-top:14px;min-height:96px}
+.ob{min-width:0;background:var(--card);border-top:6px solid var(--cc);padding:4px 4px 6px;font-size:11px;line-height:1.2;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.ob.play{background:var(--card2);border-top-style:dashed}.ob.ui{opacity:.85}
+.ob span{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.ob i{font-style:normal;font-weight:700}
+.okey{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin-top:8px;color:var(--muted)}
+.okey b{color:var(--ink)}
+@media (max-width:760px){.obar{flex-direction:column;min-height:0}.ob{flex:none!important;flex-direction:row;gap:10px;align-items:center;border-top:0;border-left:6px solid var(--cc)}.ob span{-webkit-line-clamp:1}}
+/* bible */
+.scale svg{width:100%;height:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;white-space:nowrap}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cscript{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:10px}
+.cs{background:var(--card);padding:10px;box-shadow:2px 3px 0 var(--shadow);font-size:13px}
+.cs .sw{height:58px;border-radius:2px;position:relative;overflow:hidden}
+.cs .sw i{position:absolute;inset:0;background:linear-gradient(0deg,rgba(255,170,205,.95),rgba(255,190,215,.0));}
+.cs b{display:block;margin-top:6px;font-size:14px}
+figure{margin:0}
+figcaption{font-size:13px;color:var(--muted);margin-top:4px}
+.ref img{border-radius:2px}
+/* diva */
+.look{background:var(--card);padding:14px;box-shadow:3px 5px 12px var(--shadow);position:relative}
+.look h4{font-family:"Permanent Marker",cursive;font-weight:400;font-size:20px}
+.opt{background:var(--card);padding:14px 16px;box-shadow:3px 5px 12px var(--shadow);position:relative;border-left:6px solid var(--c2)}
+.opt.rec{outline:3px solid var(--keep);outline-offset:3px}
+.opt h4 .st{margin-left:6px}
+/* fly */
+.flymap,.flyprof{width:100%;height:auto;display:block;background:var(--sv-bg)}
+.flymap .fpath,.flyprof .fpath{fill:none;stroke:var(--new);stroke-width:5;stroke-linejoin:round;stroke-dasharray:14 7}
+.fk{fill:var(--card);stroke:var(--new);stroke-width:3}
+.fkl{font:700 15px "Atkinson Hyperlegible",sans-serif;fill:#1b1512;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.fkl.big{font-size:20px}
+.fwedge{fill:rgba(192,38,91,.25);stroke:var(--new);stroke-width:2}
+.flyprof .bg{fill:var(--sv-bg)}.flyprof .sea{fill:var(--sv-sea)}.flyprof .sand{fill:var(--sv-sand)}
+.flyprof .gl{stroke:var(--sv-mut);stroke-width:1}
+.flyprof .bldb{fill:var(--sv-bld);stroke:var(--sv-mut)}.flyprof .shopb{fill:var(--sv-shop);stroke:var(--sv-mut)}.flyprof .ctnb{fill:var(--sv-ctn)}
+.flyprof .pl{font:12px "Atkinson Hyperlegible",sans-serif;fill:var(--sv-ink)}.flyprof .pl.b{font-weight:700}
+.flyprof .clr{stroke:var(--sv-axis);stroke-dasharray:6 5;stroke-width:1.5}
+.flyprof .look{stroke:var(--sv-ink);stroke-width:2}
+.ahd{fill:var(--sv-ink)}
+.oldfly{margin-top:10px;font-size:14px}
+.ofr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.ofr img{filter:grayscale(.3);outline:3px solid var(--new);outline-offset:-3px}
+/* scenes */
+.scene{margin:46px 0 0;padding-top:10px}
+.sch{background:var(--card);padding:16px 20px 12px;border-left:10px solid var(--cc);box-shadow:3px 5px 12px var(--shadow);position:relative}
+.sch .tab{position:absolute;top:-14px;right:18px;background:var(--cc);color:#fff;font:700 13px "Atkinson Hyperlegible",sans-serif;padding:3px 10px;transform:rotate(2deg);box-shadow:2px 2px 0 var(--shadow)}
+.scid{font-family:"Permanent Marker",cursive;font-weight:400;color:var(--cc);margin-right:6px}
+.sch p{margin:4px 0;font-size:15px}
+.blkwrap{background:var(--card);margin:20px 0 0;padding:16px;position:relative;box-shadow:3px 5px 12px var(--shadow)}
+.blk{width:100%;height:auto;display:block}
+.blkg{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.blkg:has(.blk2){grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}
+@media (max-width:820px){.blkg:has(.blk2){grid-template-columns:1fr}}
+.cap2{margin:0 0 6px;font-weight:700;font-size:14px}
+.rule{margin:10px 0 0;font-size:15px}
+.calls{background:var(--card2);padding:12px 16px;margin-top:16px;box-shadow:2px 3px 0 var(--shadow)}
+.calls ol{margin:6px 0 0;padding-left:20px}.calls li{margin:4px 0}.calls .st{margin-left:6px}
+.shots{display:grid;gap:22px;margin-top:22px}
+.shot{background:var(--card);display:grid;grid-template-columns:minmax(0,46%) minmax(0,1fr);gap:0;box-shadow:3px 5px 12px var(--shadow);position:relative;border-top:4px solid var(--cc)}
+.shot .pan{padding:12px;background:var(--card2)}
+.shot .pw{position:relative}
+.shot .pan img{width:100%;aspect-ratio:16/9;object-fit:cover;border:6px solid #fff;box-shadow:1px 2px 4px var(--shadow)}
+.pan.multi{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start}
+.pan.multi img{border-width:4px}
+.pan.multi figcaption{font-weight:700;color:var(--ink)}
+.src{font-size:12px;color:var(--muted);margin-top:6px}
+.src .flop{font-style:normal;font-weight:700;color:var(--revise)}
+.det{padding:12px 16px 14px}
+.det header{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:8px}
+.sid{font-family:"Permanent Marker",cursive;font-size:24px;line-height:1}
+.sty{font-weight:700}
+.dur,.cr{font-size:13px;background:var(--card2);padding:2px 8px;border-radius:10px}
+.cr{color:var(--new);font-weight:700}
+.ln{font-family:Kalam,cursive;font-size:19px;line-height:1.35;background:var(--card2);border-left:4px solid var(--cc);padding:6px 10px;margin:4px 0 8px}
+.ln b{font-family:"Atkinson Hyperlegible",sans-serif;font-size:12px;letter-spacing:.8px;margin-right:6px;vertical-align:2px}
+.mrow{margin-bottom:8px}.mrow small{color:var(--muted);font-size:13px}
+.det dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14.5px}
+.det dt{font-weight:700;color:var(--muted);font-size:12px;letter-spacing:.6px;text-transform:uppercase;padding-top:3px}
+.det dd{margin:0}
+@media (max-width:820px){.shot{grid-template-columns:1fr}.det dl{grid-template-columns:1fr}.det dt{padding-top:6px}}
+/* overlays (paper UI mock-ups) */
+.ov{position:absolute;inset:6px;pointer-events:none}
+.ov-card{position:absolute;top:7%;left:50%;transform:translateX(-50%) rotate(-2deg);background:#fbf3df;color:#2a221d;padding:4px 14px;font:700 clamp(10px,1.6vw,15px) "Atkinson Hyperlegible",sans-serif;box-shadow:2px 3px 0 rgba(0,0,0,.3);display:flex;gap:8px;align-items:center}
+.ov-card b{font-family:"Permanent Marker",cursive;font-weight:400;font-size:1.6em;color:#e46a9c}
+.ov-pol{position:absolute;left:4%;bottom:8%;width:20%;aspect-ratio:1;background:#fff;padding:4% 4% 9%;transform:rotate(-5deg);box-shadow:2px 3px 0 rgba(0,0,0,.35)}
+.ov-pol i{display:block;width:100%;height:100%;background-size:300%;background-position:48% 22%}
+.ov-sub{position:absolute;left:27%;right:6%;bottom:9%;background:rgba(251,243,223,.95);color:#2a221d;font:clamp(9px,1.4vw,13px) Kalam,cursive;padding:3px 8px;transform:rotate(.6deg)}
+.ov-sub b{font-family:"Atkinson Hyperlegible",sans-serif;font-size:.85em;margin-right:4px}
+.ov-tok{position:absolute;top:22%;left:50%;transform:translateX(-50%);display:flex;gap:3px}
+.ov-tok i{width:12px;height:12px;border-radius:50%;background:#fbf3df;box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+.ov-stamp{position:absolute;left:50%;top:44%;width:30%;transform:translate(-50%,-50%) rotate(-6deg);fill:#7da23a;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.35))}
+.uisk{width:100%;height:auto;aspect-ratio:16/9;border:6px solid #fff;background:var(--sv-bg)}
+.uisk .uibg{fill:#efe2c6}.uisk .uiln rect{fill:#c9b28c}.uisk .uitx{font:12px Kalam,cursive;fill:#6b5d52}
+/* blocking svg styling */
+.blk .bg{fill:var(--sv-bg)}
+.blk .lot{fill:var(--sv-lot)}.blk .road{fill:var(--sv-road)}.blk .plaza{fill:var(--sv-plaza)}.blk .walk{fill:var(--sv-plaza)}
+.blk .bld{fill:var(--sv-bld);stroke:var(--sv-mut);stroke-width:1}
+.blk .shop{fill:var(--sv-shop);stroke:var(--sv-ink);stroke-width:1.5}
+.blk .door{stroke:var(--sv-ink);stroke-width:4;fill:none;stroke-linecap:round}
+.blk .win{stroke:#4aa3d0;stroke-width:5;fill:none}
+.blk .palm{fill:var(--sv-tree);stroke:var(--sv-ink);stroke-width:1}
+.blk .spill{fill:var(--sv-spill);opacity:.85}
+.blk .ctn{fill:var(--sv-ctn);stroke:var(--sv-ink);stroke-width:1.5}
+.blk .prop{fill:var(--sv-bld);stroke:var(--sv-ink);stroke-width:1}
+.blk .floor{fill:var(--sv-floor)}.blk .wall{stroke:var(--sv-ink);stroke-width:4;fill:none}
+.blk .shelf{fill:#c9a67a;stroke:var(--sv-ink);stroke-width:.8}.blk .ctr{fill:#bfe3ea;stroke:var(--sv-ink);stroke-width:1}
+.blk .grass,.blk .field{fill:var(--sv-green)}.blk .tree{fill:var(--sv-tree);opacity:.75}
+.blk .path{stroke:var(--sv-sand);stroke-width:7;fill:none;stroke-linecap:round}
+.blk .pond{fill:var(--sv-sea);stroke:var(--sv-mut)}.blk .gazebo{fill:#f3b0c6;stroke:var(--sv-ink);stroke-width:1.5}
+.blk .sand{fill:var(--sv-sand)}.blk .sea{fill:var(--sv-sea)}.blk .mat{fill:var(--sv-mat);stroke:var(--sv-mut)}.blk .pier{fill:#b48a62}
+.blk .crop{fill:#8fb85c}.blk .barn{fill:#c94a3c;stroke:var(--sv-ink)}.blk .silo{fill:#e8e2d4;stroke:var(--sv-ink)}
+.blk .fence{fill:none;stroke:#9a7652;stroke-width:2.5;stroke-dasharray:6 3}.blk .hay{fill:#e7c66a;stroke:var(--sv-mut)}
+.blk .lbl{font:13px "Atkinson Hyperlegible",sans-serif;fill:var(--sv-ink)}
+.blk .lbl.sm{font-size:12px;fill:var(--sv-mut)}.blk .lbl.xs{font-size:11px;fill:var(--sv-mut)}.blk .lbl.b{font-weight:700;fill:var(--sv-ink)}
+.blk .ch{stroke:#1b1512;stroke-width:2}
+.blk .ch.bro{fill:#3b6fd1}.blk .ch.sal{fill:#1fa79a}.blk .ch.boss{fill:#c0265b}.blk .ch.npc{fill:#9b8b7b}
+.blk .chl{font:700 12px "Atkinson Hyperlegible",sans-serif;fill:#fff}
+.blk .face{stroke-width:3;stroke-linecap:round}.blk .face.bro{stroke:#3b6fd1}.blk .face.sal{stroke:#1fa79a}.blk .face.boss{stroke:#c0265b}.blk .face.npc{stroke:#9b8b7b}
+.blk .mv{fill:none;stroke-width:2.5;stroke-dasharray:7 5;stroke:var(--sv-ink)}
+.blk .mv.bro{stroke:#3b6fd1}.blk .mv.sal{stroke:#1fa79a}.blk .mv.npc{stroke:#8a7a6b}.blk .mv.exit{stroke:#3b6fd1;stroke-dasharray:2 5}
+.blk .fov{fill:var(--sv-fov);stroke:var(--sv-ink);stroke-width:1;stroke-opacity:.35}
+.blk .cam rect{fill:var(--sv-ink)}.blk .cam text{font:700 12px "Atkinson Hyperlegible",sans-serif;fill:var(--sv-bg)}
+.blk .axis{stroke:var(--sv-axis);stroke-width:2.5;stroke-dasharray:10 6;fill:none}
+.blk .axl{font:700 12px "Atkinson Hyperlegible",sans-serif;fill:var(--sv-axis)}
+.blk .cmp path{fill:var(--sv-ink)}.blk .cmp text{font:700 12px sans-serif;fill:var(--sv-ink)}
+.blk .sc path{stroke:var(--sv-ink);fill:none;stroke-width:2}.blk .sc text{font:11px sans-serif;fill:var(--sv-ink)}
+.legsvg{width:100%;max-width:520px;height:auto}
+/* summary */
+.sum td a{font-weight:700}
+.sum tr.r-new td:first-child{border-left:4px solid var(--new)}.sum tr.r-revise td:first-child{border-left:4px solid var(--revise)}.sum tr.r-keep td:first-child{border-left:4px solid var(--keep)}
+tr.sub td{font-weight:700;background:var(--card2)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px;margin:12px 0 18px}
+.kpi div{background:var(--card2);padding:10px 12px}
+.kpi b{display:block;font:400 28px "Permanent Marker",cursive}
+.qs li{margin:8px 0}
+.note{font-family:Kalam,cursive;font-size:18px;color:var(--muted)}
+.foot{margin-top:60px;font-size:13px;color:var(--muted);text-align:center}
+@media print{nav.toc{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+  <div class="lab"><div class="tape"></div><h1>Too Many Vapes</h1><p>Shooting storyboard for sign-off: every cutscene and key gameplay beat, scene by scene, with top-down blocking. Draft 1 · 10 Nov 2026</p></div>
+  <div class="meta">{{N}} shots · {{NK}} keep · {{NR}} revise · {{NN}} new ({{NOPT}} optional)<br>run time ≈ {{TOT}} · video to (re)shoot ≈ {{VIDREQ}} cr required</div>
+</header>
+<nav class="toc" aria-label="Sections"><a class="sec" href="#read">Read me</a><a class="sec" href="#spine">Story spine</a><a class="sec" href="#flow">Flow</a><a class="sec" href="#bible">Continuity</a><a class="sec" href="#diva">Diva + bosses</a><a class="sec" href="#fly">Fly-in path</a>{{NAV}}<a class="sec" href="#sum">Summary</a><a class="sec" href="#q">Decide</a></nav>
+
+<h2 id="read">How to read this binder</h2>
+<div class="grid g2">
+  <div class="card legend"><div class="tape"></div>
+    <h4>Stamps</h4>
+    <p><span class="st st-keep">Keep</span> The existing clip works; its poster or frame is the panel.<br>
+    <span class="st st-revise">Revise</span> Edit only (trim, flop, regrade) unless a cost is shown.<br>
+    <span class="st st-new">New</span> Needs a new clip (or new engine work). The panel is a rough sketch.<br>
+    <span class="st st-opt">optional</span> Cut it if the budget is short.</p>
+    <h4>Mouth rule (from the lip-sync diagnosis)</h4>
+    <p>Seedance re-performs a reference line: it adds 0.4–1.3 s lead-in and stretches the line 5–20%. Lips only hold when the speaker faces camera in a medium or close shot, and reference audio can't be combined with start/end frames. So:</p>
+    <p><span class="mt gen">generate as lip-sync shot</span> one speaker, facing camera, mouth visible for the whole line, duration = line + 1 s.<br>
+    <span class="mt hid">mouth hidden</span> back, over-the-shoulder, phone or offscreen: the line is laid in post, and start/end frames can be used for continuity.<br>
+    <span class="mt ok">clip carries its line</span> older clips already lip-synced to their own line; they now play their own audio.</p>
+  </div>
+  <div class="card"><div class="tape"></div>
+    <h4>Blocking diagrams</h4>
+    <svg class="blk legsvg" viewBox="0 0 520 200" role="img" aria-label="Diagram legend">
+      <rect width="520" height="200" class="bg"/>
+      <path d="M40 40 L95 18 A60 60 0 0 1 95 62 Z" class="fov"/><g class="cam"><rect x="30" y="32" width="20" height="16" rx="3"/><text x="40" y="44.5" text-anchor="middle">1.3</text></g>
+      <text x="120" y="45" class="lbl">camera + shot number, wedge = lens / field of view</text>
+      <circle cx="40" cy="95" r="11" class="ch bro"/><text x="40" y="99" class="chl" text-anchor="middle">B</text><line x1="51" y1="95" x2="58" y2="95" class="face bro"/>
+      <circle cx="78" cy="95" r="11" class="ch sal"/><text x="78" y="99" class="chl" text-anchor="middle">S</text>
+      <text x="120" y="99" class="lbl">character mark (B bro, S Sal, boss, townsfolk); tick = facing</text>
+      <path d="M28 140 L92 140" class="mv bro" marker-end="url(#ahl)"/><text x="120" y="144" class="lbl">movement</text>
+      <path d="M28 178 L92 178" class="axis"/><text x="120" y="182" class="lbl">180° line: cameras stay on one side</text>
+      <defs><marker id="ahl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" class="ahd"/></marker></defs>
+    </svg>
+    <p>Every set is drawn top-down from the game's own geometry (index.html / world.js), <b>north up, ocean (east) to the right</b>, like the town map. A set looks the same every time it comes back.</p>
+  </div>
+</div>
+<div class="card" style="margin-top:22px"><div class="tape"></div><h4>What this board fixes</h4><ul>{{FIXES}}</ul></div>
+
+<h2 id="spine">Story spine: why, what, payoff</h2>
+<p class="note">One week, one absurd problem. Each chapter: what Sal wants → what's in the way → why the bro goes HERE → how the out-scene pays it off. The loop every chapter: hook 5 in the district → they follow in a conga line → walk them to Cloud Kingz → Sal counts them in live.</p>
+<div class="spine">{{SPINE}}</div>
+
+<h2 id="flow">The whole game on one strip</h2>
+<div class="card"><div class="tape"></div>
+  <div class="obar">{{BAR}}</div>
+  <div class="okey"><span><b>{{TOT}}</b> total</span><span><b>{{CUT}}</b> cutscenes (solid)</span><span><b>{{PLAY}}</b> gameplay (dashed)</span><span>Colour = chapter accent</span></div>
+</div>
+
+<h2 id="bible">Continuity bible</h2>
+<div class="grid g2">
+  <div class="card scale"><div class="tape"></div><h4>Cast &amp; scale (the bro = 1.0)</h4>
+    <svg viewBox="0 0 560 250" role="img" aria-label="Height chart of the cast">
+      <rect width="560" height="250" fill="var(--sv-bg)"/>
+      <line x1="10" y1="225" x2="550" y2="225" stroke="var(--sv-mut)"/>
+      <line x1="10" y1="45" x2="550" y2="45" stroke="var(--sv-mut)" stroke-dasharray="4 4"/><text x="548" y="40" text-anchor="end" font-size="11" fill="var(--sv-mut)">bro head 1.0</text>
+      <line x1="10" y1="85" x2="550" y2="85" stroke="var(--sv-mut)" stroke-dasharray="2 5"/><text x="548" y="80" text-anchor="end" font-size="11" fill="var(--sv-mut)">bro shoulder ≈ Sal's head 0.78</text>
+      <g font-size="12" text-anchor="middle" fill="var(--sv-ink)">
+        <rect x="30" y="45" width="44" height="180" rx="18" fill="#3b6fd1"/><text x="52" y="243">Bro 1.0</text>
+        <rect x="100" y="85" width="50" height="140" rx="20" fill="#1fa79a"/><text x="125" y="243">Sal 0.78</text>
+        <rect x="180" y="18" width="62" height="207" rx="22" fill="#c0265b"/><text x="211" y="243">Prime 1.15</text>
+        <rect x="270" y="30" width="48" height="195" rx="22" fill="#e8e2d4" stroke="#c0265b" stroke-width="3"/><text x="294" y="243">Detecto 1.08</text>
+        <rect x="345" y="40" width="50" height="185" rx="20" fill="#9a1d3a"/><text x="370" y="243">Diva A 1.03*</text>
+        <rect x="415" y="85" width="50" height="140" rx="22" fill="#e48fb0"/><text x="440" y="243">Diva B 0.78</text>
+        <rect x="485" y="60" width="50" height="165" rx="24" fill="#7d1730"/><text x="510" y="243">Diva C 0.55+hair</text>
+      </g>
+    </svg>
+    <p style="font-size:14px">* including the beehive. <b>Bro:</b> blonde curly clay hair, shirtless, black-and-blue wetsuit tied at the waist, cowrie-shell necklace, barefoot, green vape box, surfboard in ch1 and ch3–4. <b>Sal:</b> bald dome with dark side hair, black moustache, aviators pushed up on his head, teal flamingo shirt, white trousers, white loafers, a thin gold chain. In two-shots Sal's eyeline is UP to the bro and the bro's is DOWN.</p>
+  </div>
+  <div class="card ref"><div class="tape"></div><h4>Character sheets (locked)</h4>
+    <img src="img/ref_lineup.jpg" alt="Sal and the bro side by side for scale" loading="lazy">
+    <div class="grid g2" style="margin-top:10px;gap:10px"><img src="img/ref_bro.jpg" alt="Bro turnaround" loading="lazy"><img src="img/ref_sal.jpg" alt="Sal turnaround" loading="lazy"></div>
+  </div>
+</div>
+<div class="grid g3" style="margin-top:22px">
+  <figure class="card"><div class="tape"></div><img src="img/k_ch2_boss.jpg" alt="Current diva" loading="lazy"><figcaption><b>The diva (ch2, current look)</b>: soprano, tiara, blonde updo, pearls, crimson gown, lace fan. Redesign options below.</figcaption></figure>
+  <figure class="card"><div class="tape"></div><img src="img/k_ch3_boss.jpg" alt="Gym Bro Prime" loading="lazy"><figcaption><b>Gym Bro Prime (ch3)</b>: gold crown, blue wraparound shades, gold chain (he gives it away in 3.5), red tank, blue shorts.</figcaption></figure>
+  <figure class="card"><div class="tape"></div><img src="img/k_ch5_boss.jpg" alt="Detecto" loading="lazy"><figcaption><b>Detecto (ch5)</b>: a ceiling smoke detector for a head with one red LED, white suit, red sash, red shoes. The 1994 "Cleanest Air" mascot.</figcaption></figure>
+</div>
+<div class="card" style="margin-top:22px"><div class="tape"></div><h4>Props &amp; state over the story</h4>
+<div class="tw"><table>
+<thead><tr><th>Thing</th><th>Ch1 in (Mon am)</th><th>Ch1 out</th><th>Ch2 (Tue)</th><th>Ch3 (Wed)</th><th>Ch4 (Thu)</th><th>Ch5 (Fri)</th><th>End (Fri dusk)</th></tr></thead>
+<tbody>
+<tr><td><b>Container</b></td><td>One rust-red 20 ft box in the plaza, long side N–S. Side doors on the WEST face, burst open toward Cloud Kingz.</td><td>Same</td><td colspan="3">Same, not in cutscenes. The spill shrinks in-engine as the count drops (5,000 → 4,400 → 3,600 → 2,800 → 2,000).</td><td>Doors open, spill a low drift, Sal standing on the roof.</td><td>EMPTY, doors open, spill gone, cracked paving.</td></tr>
+<tr><td><b>Containers in town</b></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1 (the engine's second blue box at ≤500 conflicts: see questions)</td><td>1 empty + <b>10</b> on the truck (50,000 ÷ 5,000)</td></tr>
+<tr><td><b>Sal</b></td><td>Scared. Shades up on his head, thin chain.</td><td>Hopeful</td><td>Happy, on the phone</td><td>Greedy. Shades ON, <b>two chains</b> (his + Prime's), cash fan</td><td>Greedy, on a bucket</td><td>Megaphone, shades on, two chains</td><td>Crying with joy, then sheepish</td></tr>
+<tr><td><b>Bro</b></td><td>Board under his arm, vape in hand</td><td>No board</td><td>No board</td><td>Board planted in the sand</td><td>Board lies beside him in the fog</td><td>Vape</td><td>Empty-handed</td></tr>
+<tr><td><b>Haze</b></td><td>0%: crisp blue, cotton clouds</td><td>5%: wisps</td><td>15%: faint pink</td><td>30%: the horizon blurs</td><td>55% → 60%: pink fog bank</td><td>80%: sun a disc</td><td>90%: headlights glow</td></tr>
+</tbody></table></div></div>
+<div class="card" style="margin-top:22px"><div class="tape"></div><h4>Colour script (accent per chapter, haze climbing)</h4>
+<div class="cscript">
+  <div class="cs"><div class="sw" style="background:linear-gradient(#9fd2f2,#fdf0d5)"><i style="opacity:0"></i></div><b style="color:var(--c1)">Ch1 · hot pink</b>Monday morning, clean blue sky → golden hour out.</div>
+  <div class="cs"><div class="sw" style="background:linear-gradient(#a8d4ef,#e3f0c4)"><i style="opacity:.15"></i></div><b style="color:var(--c2)">Ch2 · lime</b>Tuesday mid-morning in the park greens.</div>
+  <div class="cs"><div class="sw" style="background:linear-gradient(#8ccbf0,#f4e2b2)"><i style="opacity:.3"></i></div><b style="color:var(--c3)">Ch3 · sky blue</b>Wednesday, bright midday.</div>
+  <div class="cs"><div class="sw" style="background:linear-gradient(#f6c98a,#e9b45a)"><i style="opacity:.55"></i></div><b style="color:var(--c4)">Ch4 · amber</b>Thursday afternoon → pink fog at dusk.</div>
+  <div class="cs"><div class="sw" style="background:linear-gradient(#f7a08c,#f3c1b0)"><i style="opacity:.8"></i></div><b style="color:var(--c5)">Ch5 · pink-red</b>Friday sunset.</div>
+  <div class="cs"><div class="sw" style="background:linear-gradient(#7d6a8e,#f0a7bf)"><i style="opacity:.9"></i></div><b style="color:var(--c5)">End</b>Friday dusk, haze 90%.</div>
+</div>
+<p style="font-size:14px;margin:10px 0 0">Ch1 out is graded warm (1.11 currently runs warmer than 1.12, so match them). Ch4 in was shot sunny with no haze: accept it, or add a pink haze layer in the grade.</p></div>
+
+<h2 id="diva">The diva (and the "why am I vaping a villain" problem)</h2>
+<p class="note">She shouldn't be a villain. Nobody in this story is evil: they're obstacles with wants. Three roles, then three claymation looks to pick from. Nothing gets built until you choose.</p>
+<div class="grid g3">
+  <div class="opt rec"><div class="tape"></div><h4>A · The captive audience <span class="st st-keep">recommended</span></h4>
+  <p>La Diva Lungarotti, Coral Vista's only celebrity (she sang at the 1994 Cleanest Air ceremony), is rehearsing her comeback aria for Friday's Breathe Easy Day. Nobody walks out on an aria, so every grandma in the park is pinned to a bench. <b>You can't recruit anyone while she sings.</b></p>
+  <p><b>Interaction:</b> offer her ONE puff, timed to the top of her phrase (the existing rhythm ring). Her high C comes out as a chain of perfect cloud rings. She's thrilled, ends the aria ("BRAVISSIMA!"), and the grandmas are free and follow you. From then on she's the shop's hype-woman: her next aria pulls nearby grandmas toward your conga.</p>
+  <p><b>Payoff:</b> she buys every mango in the shop, so Sal's "I sold out of mango!" lands. Works with the existing 2.2 and 2.5 clips (ears covered = too polite to leave).</p></div>
+  <div class="opt"><div class="tape"></div><h4>B · The rival act</h4>
+  <p>She thinks the bro is a street performer stealing her audience. It becomes a <b>sing-off vs cloud-off</b>: each perfect rip wins one audience member, and each of her notes blows you back a step (keeps the current shove mechanic, now as showbiz rather than violence).</p>
+  <p><b>Payoff:</b> she concedes the crowd with a deep bow and becomes your fan. Keeps the most of today's code but is the least original.</p></div>
+  <div class="opt"><div class="tape"></div><h4>C · The lost voice</h4>
+  <p>She has lost her voice two days before her comeback; the doctor prescribed "steam." The bro offers his "humidifier." One puff and her voice comes back two octaves higher, and the grandmas weep and follow.</p>
+  <p><b>Payoff:</b> sweet and simple, but the lightest gameplay of the three (one walk-up, no skill).</p></div>
+</div>
+<div class="grid g3" style="margin-top:26px">
+  <figure class="look"><div class="tape"></div><h4>Look A · Grand dame</h4><img src="img/diva_a.jpg" alt="Diva look A turnaround" loading="lazy"><figcaption>Tall pear shape, platinum beehive + tiara, triple pearls, crimson velvet gown with gold trim, lace fan. Closest to the current clips, so least reshoot risk. The gown reads a little like flocked fabric: push it toward plasticine.</figcaption></figure>
+  <figure class="look"><div class="tape"></div><h4>Look B · Retired star in a housecoat</h4><img src="img/diva_b.jpg" alt="Diva look B turnaround" loading="lazy"><figcaption>Seventies, Sal's height, pink satin kimono over the gown, feather boa, foam curlers under a teal turban, cat-eye shades, pom-pom slippers, tea mug. The most Coral Vista (a retirement town) and the funniest silhouette.</figcaption></figure>
+  <figure class="look"><div class="tape"></div><h4>Look C · Tiny titan</h4><img src="img/diva_c.jpg" alt="Diva look C turnaround" loading="lazy"><figcaption>Very short and round, a silver bouffant twice her head height with a tiara on top, sequined crimson cape with a stiff collar, orthopedic sneakers, opera glasses on a stick. Huge lungs, tiny body: the clearest gag for "lungs".</figcaption></figure>
+</div>
+<div class="grid g2" style="margin-top:22px">
+  <div class="card"><div class="tape"></div><h4>Gym Bro Prime: same problem, flagged</h4><p>Today he's a 3-HP boss you vape into submission. <b>Fix:</b> he's the beach's gatekeeper ("nobody here breathes till Prime breathes first") and challenges you to a <b>three-rep lung set</b> while his bros ring you. Same input (perfect rips, his exhale shoves you back), but framed as a contest he respects. <b>Payoff:</b> he hands you his gold chain in tribute (3.5), the bro hands it to Sal, and Sal's "Two chains, kid. TWO." is literal.</p></div>
+  <div class="card"><div class="tape"></div><h4>Detecto: keep him as the antagonist, fix the verb</h4><p>He's the one character whose opposition makes sense: detecting smoke is his job, and the haze woke him up. <b>Fix the verb, not the role:</b> his alarm pulse clears the square of customers. You don't hit him; you <b>fill his sensor</b> three times until he gives a happy low-battery chirp and falls asleep standing up. Then the last 250 sell.</p></div>
+</div>
+
+<h2 id="fly">Fly-in path (opening → first gameplay frame)</h2>
+<div class="card"><div class="tape"></div>
+<p>One continuous glide, <b>east to west along the game's x = 0 line</b>. Ocean, beach, Muscle Beach and two downtown blocks, then it drops into the open square over the container and settles on the street facing Cloud Kingz. Blocks along the line can be up to 19 m tall, so the camera holds ≥ 22 m until it has cleared the last block edge (z −15.5). Only then does it descend, over open plaza. The shop never enters frame before the last two seconds, and the camera never goes past z 8, so it can't touch the shop.</p>
+{{FLYMAP}}
+<p class="note">Map: coast on the right (east). Dashed line = camera path, wedge = landing view toward the shop.</p>
+{{FLYPROF}}
+<div class="tw"><table><thead><tr><th>Key</th><th class="n">t (s)</th><th class="n">game position</th><th class="n">height (m)</th><th class="n">pitch</th></tr></thead><tbody>{{FLYTAB}}</tbody></table></div>
+<p style="font-size:14px">Yaw is constant (facing +z, i.e. west) the whole way; roll ≤ 10° for life. The LAND frame must equal the engine's LAND (x 0, z 8, eye 1.6, yaw π, pitch 0.03), which is the existing ch1_fly last frame (panel D). <b>Recommended way to make it:</b> fly this spline in the engine and record it (free, exact, no clipping), then stylise with video-to-video. Or generate it with start frame A and end frame = the LAND frame (no audio, so keyframes are allowed).</p>
+</div>
+
+<h2 id="scenes">Scenes</h2>
+{{SCENES}}
+
+<h2 id="sum">Summary: every shot</h2>
+<div class="card"><div class="tape"></div>
+<div class="kpi"><div><b>{{N}}</b>shots</div><div><b style="color:var(--keep)">{{NK}}</b>keep</div><div><b style="color:var(--revise)">{{NR}}</b>revise</div><div><b style="color:var(--new)">{{NN}}</b>new ({{NOPT}} optional)</div><div><b>{{VIDREQ}}</b>cr, required video</div><div><b>{{VID}}</b>cr, incl. optional</div></div>
+<div class="tw"><table class="sum"><thead><tr><th>Shot</th><th>Scene</th><th>Type</th><th>Status</th><th>Made in</th><th class="n">Sec</th><th class="n">Credits</th></tr></thead><tbody>{{ROWS}}</tbody></table></div>
+<p style="font-size:14px">Credits = new Seedance video at 30 cr/s (720p), rounded up to whole seconds. Revise = edit only (0) unless shown in brackets (diva reshoot, only if she's restyled). In-engine beats cost no credits but need code.</p>
+<h4 style="margin-top:20px">Priority to fit the budget</h4>
+<p style="font-size:15px">Runway balance after this storyboard: <b>≈ {{LEFT}} cr</b> (this board spent {{IMG}} cr on 21 sketch panels and diva sheets; another session also spent credits while it was being made, so re-check before shooting).</p>
+<div class="tw"><table><thead><tr><th>#</th><th>Shot</th><th class="n">Credits</th><th>Why</th></tr></thead><tbody>{{PRI}}</tbody></table></div>
+<p style="font-size:14px">If the fly-in is recorded from the engine instead of generated, tier 1 drops to 510 and tier 2's 4.4 and 3.7 both fit.</p>
+</div>
+
+<h2 id="q">Decisions for you</h2>
+<div class="card"><div class="tape"></div><ol class="qs">
+<li><b>Diva role:</b> A (captive audience, recommended), B (rival act) or C (lost voice)?</li>
+<li><b>Diva look:</b> A, B or C? Or keep the current claymation look in the clips, which means no reshoot of 2.2 and 2.5.</li>
+<li><b>Fly-in:</b> record the path from the engine and stylise it (free, exact), or generate 10 s in Runway (300 cr)? 10 s or keep 8 s?</li>
+<li><b>Bro's "Say less, boss":</b> free version over his back as he walks out (1.9), or a new lip-sync close-up (1.8, 150 cr)?</li>
+<li><b>New goal-call VO</b> for chapters 2–5 (they explain the WHY). They need four new ElevenLabs takes in Sal's voice. OK to record?</li>
+<li><b>Prime's chain</b> goes to Sal (making "two chains" literal). OK? The 3.7 sketch shows it on the bro; the shot would be prompted without it.</li>
+<li><b>Lifeguard tower:</b> the clips have it south of the gym, the game has it north. Flop 3.1 and 3.3 (boarded, free), or move the tower in the engine?</li>
+<li><b>The engine's second blue container</b> (it appears when the count drops to 500, an old twist) contradicts the ending, where the new order arrives on a truck. Remove it?</li>
+<li><b>Container doors:</b> the board treats it as a side-opening box with doors on the west face toward the shop (as the engine spills it). OK, or rotate it end-on?</li>
+<li><b>Days of the week</b> (Mon–Fri, one chapter per day, haze climbing). OK as the time-of-day plan?</li>
+</ol></div>
+<p class="foot">Panels marked "rough sketch" are generated storyboard sketches with no text in the image; all labels live in this page. Posters and frames come from assets/story/clay. Built from assets/story/script.json, js/story.js, index.html and js/world.js.</p>
+</div>
+</body>
+</html>
