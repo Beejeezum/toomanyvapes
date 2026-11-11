@@ -55,10 +55,8 @@
      "vo": "sal_ch1_go"
     },
     {
-     "img": "ch1_fly",
-     "vid": "ch1_fly",
-     "aud": true,
-     "hold": 8
+     "engine": "fly",
+     "hold": 10
     }
    ],
    "call": {

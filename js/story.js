@@ -280,11 +280,17 @@ function play(shots,done,dk,toPlay){shots=(shots||[]).map(f=>Object.assign({_d:d
   callStop();seq={shots,i:-1,done,tm:0,toPlay};el.hidden=false;filmOn();requestAnimationFrame(()=>{if(seq)el.classList.add('on')});
   if(document.exitPointerLock&&document.pointerLockElement)document.exitPointerLock();X.emit('cutscene',true);next()}
 function finish(silent){const s=seq;if(!s)return;seq=null;clearTimeout(s.tm);if(au){au.stop();au=null}vid.pause();clipOff();
-  el.classList.remove('on');setTimeout(()=>{if(!seq){el.hidden=true;vid.removeAttribute('src');vid.hidden=true}},320);
+  el.classList.remove('on');setTimeout(()=>{if(!seq){el.hidden=true;vid.removeAttribute('src');vid.hidden=true;el.classList.remove('eng')}},320);// an engine shot stays see-through while the layer fades
   X.emit('cutscene',false);if(!silent&&s.done)s.done()}
 function next(){const s=seq;if(!s)return;clearTimeout(s.tm);if(au){au.stop();au=null}clipOff();s.i++;if(s.i>=s.shots.length){finish();return}
   const f=s.shots[s.i],my=s.i,t0=performance.now(),live=()=>seq===s&&s.i===my,talk=!!(f.aud&&f.vid);
   s.t0=t0;s.subs=f.subs||null;s.subI=-1;s.clipT=false;
+  /* ENGINE SHOT ({engine:'fly',hold:10}, js/flyin.js): no still or clip; the layer stays up see-through (#st.eng, styled by the
+     mod: film dressing only) while the mod films the live world. X.emit('engineShot',name,done,live): done() advances like a clip
+     ending; a tap/skip advances as usual (live() turns false and the mod lands at once); if done() never comes, hold + 4 s. */
+  el.classList.toggle('eng',!!f.engine);
+  if(f.engine){vid.pause();vid.hidden=true;vid.removeAttribute('src');setCap(f);X.emit('engineShot',f.engine,()=>{if(live())next()},live);
+    if(live())s.tm=setTimeout(()=>{if(live())next()},((f.hold||10)+4)*1000);return}
   showStill(f,!!f.vid);vid.pause();vid.hidden=true;vid.oncanplay=vid.onerror=vid.onloadedmetadata=vid.onended=vid.onplaying=null;vid.ontimeupdate=subsTick;
   setCap(f.subs?f.subs[0]:f);
   let vd=0,voDone=!f.vo||talk,voEnd=0,clipDone=!talk,fb=false;const hold=f.hold?f.hold*1000:readT(f);
