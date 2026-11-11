@@ -100,6 +100,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 @media (max-width:520px){#radar{width:78px;height:78px}#prompt{font-size:13px}}
 .ov .bruce{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) rotate(-1.5deg);font:600 12px/1 system-ui,sans-serif;letter-spacing:.04em;color:#15101d;background:#f3e3b0;padding:6px 10px;text-decoration:none;box-shadow:1px 2px 0 rgba(0,0,0,.3);opacity:.85;white-space:nowrap}
 .ov .bruce:hover{opacity:1}
+#gate{z-index:70;background:rgba(20,15,28,.96)}
+#gate .gl{font:700 clamp(16px,3vw,22px)/1.4 system-ui,sans-serif;max-width:26ch}
+#gate .gateNo{color:#fff7ea;opacity:.7;font:600 13px system-ui,sans-serif;margin-top:6px}
+#intro .warn{position:absolute;left:50%;bottom:calc(48px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font:700 11px/1 system-ui,sans-serif!important;letter-spacing:.12em;text-transform:uppercase;color:#fff7ea;opacity:.75;margin:0;white-space:nowrap}
 </style>
 
 </head>
@@ -123,10 +127,17 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
     <div id="stick" hidden><i id="nub"></i></div>
     <button id="vbtn" hidden>VAPE</button>
   </div>
+  <div id="gate" class="ov" hidden>
+    <h1>18+</h1>
+    <p class="gl">This is satire. Do not vape.<br>For adults 18 and over.</p>
+    <button id="gateOk">I'm 18+</button>
+    <a class="gateNo" href="https://brucepinchbeck.com" rel="noopener">Get me out of here</a>
+  </div>
   <div id="intro" class="ov">
     <h1>Too Many Vapes</h1>
     <p class="loc">Get the whole town hooked</p>
     <button id="go">Play</button>
+    <p class="warn">Satire · don't vape · 18+</p>
     <a class="bruce" href="https://brucepinchbeck.com" target="_blank" rel="noopener">Another bad idea by Bruce</a>
   </div>
   <div id="win" class="ov" hidden>
@@ -587,7 +598,7 @@ function win(){mode='won';emit('win');hold=false;held=null;voice('win',1);clip('
 function start(){if(!STOCK.some(s=>s>0)){fillStock(count);setFlav(ri(FLAV.length),1)}for(const n of npcs)if(n.crave==null)setCrave(n);mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();emit('start');updMusic();clip('sfx/slam',{vol:.5});setTimeout(()=>{if(BUF['vo/start'])voice('start',1)},700)}
 function reset(){px=0;pz=5;yaw=pitch=0;count=5000;STOCK.fill(0);for(const n of npcs)n.crave=null;used=0;charge=1;combo=0;best=1;lungs=0;time=0;heat=0;twist=false;newsI=0;for(const k in act)act[k]=0;
   for(const n of npcs){n.state='wander';n.times=0;n.hooked=n.type==='gym';n.cool=0;n.inh=0;n.fl=0;for(const wm of n.H.Wh)wm.material=M(0xffffff);n.g.position.set(n.hx,0,n.hzz)}seedPicks();start()}
-$('go').onclick=start;$('vape').addEventListener('click',()=>cycleFlav(1));$('again').onclick=reset;
+$('go').onclick=start;{const g=$('gate');let ok=false;try{ok=localStorage.getItem('tmv_18')==='1'}catch(e){}if(!ok){g.hidden=false;$('intro').hidden=true}$('gateOk').onclick=()=>{try{localStorage.setItem('tmv_18','1')}catch(e){}g.hidden=true;$('intro').hidden=false}}$('vape').addEventListener('click',()=>cycleFlav(1));$('again').onclick=reset;
 const rc=$('radar').getContext('2d');
 function radar(){const S=208,h=104,sc=h/62,sn=Math.sin(yaw),cs=Math.cos(yaw);rc.clearRect(0,0,S,S);rc.fillStyle='rgba(20,15,28,.72)';rc.beginPath();rc.arc(h,h,h,0,7);rc.fill();
   const P=(x,z,col,sz,edge)=>{const dx=x-px,dz=z-pz;let X=(dx*cs-dz*sn)*sc,Y=(dx*sn+dz*cs)*sc;const l=Math.hypot(X,Y);if(l>h-8){if(!edge)return;X*=(h-8)/l;Y*=(h-8)/l}rc.fillStyle=col;rc.fillRect(h+X-sz/2,h+Y-sz/2,sz,sz)};
