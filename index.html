@@ -852,7 +852,7 @@ function release(n,kind){if(held===n)held=null;const match=kind!=='passive'&&n.c
   if(tut===0)tut=1;if(kind!=='passive'&&holdN>0){const ge=$('gain');ge.textContent='−'+holdN.toLocaleString();ge.classList.remove('go');void ge.offsetWidth;ge.classList.add('go');holdN=0}
   comboT=7;best=Math.max(best,mult());n.col.setHex(act.boost>0?0xff7a1a:flav[1]).lerp(whiteC,act.boost>0?.25:.5);n.emo=act.boost>0?'🔥':flav[2];
   say(n,pick(n.t.say),2.6);hit(n,kind);if(n.type==='tuba'&&!BUF['sfx/tuba'])beep(58,.7,'sawtooth',.09);setTimeout(()=>call(n,0),420);
-  if(match){0;combo+=2;drain(n.t.rate*mult()*n.t.cap*.6);for(let i=0;i<6;i++){const m=mouth(n,v3);emo('😍',m.x,m.y+.3,m.z,rand(-1,1),rand(1,2),rand(-1,1),.45)}if(!n.hooked)n.times=Math.max(n.times,n.t.hook);beep(990,.08,'triangle',.05);beep(1480,.12,'triangle',.05,.07)}
+  if(match){0;combo+=2;drain(n.t.rate*mult()*n.t.cap*.6);if(!n.hooked)n.times=Math.max(n.times,n.t.hook);beep(990,.08,'triangle',.05);beep(1480,.12,'triangle',.05,.07)}
   setCrave(n);emit('release',n,kind,match);
   if(!n.hooked&&n.times>=n.t.hook){n.hooked=true;for(const wm of n.H.Wh)wm.material=M(0xffc4c4);if(kind!=='passive'){say(n,'…ok I love it',2.6);if(Math.random()<.5)voice('hooked')}}}
 function soak(n,k,dt){n.inh+=dt*k;drain(n.t.rate*mult()*dt*.5);if(mode==='play'&&n.inh>=n.t.cap*.85)release(n,'passive')}
@@ -994,7 +994,7 @@ function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,
     const k=Math.ceil(dt*46*n.exI*(ty.ring?.25:1));
     for(let i=0;i<k;i++){const sp=rand(2.5,6)*Math.min(1.6,.6+n.exI*.5);puff(m.x,m.y,m.z,up?rand(-1.5,1.5):Math.sin(ry)*sp+rand(-.9,.9),up?sp*1.2:rand(.2,1.6),up?rand(-1.5,1.5):Math.cos(ry)*sp+rand(-.9,.9),n.col,rand(2,4.2),.25,rand(1.6,3.4)*Math.max(.5,n.exI))}
     if(ty.ring){n.ringT-=dt;if(n.ringT<=0){n.ringT=.36;ring(m,ry,n.col)}}
-    if(Math.random()<dt*7*Math.min(2,.6+n.exI)){const sp=rand(1.5,3.5);emo(n.emo,m.x,m.y,m.z,Math.sin(ry)*sp+rand(-.8,.8),rand(.5,1.4)+up*2,Math.cos(ry)*sp+rand(-.8,.8),rand(.3,.55)*Math.max(.7,Math.min(1.6,n.exI)))}
+    
     if(act.chain>0)for(const o of npcs){if(o!==n&&soakable(o)&&Math.hypot(o.g.position.x-p.x,o.g.position.z-p.z)<6.5)soak(o,.9,dt)}
     if(n.ex<=0){n.inh=0;n.cool=n.hooked?2.2:4.5;n.state=n.hooked?'wander':'flee';n.tm=rand(4,7)}
     pose(n,0,4,2,t,dt);return}

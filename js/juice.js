@@ -194,10 +194,10 @@ let lastX=J.px,lastZ=J.pz,stepAcc=0,stepSide=1,lastCount=J.count,beatT=0,moving=
 J.playIntro=()=>{if(!introDone)cineStart()};
 J.on('start',()=>{if(fin)finEnd();tierI=0;lastCount=J.count;lastX=J.px;lastZ=J.pz;if(!introDone)setTimeout(cineStart,0)});
 J.on('win',()=>{if(cine)cineEnd();if(!fin)finStart()});
-J.on('grab',n=>{J.mouth(n,mv);for(let i=0;i<5;i++){const a=rand(0,PI*2);J.emo(J.pick(['⭐','✨','💥']),mv.x,mv.y+.15,mv.z,Math.cos(a)*rand(1,2.4),rand(.8,2.2),Math.sin(a)*rand(1,2.4),rand(.22,.34))}
+J.on('grab',n=>{
   J.slide(420,1150,.09,'triangle',.035);shake(.12);punch(.035)});
 J.on('release',(n,kind)=>{if(kind==='passive')return;const f=n.t&&n.t.cap?n.inh/n.t.cap:.5;
-  if(kind==='perfect'){squash(n,.32);burst(n,1);shake(.32);punch(.07);J.slide(220,90,.18,'sine',.06);J.mouth(n,mv);J.emo('💥',mv.x,mv.y+.2,mv.z,0,1.5,0,.6)}
+  if(kind==='perfect'){squash(n,.32);burst(n,1);shake(.32);punch(.07);J.slide(220,90,.18,'sine',.06);}
   else if(kind==='over'){squash(n,.38);burst(n,1.2);shake(.3);punch(-.04)}
   else if(f>.45){squash(n,.16);burst(n,.6)}});
 J.on('bust',()=>{shake(.75);punch(-.07);doFlash('#e0244a',.45,420);J.beep(70,.35,'sine',.09)});

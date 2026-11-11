@@ -45,8 +45,8 @@ function grade(n,kind){if(kind==='passive')return null;const f=n.inh/((n.t&&n.t.
   if(kind==='over'||f>GREEN1+.02||f<GREEN0)return'miss';const s=n._sweet||sweet,d=Math.abs(f-s);
   return d<=W_PERF?'perfect':d<=W_GREAT?'great':'good'}
 X.on('release',(n,kind)=>{const g=grade(n,kind);if(!g)return;X.lastGrade=g;
-  SND[g]();burst(g);
-  if(g==='perfect'){X.combo=(X.combo||0)+2;try{const p=X.mouth&&X.mouth(n,new X.T.Vector3());if(p)for(let i=0;i<6;i++)X.emo('✨',p.x,p.y+.2,p.z,(Math.random()-.5)*3,1.5+Math.random()*2,(Math.random()-.5)*3,.3)}catch(e){}if('slow' in X)X.slow=Math.max(X.slow,.18)}
+  SND[g]();
+  if(g==='perfect'){X.combo=(X.combo||0)+2;if('slow' in X)X.slow=Math.max(X.slow,.18)}
   else if(g==='great'){X.combo=(X.combo||0)+1}
   X.emit&&X.emit('rhythm',g,n)});
 X.rhythm={get sweet(){return sweet},W_PERF,W_GREAT};
