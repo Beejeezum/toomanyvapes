@@ -58,14 +58,15 @@ function aimAt(useStraw){tgt.ok=false;const n=X.held||held;if(!n||!V||!X.mouth)r
 /* straw: while held, their actual mouth (H.m) is pinned to one fixed point in front of the lens (centre, at the vape tip's depth),
    re-pinned every frame after the camera moves, and the core's lip-lock target (the invisible armR.tip) is parked on the same point,
    so neither the mouth nor the clay pod's white tip jiggles: they sip from it like a straw. */
-const S=X.T?new X.T.Vector3():null,SW=X.T?new X.T.Vector3():null,SM=X.T?new X.T.Vector3():null;let sOn=null,tipRest=null,fCur='out';const STRAW=[.5,.52];// where on screen (0..1) the straw point sits
+const S=X.T?new X.T.Vector3():null,SW=X.T?new X.T.Vector3():null,SM=X.T?new X.T.Vector3():null;let sOn=null,sT=0,tipRest=null,fCur='out';const STRAW=[.5,.5];// where on screen (0..1) the straw point sits
 function straw(){const n=X.held,tip=X.armR&&X.armR.tip,cam=X.cam;if(!tip||!S)return false;if(!tipRest)tipRest=tip.position.clone();
   if(!n||!n.H||!n.H.m||!n.g||X.mode!=='play'){if(sOn){tip.position.copy(tipRest);sOn=null}return false}
   cam.updateMatrixWorld();
-  if(sOn!==n){sOn=n;tip.position.copy(tipRest);tip.parent.updateMatrixWorld(true);tip.getWorldPosition(SW);cam.worldToLocal(SW);
+  if(sOn!==n){sOn=n;sT=performance.now();tip.position.copy(tipRest);tip.parent.updateMatrixWorld(true);tip.getWorldPosition(SW);cam.worldToLocal(SW);
     const d=Math.max(.7,Math.min(1.3,-SW.z)),th=Math.tan(cam.fov*Math.PI/360);S.set((STRAW[0]*2-1)*d*th*cam.aspect,(1-STRAW[1]*2)*d*th,-d)}
   SW.copy(S);cam.localToWorld(SW);
-  n.g.updateMatrixWorld(true);n.H.m.getWorldPosition(SM);n.g.position.x+=SW.x-SM.x;n.g.position.y+=SW.y-SM.y;n.g.position.z+=SW.z-SM.z;n.g.updateMatrixWorld(true);
+  const age=(performance.now()-sT)/1000,k=age<.33?Math.min(1,.12+age*2.2):1;// they lean in to meet the vape over ~1/3 s, then stay locked
+  n.g.updateMatrixWorld(true);n.H.m.getWorldPosition(SM);n.g.position.x+=(SW.x-SM.x)*k;n.g.position.y+=(SW.y-SM.y)*k;n.g.position.z+=(SW.z-SM.z)*k;n.g.updateMatrixWorld(true);
   tip.parent.updateMatrixWorld(true);SM.copy(SW);tip.parent.worldToLocal(SM);tip.position.copy(SM);return true}
 const STEP=1/12;let lastT=performance.now();
 X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000)||1/60;lastT=now;if(!M)return;
@@ -95,15 +96,14 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   // resting pose: park the pod's mouthpiece at ~68% across, a bit below middle, whatever the screen shape
   {const fm=M.R.f[f]&&M.R.f[f].mp;if(fm&&f==='out'){const mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,k=1-aimK;
     tx+=Math.max(-W*.1,Math.min(Wc*.5,(W*.68-mx)))*k;ty+=Math.max(-H*.1,Math.min(H*.2,(H*.6-my)))*k}}
-  if(aimK>0){aimAt(sOK);const fm=M.R.f[f]&&M.R.f[f].mp;/* aim at their actual mouth: they stay put, the vape comes to them */
-    if(fm&&tgt.ok){// lock the pod's mouthpiece onto their mouth: rotate + scale round the bottom-right corner (the forearm stays
-      // attached to the screen edge), then a small nudge for what's left
-      const px=W,py=H,mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,dmx=mx-px,dmy=my-py,dtx=tgt.x-px,dty=tgt.y-py;
-      let th=Math.atan2(dty,dtx)-Math.atan2(dmy,dmx);th=Math.atan2(Math.sin(th),Math.cos(th));th=Math.max(-.6,Math.min(.6,th))*aimK;
-      sc=1+(Math.max(.78,Math.min(1.75,Math.hypot(dtx,dty)/Math.max(1,Math.hypot(dmx,dmy))))-1)*aimK;rot+=th*180/Math.PI;
-      const c=Math.cos(th),s=Math.sin(th),rx=px+sc*(dmx*c-dmy*s),ry=py+sc*(dmx*s+dmy*c);
+  if(aimK>0){aimAt(sOK);const fm=M.R.f[f]&&M.R.f[f].mp;
+    /* the arm EXTENDS out to the middle and they meet it there: the clay frames are cut from full first-person photos (1376x768) in which
+       the reach already sits mid-frame with the forearm rising from the bottom edge. So the reach grows to the photo's own size (no
+       rotation) and slides down/right until the white tip is on the straw point; the forearm stays cut off by the bottom of the screen. */
+    if(fm&&tgt.ok){const k0=Math.max(W/1376,H/768)*M.R.h/Math.max(1,Hc);sc=1+(k0-1)*aimK;
+      const px=W,py=H,mx=W-Wc+fm[0]*Wc,my=H-Hc+fm[1]*Hc,rx=px+sc*(mx-px),ry=py+sc*(my-py);
       if(pin){tx+=tgt.x-rx;ty+=tgt.y-ry}// held: the tip lands exactly on the mouth, no slack
-      else{tx+=Math.max(-W*.04,Math.min(W*.08,(tgt.x-rx)*aimK));ty+=Math.max(-H*.04,Math.min(H*.08,(tgt.y-ry)*aimK))}}}
+      else{tx+=(tgt.x-rx)*aimK;ty+=(tgt.y-ry)*aimK}}}
   if(!pin&&pump===1&&!rm){sc*=.97;tx-=W*.004;ty-=H*.006}// a little shove on a puff (not while sipping: the tip stays put)
   if(!rm&&!pin){const j=boilK*1.37;tx+=Math.sin(j*2.1)*W*.0012;ty+=Math.cos(j*1.7)*H*.003;rot+=Math.sin(j*3.3)*.35}
   R.style.transform=`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
