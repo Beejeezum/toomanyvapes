@@ -130,6 +130,12 @@
      "vid": "ch2_boss",
      "aud": true,
      "hold": 6
+    },
+    {
+     "img": "ch2_gran",
+     "vid": "ch2_gran",
+     "aud": true,
+     "hold": 4
     }
    ],
    "call": {
@@ -145,8 +151,14 @@
    },
    "out": [
     {
-     "img": "ch2_out_v2",
-     "vid": "ch2_out_v2",
+     "img": "ch2_ring",
+     "vid": "ch2_ring",
+     "aud": true,
+     "hold": 6
+    },
+    {
+     "img": "ch2_mango",
+     "vid": "ch2_mango",
      "aud": true,
      "hold": 5
     },
@@ -155,8 +167,10 @@
      "who": "SAL",
      "vo": "sal_ch2_out_1",
      "cap": "Kid! I sold out of mango! I've never sold out of ANYTHING!",
-     "vid": "ch2_out_1",
-     "aud": true
+     "vid": "ch2_out_1#t=0.7",
+     "aud": true,
+     "jIn": "sal_ch2_out_1_pre.m4a",
+     "jLead": 0.7
     }
    ]
   },
@@ -219,6 +233,12 @@
      "cap": "Two chains, kid. TWO. We're franchising.",
      "vid": "ch3_out_1",
      "aud": true
+    },
+    {
+     "img": "ch3_flat",
+     "vid": "ch3_flat",
+     "aud": true,
+     "hold": 5
     }
    ]
   },
@@ -268,6 +288,12 @@
      "cap": "Can't even see the waves anymore, man.",
      "vid": "ch4_out_1",
      "aud": true
+    },
+    {
+     "img": "ch4_phone",
+     "vid": "ch4_phone",
+     "aud": true,
+     "hold": 5
     }
    ]
   },
@@ -311,6 +337,12 @@
   }
  ],
  "end": [
+  {
+   "img": "end_sleep",
+   "vid": "end_sleep",
+   "aud": true,
+   "hold": 5
+  },
   {
    "img": "end_1",
    "who": "SAL",
