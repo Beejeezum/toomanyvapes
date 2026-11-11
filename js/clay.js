@@ -53,7 +53,7 @@ const CLAYT=(()=>{const n=256,a=clayHeight(n),b=paperGrain(n),d=new Uint8Array(n
 const KIND={
   clay:[.04,1.15,0,1,0,.24], vc:[.036,1.15,0,.8,0,.22], cloth:[.026,1.4,0,.5,.3,.15],
   felt:[.07,2,.75,0,1,.1, .0045,.14,1,.9, 0,0,.2,.5], feltHill:[.07,2,.75,0,1,.1, 0,0,0,0, 0,0,.2,0],
-  sand:[.05,2,1,.15,1,.08], road:[.05,1,.6,.3,0,.12], tile:[.04,1.6,.55,.15,1,.08, .007,.09,1,1, 0,0,0,4], wood:[.035,1.5,.7,.35,1,.08],
+  sand:[.05,2,1,.15,1,.08], cpaper:[.03,2.2,.7,0,1,.05], paint:[.05,2,.9,.7,1,.04], tile:[.04,1.6,.55,.15,1,.08, .007,.09,1,1, 0,0,0,4], wood:[.035,1.5,.7,.35,1,.08],
   leaf:[.06,1.3,.8,.6,0,.12], water:[.03,1,.65,1.2,0,.06], paper:[.018,2.5,.3,.1,1,.1], corr:[.045,1,.85,.3,1,.08], hay:[.06,2,.9,0,1,.1],
   wall:[.03,1,.3,.12,1,.1, 0,0,0,0, 5,.45,0,0], kraft:[.035,2,.5,.12,1,.1], sponge:[.07,2,.95,0,1,.06], fuzz:[.06,2.5,.8,0,1,.1, 0,0,0,0, 0,0,.45,0], flute:[.04,1,.9,.15,1,.06], stick:[.035,1.5,.6,.35,1,.08]};
 const setKind=(m,kind)=>{const v=KIND[kind]||KIND.clay;const u=m.userData.clay||(m.userData.clay={p:new T.Vector4(),q:new T.Vector4(),e:new T.Vector4(),r:new T.Vector4()});u.kind=kind;
@@ -156,14 +156,6 @@ function sand(k,n){k.fillStyle='#e4cc98';k.fillRect(0,0,n,n);
   for(let i=0;i<n*n*.28;i++){const x=rand(0,n),y=rand(0,n),r=Math.random()<.7?rand(1,1.8):rand(1.8,3);k.fillStyle='rgba(95,65,35,.4)';k.fillRect(x+.6,y+.6,r,r);
     k.fillStyle=C[(Math.random()*C.length)|0];k.fillRect(x,y,r,r);if(r>1.6){k.fillStyle='rgba(255,252,240,.6)';k.fillRect(x,y,r*.45,r*.45)}}
   for(let i=0;i<n/8;i++){const x=rand(0,n),y=rand(0,n),r=rand(2,4.5);k.fillStyle='rgba(90,70,50,.45)';k.beginPath();k.ellipse(x+1,y+1.2,r,r*.75,0,0,PI*2);k.fill();k.fillStyle=pick(['#9c8f84','#b3a089','#7d6f66','#f4ece0','#e9b9a3']);k.beginPath();k.ellipse(x,y,r,r*.75,rand(0,3),0,PI*2);k.fill();k.fillStyle='rgba(255,255,255,.4)';k.fillRect(x-r*.4,y-r*.4,r*.5,r*.35)}}
-// road: dark paint brushed onto card along the road (canvas y), streaky bristle lines, thin patches where the card shows through
-function road(k,n){k.fillStyle='#56473f';k.fillRect(0,0,n,n);k.lineCap='round';
-  for(let i=0;i<16;i++){const x=rand(0,n),y=rand(0,n),r=rand(12,40);W9(n,x,y,r,(p,q)=>blob(k,p,q,r,'rgba(160,118,80,.17)','rgba(160,118,80,0)'))}
-  for(let i=0;i<95;i++){const x=rand(0,n),y=rand(0,n),L=rand(50,170),bw=rand(8,24),d=rand(-8,8),lean=rand(-.1,.1),nb=6+ri(7);
-    for(let j=0;j<nb;j++){const o=(j/(nb-1)-.5)*bw;k.strokeStyle=hsl(20+rand(-4,4),12+rand(-4,4),31+d*1.4+rand(-7,7),rand(.1,.3));k.lineWidth=rand(.8,2.6);const j1=rand(-2,2),j2=rand(-2,2);
-      W9(n,x+o,y+L/2,L,(p,q)=>{q-=L/2;k.beginPath();k.moveTo(p,q);k.bezierCurveTo(p+lean*L*.3+j1,q+L*.33,p+lean*L*.6+j2,q+L*.66,p+lean*L,q+L);k.stroke()})}
-    k.fillStyle=hsl(20,12,26+d,.18);W9(n,x+lean*L,y+L,bw,(p,q)=>{k.beginPath();k.ellipse(p,q,bw*.55,2.2,0,0,PI*2);k.fill()})}
-  for(let i=0;i<2400;i++){k.fillStyle=Math.random()<.5?'rgba(255,240,220,.07)':'rgba(20,10,10,.1)';k.fillRect(rand(0,n),rand(0,n),1,1)}}
 // sidewalk: one panel of thick grey card per tile (the shader adds the seams), pulpy mottling, fibres, scuffs, crushed edges
 function tile(k,n){k.fillStyle='#d2ccc1';k.fillRect(0,0,n,n);k.lineCap='round';
   for(let i=0;i<50;i++){const x=rand(0,n),y=rand(0,n),r=rand(10,40),d=rand(-7,6);blob(k,x,y,r,hsl(36,10,79+d,.45),hsl(36,10,79+d,0))}
@@ -260,13 +252,13 @@ function shadowFlags(o,inCam){const m=o.material;if(!o.isMesh||!m||Array.isArray
 let stripped=stripInk(scene);for(const n of npcs)if(n.inks)n.inks.length=0;
 indexTextures();
 const S=X.TXS||{},WT=(X.world&&X.world.tex)||{};
-repaint(S.grass,touch?256:512,(k,n)=>felt(k,n,112,46,31),'felt');repaint(S.road,256,road,'road');repaint(S.tile,256,tile,'tile');repaint(S.leaf,256,leaf,'leaf');
+repaint(S.grass,touch?256:512,(k,n)=>felt(k,n,112,46,31),'felt');repaint(S.tile,256,tile,'tile');repaint(S.leaf,256,leaf,'leaf');
 repaint(S.bark,128,bark,'wood');repaint(S.water,128,water,'water');repaint(S.plank,128,(k,n)=>sticks(k,n,false,true),'wood');repaint(S.hay,128,hay,'hay');repaint(S.corr,64,corr,'corr');
 repaint(WT.sand,256,sand,'sand');repaint(WT.sea,128,sea,'water');repaint(WT.plank,128,(k,n)=>sticks(k,n,true,false),'wood');
-// sheet sizes: ground felt in ~9 m sheets, plaza card in ~4 m panels; the cross streets' brush strokes are turned to run along them; hills are one felt drape
+// sheet sizes: ground felt in ~9 m sheets, plaza card in ~4 m panels; hills are one felt drape (streets are black paper sheets built in world.js)
 {const G=users.get(S.grass&&S.grass.image);if(G){for(const t of G.tex)if(t.repeat.x===70)t.repeat.set(42,42);for(const m of G.mats)if(m.map&&m.map.repeat.x===8)setKind(m,'feltHill')}
   const P=users.get(S.tile&&S.tile.image);if(P)for(const t of P.tex)if(t.repeat.x===40)t.repeat.set(31,31);
-  const Rd=users.get(S.road&&S.road.image);if(Rd)for(const t of Rd.tex)if(t.repeat.x>t.repeat.y){t.repeat.set(t.repeat.y,t.repeat.x);t.center.set(.5,.5);t.rotation=PI/2}}
+}
 // shop fronts, signs and billboards painted in code: give them the hand-painted card treatment; building walls are painted corrugated card
 const FAC=new Set();W.traverse(o=>{const m=o.material;if(o.isMesh&&m&&m.map&&m.map.image&&m.map.image.width===256&&m.map.image.height===256&&o.geometry.type==='BoxGeometry'&&o.scale.y>4)FAC.add(m.map.image)});
 for(const[c,L]of users){if(repainted.has(c)||!c.getContext||c.width<256)continue; // 256+ wide = facades, signs, billboards (not the 64/128 face, cloth and label cut-outs)

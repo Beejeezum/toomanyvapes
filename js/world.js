@@ -70,6 +70,9 @@ function GB(){const P=[],N=[],U=[],C=[],I=[];const b={P,
   geo(){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.setAttribute('uv',new T.Float32BufferAttribute(U,2));
     g.setAttribute('color',new T.Float32BufferAttribute(C,3));g.setIndex(P.length/3>65535?new T.Uint32BufferAttribute(I,1):new T.Uint16BufferAttribute(I,1));g.computeBoundingSphere();return g},
   mesh(mat,par){if(!I.length)return null;const m=new T.Mesh(b.geo(),mat);(par||WG).add(m);return m}};return b}
+// triangles / quads that always face up (+y), whatever order their corners come in
+function upTri(gb,a,b,c){const P=gb.P,ax=P[a*3],az=P[a*3+2],cr=(P[b*3]-ax)*(P[c*3+2]-az)-(P[b*3+2]-az)*(P[c*3]-ax);if(cr<0)gb.tri(a,b,c);else gb.tri(a,c,b)}
+function upQuad(gb,a,b,c,d){upTri(gb,a,b,c);upTri(gb,a,c,d)}
 /* a box as one popsicle stick: wood grain runs along its longest side, whatever its orientation */
 const _sv=new T.Vector3(),_sn=new T.Vector3(),SQ=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]];
 function stickBox(gb,m4,w,h,d,col){const D=[w,h,d],th=D.indexOf(Math.min(w,h,d)),lg=D.indexOf(Math.max(w,h,d)),md=3-th-lg;
@@ -231,14 +234,35 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
     else{flute([u,0,c],[len,0,0],[0,KH,0],[0,0,sgn],1,len);flute([u,0,c-sgn*KW],[len,0,0],[0,KH,0],[0,0,-sgn],1,len);KT.quad([u,KH,c0],[len,0,0],[0,0,c1-c0],[0,1,0],u/20,v/20,c0/20,c1/20)}}};
   for(const l of LINES)for(const[s0,s1]of blocks){kerb(0,l-H,1,s0,s1);kerb(0,l+H,-1,s0,s1);kerb(1,l-H,1,s0,s1);kerb(1,l+H,-1,s0,s1)}
   for(const[s0,s1]of blocks){kerb(0,-E,-1,s0,s1);kerb(0,E,1,s0,s1);kerb(1,-E,-1,s0,s1);kerb(1,E,1,s0,s1)}
-  /* lane dashes: hand-painted strokes (tapered, wobbly, a little thicker paint down the middle) instead of 250 little boxes */
-  const DASH=X.M(0xffe27a),yel=new T.Color(),WHT=new T.Color(1,1,.9);
-  const dash=(cx,cz,alongZ)=>{const len=2.2*rand(.92,1.06),wd=.25*rand(.9,1.1),segs=8,curve=rand(-.05,.05),ang=rand(-.03,.03),ca=Math.cos(ang),sa=Math.sin(ang),y=.042;
-    yel.setHSL(rand(.12,.135),rand(.8,.95),rand(.58,.66));const edge=yel.clone().multiplyScalar(.85),mid=yel.clone().lerp(WHT,.15);let prev=null;
-    for(let i=0;i<=segs;i++){const t=i/segs,s=(t-.5)*len,hw=wd*.5*(.5+.5*Math.pow(Math.sin(t*PI),.3))*(1+rand(-.1,.1)),off=curve*(1-(2*t-1)**2);
-      const P=o=>{const lx=s*ca-o*sa,lz=s*sa+o*ca;return alongZ?[cx+lz,cz+lx]:[cx+lx,cz+lz]},A=P(off-hw),M=P(off+rand(-.02,.02)),B=P(off+hw);
-      const ids=[DS.v(A[0],y,A[1],0,1,0,t,0,edge),DS.v(M[0],y+.003,M[1],0,1,0,t,.5,mid),DS.v(B[0],y,B[1],0,1,0,t,1,edge)];
-      if(prev){DS.tri4([prev[0],ids[0],ids[1],prev[1]],!alongZ);DS.tri4([prev[1],ids[1],ids[2],prev[2]],!alongZ)}prev=ids}};
+  /* lane dashes and zebra crossings: single strokes of poster paint on the black paper (bristle streaks, a loaded round start, a dry-brush
+     tail that breaks up into separate hairs); the stroke shapes live in an alpha-tested atlas, tinted yellow or white per stroke */
+  // streets and their paint are laid out from a fixed seed, so the street outside Cloud Kingz looks the same on every load (the opening's
+  // last shot cuts to this view)
+  const SR=(s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296})(20261110),srand=(a,b)=>a+SR()*(b-a),sri=n=>Math.floor(SR()*n);
+  const DASH=X.M(0xffe27a),yel=new T.Color();
+  const PAINT_ROWS=4,strokeT=craftTex(512,256,(k,Wd,Ht)=>{k.clearRect(0,0,Wd,Ht);k.lineCap='round';const H=Ht/PAINT_ROWS;
+    for(let r=0;r<PAINT_ROWS;r++){const cy=r*H+H/2,hw=H*.36,tail=srand(.14,.26)*Wd,r0=hw*srand(.7,1.05),wob=[srand(0,9),srand(0,9),srand(0,9)];
+      const ed=(x,s)=>hw*(.9+.05*Math.sin(x*.021+wob[0]+s)+.035*Math.sin(x*.067+wob[1]*s)+.02*Math.sin(x*.19+wob[2]));
+      // the solid body of the stroke, ragged along both edges
+      k.fillStyle='rgb(228,228,228)';k.beginPath();for(let x=r0;x<=Wd-tail;x+=4)k.lineTo(x,cy-ed(x,0));for(let x=Wd-tail;x>=r0;x-=4)k.lineTo(x,cy+ed(x,2));k.closePath();k.fill();
+      k.beginPath();k.ellipse(r0+1,cy,r0,hw*.92,0,0,PI*2);k.fill();
+      // bristles: streaks of thicker and thinner paint, breaking into separate hairs toward the tail and the edges
+      const nb=64;for(let j=0;j<nb;j++){const f=(j+.5)/nb*2-1,e=Math.abs(f),yy=cy+f*hw*1.02+srand(-.5,.5),lum=(205+srand(-30,45))|0;
+        const x0=r0*(1-Math.sqrt(Math.max(0,1-f*f)))+srand(0,3),x1=Wd-2-srand(0,tail)*(.15+e*.85)-srand(0,6);
+        k.strokeStyle=`rgb(${lum},${lum},${lum})`;k.lineWidth=srand(.9,1.8);let x=x0;
+        while(x<x1){const L=srand(25,160)*(1-e*.55),dry=x>Wd-tail*1.3||e>.86,x2=Math.min(x+L,x1);k.beginPath();k.moveTo(x,yy+srand(-.3,.3));k.lineTo(x2,yy+srand(-.4,.4));k.stroke();x=x2+(dry?srand(2,14):srand(0,1.5))}}
+      // a few dry gaps where the brush skipped over the paper's tooth
+      k.save();k.globalCompositeOperation='destination-out';for(let i=0;i<8;i++){const x=srand(Wd*.25,Wd-tail*.5),y=cy+(SR()<.5?-1:1)*hw*srand(.7,.95);k.fillStyle='rgba(0,0,0,.9)';k.fillRect(x,y,srand(10,40),srand(.5,1))}k.restore()}});
+  const PAINTM=new T.MeshToonMaterial({gradientMap:GRAD,map:strokeT,vertexColors:true,alphaTest:.5});PAINTM.userData.clayKind='paint';
+  const paint=(cx,cz,alongZ,len,wd,col)=>{const segs=6,curve=srand(-.04,.04)*len/2.2,ang=srand(-.025,.025),ca=Math.cos(ang),sa=Math.sin(ang),y=.052,row=sri(PAINT_ROWS),flip=SR()<.5;
+    const v0=(row+.06)/PAINT_ROWS,v1=(row+.94)/PAINT_ROWS,hw=wd*.5/.8;let prev=null;
+    for(let i=0;i<=segs;i++){const t=i/segs,s=(t-.5)*len,off=curve*(1-(2*t-1)**2),u=flip?1-t:t;
+      const P=o=>{const lx=s*ca-o*sa,lz=s*sa+o*ca;return alongZ?[cx+lz,cz+lx]:[cx+lx,cz+lz]},A=P(off-hw),B=P(off+hw);
+      const ids=[DS.v(A[0],y,A[1],0,1,0,u,v0,col),DS.v(B[0],y,B[1],0,1,0,u,v1,col)];if(prev)upQuad(DS,prev[0],ids[0],ids[1],prev[1]);prev=ids}};
+  // crossings get zebra stripes on the inner four-by-four; lane dashes keep clear of crossings and zebras
+  const ZEB=l=>Math.abs(l)<=33,X0=3.7;
+  const dash=(cx,cz,alongZ)=>{const s=alongZ?cz:cx,l=alongZ?cx:cz;for(const L of LINES){const d=Math.abs(s-L);if(d<X0+1.2||ZEB(L)&&ZEB(l)&&d<X0+3.3)return}
+    yel.setHSL(srand(.115,.13),srand(.82,.95),srand(.53,.6));paint(cx,cz,alongZ,2.3*srand(.92,1.06),.3*srand(.9,1.1),yel.clone())};
   /* ---------- household objects: what a crafty person would build the town from ----------
      kitchen-sponge trees on twigs, button-and-pin flowers, pom-pom hedges, pipe-cleaner crops, thimble hydrants, paperclip street lamps,
      tin-can water towers on chopsticks, a doily gazebo on straws, felt lily pads, a shoebox barn, a loo-roll silo, clothespin fence posts.
@@ -259,6 +283,7 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
   const towers=[],pillars=[];let gazebo=null,silo=null,barn=null;
   for(const o of W.children){if(!o.isMesh)continue;const m=o.material,img=m&&m.map&&m.map.image,s=o.scale,t=o.geometry.type,P=o.position,c=hex(m);
     if(m===DASH&&P.y===0&&Math.abs(s.y-.07)<.01&&Math.min(s.x,s.z)<.3){gone.push(o);dash(P.x,P.z,s.z>s.x)}
+    else if(img&&TXS.road&&img===TXS.road.image)gone.push(o); // the old painted-board streets: replaced by paper sheets below
     // sponge trees: discs of kitchen sponge round each canopy ball, a dark sponge core, a twig trunk on a card disc
     else if(img&&img===leafImg&&t==='SphereGeometry'){gone.push(o);const pal=c===0xff9ac0?PINKS:GREENS,R=(s.x+s.y+s.z)/6,n=clamp(Math.round(R*5),4,10);
       put(SP,gSph,pal[3],P.x,P.y,P.z,s.x*.72,s.y*.72,s.z*.72);
@@ -311,6 +336,58 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
     for(const y of[.5,3.3])put(PR,gCyl,0xc8a860,x,y,z,.34,.1,.34)}
   // pom-pom hedges along the park's edge
   for(let z=-60;z<=60;z+=6.5){if(Math.abs(z)<9)continue;const x=-66.5+rand(-.4,.4);for(let i=0;i<7;i++){const r=rand(.28,.46);put(FZ,gPom,pick(GREENS),x+rand(-.5,.5),r*.85+(i>4?r:0),z+rand(-1.3,1.3),r*2,r*1.9,r*2)}}
+  /* streets: sheets of black construction paper. Each block of street is one or two sheets (where two overlap, the top one is torn,
+     showing its pale fibrous core, or scissor-cut, and lifts a little shadow onto the one below); each crossing is a square sheet laid
+     on top, torn all round; now and then a small torn scrap patches a sheet. Matte charcoal paper (tooth, fibres, light flecks, a faint
+     mottle), every sheet its own slightly different black. All one mesh. */
+  {const cpaperT=craftTex(LO?256:512,LO?256:512,(k,n)=>{const sc=n/512;k.fillStyle='#2c2b30';k.fillRect(0,0,n,n);
+      // cloudy formation of the pulp: lots of small soft blotches, a few big ones (paper, not gravel)
+      for(let i=0;i<n*n/160;i++){const x=rand(0,n),y=rand(0,n),r=rand(3,14)*Math.max(.6,sc),c=Math.random()<.5?'80,78,86':'8,8,12';wrapDraw(n,x,y,r,(p,q)=>{const g=k.createRadialGradient(p,q,0,p,q,r);g.addColorStop(0,`rgba(${c},.07)`);g.addColorStop(1,`rgba(${c},0)`);k.fillStyle=g;k.fillRect(p-r,q-r,2*r,2*r)})}
+      for(let i=0;i<60;i++){const x=rand(0,n),y=rand(0,n),r=rand(30,120)*sc,c=Math.random()<.5?'98,95,104':'6,6,10',a=rand(.04,.11).toFixed(3);
+        wrapDraw(n,x,y,r,(p,q)=>{const g=k.createRadialGradient(p,q,0,p,q,r);g.addColorStop(0,`rgba(${c},${a})`);g.addColorStop(1,`rgba(${c},0)`);k.fillStyle=g;k.fillRect(p-r,q-r,2*r,2*r)})}
+      // pulp fibres lying every which way (never in rows), a few lighter recycled bits, specks of grey and the odd coloured fleck
+      k.lineCap='round';const F=[new Path2D(),new Path2D(),new Path2D()];
+      for(let i=0;i<n*n/30;i++){const x=rand(0,n),y=rand(0,n),a=rand(0,PI*2),l=rand(2,8)*Math.max(.6,sc),c=rand(-1.2,1.2);wrapDraw(n,x,y,l,(p,q)=>{const P=F[i%3];P.moveTo(p,q);P.quadraticCurveTo(p+Math.cos(a+c)*l*.5,q+Math.sin(a+c)*l*.5,p+Math.cos(a)*l,q+Math.sin(a)*l)})}
+      k.lineWidth=.8;k.strokeStyle='rgba(112,110,118,.12)';k.stroke(F[0]);k.strokeStyle='rgba(4,4,8,.28)';k.stroke(F[1]);k.lineWidth=.6;k.strokeStyle='rgba(140,136,142,.08)';k.stroke(F[2]);
+      for(let i=0;i<n*n/1400;i++){const x=rand(0,n),y=rand(0,n),a=rand(0,PI*2),l=rand(3,9)*Math.max(.6,sc);k.strokeStyle=`rgba(${pick(['168,162,160','140,150,170','170,140,130','150,140,110'])},${rand(.25,.5).toFixed(2)})`;k.lineWidth=rand(.5,1);
+        k.beginPath();k.moveTo(x,y);k.quadraticCurveTo(x+Math.cos(a+.8)*l*.5,y+Math.sin(a+.8)*l*.5,x+Math.cos(a)*l,y+Math.sin(a)*l);k.stroke()}
+      for(let i=0;i<n*n/2200;i++){const r=rand(.5,1.1)*Math.max(.7,sc);k.fillStyle=`rgba(${pick(['205,200,192','180,176,172','226,222,214'])},${rand(.2,.5).toFixed(2)})`;k.beginPath();k.arc(rand(0,n),rand(0,n),r,0,PI*2);k.fill()}
+      const d=k.getImageData(0,0,n,n),D=d.data;for(let i=0;i<D.length;i+=4){const v=(Math.random()-.5)*7;D[i]+=v;D[i+1]+=v;D[i+2]+=v}k.putImageData(d,0,0)});
+    const RDM=new T.MeshToonMaterial({gradientMap:GRAD,map:cpaperT,vertexColors:true});RDM.userData.clayKind='cpaper';
+    const RD=GB(),TS=3.4,RY=[.028,.034,.04],NS=LO?20:36,XH=3.7,SW=3.65,EE=62,mul=(c,k)=>({r:c.r*k,g:c.g*k,b:c.b*k});
+    const tint=()=>{const l=srand(.88,1.12),w=srand(-1,1)*.05;return{r:l*(1+w),g:l*(1+w*.15),b:l*(1-w)}};
+    const V=(x,y,z,c,R)=>RD.v(x,y,z,0,1,0,(x*R[0]-z*R[1])/TS+R[2],(x*R[1]+z*R[0])/TS+R[3],c);
+    // outward offset and rim width along an edge: torn = ragged with a wide pale core showing, cut = nearly straight with a thin light edge
+    const prof=(n,len,kind,amp)=>{amp=amp||1;const o=[],rw=[],p=[srand(0,9),srand(0,9),srand(0,9),srand(0,9)];for(let i=0;i<n;i++){const t=i/(n-1)*len;
+      if(kind==='torn'){o.push(.05+(.05*Math.sin(t*1.7/amp+p[0])+.03*Math.sin(t*5.3+p[1]))*amp+.016*Math.sin(t*13+p[2])+srand(-.018,.018));rw.push(.03+.035*(.5+.5*Math.sin(t*2.6+p[3]))+srand(0,.015))}
+      else if(kind==='cut'){o.push(.012*Math.sin(t*.9+p[0])+.005*Math.sin(t*3.1+p[1]));rw.push(.014)}else{o.push(0);rw.push(0)}}return{o,rw}};
+    // a sheet: rectangle round (cx,cz), half-lengths along the street (hl) and across (hw); per side [w-, s+, w+, s-]: 'hid' (tucked under
+    // something), 'cut' or 'torn', and whether it lifts a shadow onto what's below
+    function sheet(cx,cz,alongZ,hl,hw,kinds,shadows,y,c,ang,amp){const R=[0,0,srand(0,1),srand(0,1)],ra=srand(0,PI*2);R[0]=Math.cos(ra);R[1]=Math.sin(ra);
+      const ca=Math.cos(ang||0),sa=Math.sin(ang||0),W2=(s0,w0)=>{const s=s0*ca-w0*sa,w=s0*sa+w0*ca;return alongZ?[cx+w,cz+s]:[cx+s,cz+w]},ring=[],edges=[];
+      [[[-hl,-hw],[hl,-hw],[0,-1]],[[hl,-hw],[hl,hw],[1,0]],[[hl,hw],[-hl,hw],[0,1]],[[-hl,hw],[-hl,-hw],[-1,0]]].forEach(([f,t,o],k)=>{
+        const kind=kinds[k],len=Math.hypot(t[0]-f[0],t[1]-f[1]),n=kind==='torn'?Math.max(5,Math.round(len/7.3*NS)):kind==='cut'?Math.max(3,Math.round(len/1.2)):2,pr=prof(n,len,kind,amp),E=[];
+        for(let i=0;i<n;i++){const u=i/(n-1),s=f[0]+(t[0]-f[0])*u,w=f[1]+(t[1]-f[1])*u,d=pr.o[i],r=pr.rw[i];E.push({e:W2(s+o[0]*d,w+o[1]*d),b:W2(s+o[0]*(d-r),w+o[1]*(d-r))});ring.push(E[i].b)}
+        const os=o[0]*ca-o[1]*sa,owv=o[0]*sa+o[1]*ca;edges.push({kind,E,ow:alongZ?[owv,os]:[os,owv],sh:shadows[k]})});
+      const c0=V(cx,y,cz,c,R),ids=ring.map(([x,z])=>V(x,y,z,c,R));for(let i=0;i<ids.length;i++)upTri(RD,c0,ids[i],ids[(i+1)%ids.length]);
+      for(const{kind,E,ow,sh}of edges){if(kind==='hid')continue;const torn=kind==='torn',rc0=mul(c,torn?1.5:1.1),rc1=mul(c,torn?2.75:1.65);let pb=null;
+        for(const{e,b}of E){const q=[V(b[0],y,b[1],rc0,R),V(e[0],y,e[1],mul(rc1,srand(.85,1.12)),R)];if(pb)upQuad(RD,pb[0],q[0],q[1],pb[1]);pb=q}
+        if(!sh)continue;pb=null;
+        for(const{e}of E){const w=srand(.07,.13),q=[V(e[0],y-.003,e[1],mul(c,.3),R),V(e[0]+ow[0]*w,y-.003,e[1]+ow[1]*w,c,R)];if(pb)upQuad(RD,pb[0],q[0],q[1],pb[1]);pb=q}}}
+    const stops=[-EE];for(const L of LINES)stops.push(L-XH,L+XH);stops.push(EE);
+    for(const l of LINES)for(const az of[true,false])for(let i=0;i<stops.length;i+=2){
+      const s0=stops[i],s1=stops[i+1],a=s0===-EE?s0:s0-.6,b=s1===EE?s1:s1+.6,ka=s0===-EE?'torn':'hid',kb=s1===EE?'torn':'hid';
+      const lay=(p,q,k0,k1,y,sh0,sh1)=>sheet(az?l:(p+q)/2,az?(p+q)/2:l,az,(q-p)/2,SW,['hid',k1,'hid',k0],[false,!!sh1,false,!!sh0],y,tint());
+      if(b-a<10||!az&&l===11&&a<0&&b>0)lay(a,b,ka,kb,RY[0]); // one clean sheet across the front of Cloud Kingz
+      else{const m=a+(b-a)*srand(.4,.6),cut=SR()<.4?'cut':'torn';if(SR()<.5){lay(a,m+.35,ka,'hid',RY[0]);lay(m-.35,b,cut,kb,RY[1],true)}else{lay(a,m+.35,ka,cut,RY[1],false,true);lay(m-.35,b,'hid',kb,RY[0])}
+        // a torn scrap glued over a thin spot
+        if(SR()<.3){const p=srand(a+2,b-2),q=srand(-1.8,1.8),c=tint();sheet(az?l+q:p,az?p:l+q,SR()<.5,srand(.35,.75),srand(.3,.6),['torn','torn','torn','torn'],[true,true,true,true],RY[2],c,srand(0,PI),2.4)}}}
+    for(const a of LINES)for(const b of LINES)sheet(a,b,SR()<.5,XH+srand(-.03,.05),XH+srand(-.03,.05),['torn','torn','torn','torn'],[true,true,true,true],RY[2],tint());
+    // zebra crossings: white paint across each arm of the inner crossings
+    const WP=new T.Color();for(const a of LINES)for(const b of LINES){if(!ZEB(a)||!ZEB(b))continue;
+      for(const sd of[-1,1])for(const az of[true,false])for(let j=-3;j<=3;j++){const c=(az?b:a)+sd*(XH+1.25),x=(az?a:b)+j*.92+srand(-.04,.04);WP.setHSL(srand(.1,.14),srand(.15,.3),srand(.88,.93));
+        paint(az?x:c,az?c:x,az,1.75*srand(.94,1.04),.5*srand(.92,1.06),WP.clone())}}
+    const rm=RD.mesh(RDM);if(rm)rm.userData.noCast=1}
   {const PC=Kit();for(const g of W.children){const b=g.isGroup&&g.children[0];if(!b||!b.isMesh||b.scale.x!==1.9||b.scale.z!==4.1)continue;gone.push(g);PC.at(g.position.x,g.position.z,g.rotation.y);matchbox(PC,b.material.color.getHex(),1.9,4.1);PC.reset()}PC.build(WG)}
   for(const o of gone)if(o.parent)o.parent.remove(o);
   if(silo)silo.material=craftMat(tubeT,'kraft');
@@ -323,7 +400,7 @@ function mergeIdx(list){let nv=0,ni=0;for(const[g]of list){nv+=g.attributes.posi
   mk(PR,VCM);mk(SP,SPONGEM);mk(FZ,FUZZM);
   FL.mesh(FLUTEM);KR.mesh(KRAFTM);WS.mesh(STICKM);
   const kt=sideMat&&KT.mesh(sideMat);if(kt)kt.userData.noCast=1;
-  const dm=DS.mesh(new T.MeshToonMaterial({gradientMap:GRAD,vertexColors:true}));if(dm)dm.userData.noCast=1;
+  const dm=DS.mesh(PAINTM);if(dm)dm.userData.noCast=1;
   X.craft={removed:gone.length,buildings:blds.length}}
 
 WG.traverse(o=>{o.updateMatrix();o.matrixAutoUpdate=false});
