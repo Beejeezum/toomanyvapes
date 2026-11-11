@@ -90,12 +90,12 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
   <div id="fx" class="hud"></div>
   <div id="bubs"></div>
   <div id="hud" hidden>
-    <div id="count" class="hud"><small>VAPES LEFT</small><div id="num">5,000</div><div id="panic">TOWN PANIC<div class="bar"><i id="panicv"></i></div></div></div>
+    <div id="count" class="hud"><div id="num">5,000</div><div id="panic">HOOKED <b id="hookp">0%</b><div class="bar"><i id="panicv"></i></div></div></div>
     <div id="right" class="hud"><div id="mult"><small>CLOUD COMBO</small><span id="multv">x1</span></div><canvas id="radar" width="208" height="208"></canvas></div>
     <div id="powers" class="hud"></div>
-    <div id="vape" class="hud"><small>NOW SERVING <b id="swap">◀ Q · E ▶</b></small><div id="flavor">🥭 Mango Regret</div><div id="stock">0 left</div><div class="bar"><i id="charge"></i></div></div>
+    <div id="vape" class="hud" hidden><b id="swap"></b><div id="flavor"></div><div id="stock"></div><div class="bar"><i id="charge"></i></div></div>
     <div id="cross" class="hud"></div>
-    <div id="lung" class="hud" hidden><small id="lungt">LET GO IN THE GREEN</small><div class="bar"><i id="lungv"></i></div></div>
+    <div id="lung" class="hud" hidden><small id="lungt" hidden></small><div class="bar"><i id="lungv"></i></div></div>
     <div id="prompt" class="hud" hidden></div>
     <div id="toast" class="hud"></div>
     <div id="gain" class="hud"></div>
@@ -106,18 +106,13 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
   </div>
   <div id="intro" class="ov">
     <h1>Too Many Vapes</h1>
-    <p class="line">Oh no.</p>
-    <p class="line">You bought a shipping container filled with too many vapes.</p>
-    <p class="line">You've got to get rid of them.</p>
-    <p class="line">Any way possible.</p>
-    <button id="go">Open the container</button>
-    <p class="how" id="how">WASD to move, Shift to sprint, mouse to look. Walk up to anything alive and hold click (or Space) to push the vape into its mouth. Let go in the green for a perfect rip. Grab the glowing crates. M mutes.</p>
+    <p class="loc">Get the whole town hooked</p>
+    <button id="go">Play</button>
   </div>
   <div id="win" class="ov" hidden>
     <h1>Zero Vapes</h1>
-    <p>You got rid of every single one. The town will never recover.</p>
     <p id="stats"></p>
-    <button id="again">Buy another container</button>
+    <button id="again">Clock in again</button>
   </div>
 </div>
 
@@ -252,7 +247,7 @@ const TYPES={
  chicken:{name:'chicken',cap:.9,rate:3,speed:6,cloud:.4,hook:3,lift:1.05,hop:1,zig:1,say:['BAWK','bok bok *hff*','*lays a foggy egg*'],want:['bok?']},
  cow:{name:'cow',cap:6,rate:12,speed:3,cloud:2.6,hook:2,say:['MOOOO-hff','moo (mango)','*fogs the entire field*'],want:['moo?','MOO.']}
 };
-const SPD={worker:4.6,grandma:2,gym:6,kid:5.6,baby:3,cop:6.6,jogger:7.2,tuba:2.2,dog:6.2,cat:7.6,pigeon:6.2,chicken:4.8,cow:2.6};for(const k in SPD)TYPES[k].speed=SPD[k];
+const SPD={worker:3.8,grandma:1.8,gym:5,kid:4.6,baby:2.4,cop:5.6,jogger:6,tuba:2,dog:5.2,cat:5.8,pigeon:4,chicken:3.8,cow:2.2};for(const k in SPD)TYPES[k].speed=SPD[k];
 const CAPS={pigeon:1.1,cat:1.3,chicken:1.2,baby:1.3,kid:1.5,grandma:1.7,dog:1.5};for(const k in CAPS)TYPES[k].cap=CAPS[k];
 const SK=[0xf2c9a0,0xd9a577,0xa9744f,0x7a4b2e,0xffdfc4],HC=[0x2a1a10,0x111111,0x8a5a2a,0xd9b45a,0xb5452a,0x777777];
 function eyeHead(g,d,skin,y,z){const h=new T.Group();h.position.set(0,y,z);g.add(h);ball(h,d,d*1.04,d,skin,0,0,0);const E=[],Wh=[];
@@ -438,7 +433,7 @@ const PW={boost:{label:'BOOST MODE',e:'🔥',c:0xff7a1a,dur:12,msg:'BOOST MODE �
  chain:{label:'SECONDHAND',e:'☁️',c:0xff3fa4,dur:16,msg:'SECONDHAND SMOKE — CLOUDS ARE CONTAGIOUS'},
  rush:{label:'NICOTINE RUSH',e:'⚡',c:0xffe04a,dur:12,msg:'NICOTINE RUSH — ZOOM'}};
 const act={},pwEl={},picks=[];let pickT=5;
-for(const k in PW){act[k]=0;const d=document.createElement('div');d.className='pw';d.hidden=true;d.style.setProperty('--c',css(PW[k].c));d.innerHTML=PW[k].e+' '+PW[k].label+'<i></i>';$('powers').appendChild(d);pwEl[k]=d}
+for(const k in PW){act[k]=0;const d=document.createElement('div');d.className='pw';d.hidden=true;d.style.setProperty('--c',css(PW[k].c));d.innerHTML=PW[k].e+'<i></i>';$('powers').appendChild(d);pwEl[k]=d}
 function spawnPick(k,x,z){if(picks.length>=7)return;k=k||pick(Object.keys(PW));const P=PW[k],g=new T.Group(),m=new T.MeshToonMaterial({gradientMap:GRAD,color:P.c,emissive:P.c,emissiveIntensity:.55});
   const cr=new T.Group();box(cr,.8,.8,.8,m,0,0,0);box(cr,.86,.14,.86,0x2a2433,0,0,0);box(cr,.14,.86,.86,0x2a2433,0,0,0);g.add(cr);
   const s=new T.Sprite(new T.SpriteMaterial({map:emoTex(P.e),transparent:true,depthWrite:false}));s.position.y=1.15;s.scale.set(1,1,1);g.add(s);
@@ -542,14 +537,14 @@ const tend=e=>{for(const t of e.changedTouches){if(t.target===vbtn)hold=false;if
 game.addEventListener('touchend',tend);game.addEventListener('touchcancel',tend);
 
 /* ================= HUD ================= */
-const numEl=$('num'),toastEl=$('toast'),newsEl=$('news');let toastT=0,newsT=0,shown=-1;
-function toast(s,d){toastEl.textContent=s;toastEl.classList.add('on');toastT=d||2.2}
+const numEl=$('num'),toastEl=$('toast'),newsEl=$('news');let toastT=0,newsT=0,shown=-1,hkP=-1;
+function toast(s,d){} /* no gameplay captions */
 const NEWS=[[4800,"LOCAL MAN SEEN 'HANDING OUT' VAPES"],[4200,'PIGEONS REPORT NOTES OF MANGO'],[3500,"MAYOR: 'WHY IS IT FOGGY'"],[2800,'GRANDMAS FORM VAPE GANG, DEMAND BUTTERSCOTCH'],[2000,'SCHOOL PICTURE DAY RUINED BY CLOUD'],[1200,'COWS NOW 40% CLOUD, SAYS FARMER'],[300,"SCIENTISTS: 'PLEASE STOP'"]];
 const bubs=[];for(let i=0;i<14;i++){const d=document.createElement('div');d.className='bub';d.hidden=true;$('bubs').appendChild(d);bubs.push({d,n:null,t:0})}
-function say(n,s,d){let b=bubs.find(b=>b.n===n)||bubs.find(b=>!b.n)||bubs[0];b.n=n;b.t=d||2.2;b.d.textContent=s}
+function say(n,s,d){return} /* no speech-bubble text; the barks carry it */ function _sayOld(n,s,d){const now=performance.now(),own=bubs.find(b=>b.n===n&&b.t>0);if(!own&&(now<sayT0||bubs.filter(b=>b.n&&b.t>0).length>=2))return;sayT0=now+1600;let b=own||bubs.find(b=>!b.n||b.t<=0)||bubs[0];b.n=n;b.t=d||2.2;b.d.textContent=s}
 function mouth(n,o){const ry=n.g.rotation.y;return o.set(n.g.position.x+Math.sin(ry)*n.hz,n.g.position.y+n.hy,n.g.position.z+Math.cos(ry)*n.hz)}
 const mult=()=>Math.min(5,1+combo*.25)*(act.boost>0?2:1)*(act.dual>0?2:1);
-function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;if(STOCK[fi]>0)STOCK[fi]--;emit('vape',fi);if(STOCK[fi]<=0&&count>0){const was=flav[0];setFlav(fi,1);toast('OUT OF '+was.toUpperCase()+' — NOW '+flav[0].toUpperCase(),1.6)}else if(fr%4===0)flavHUD();toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
+function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;if(STOCK[fi]>0)STOCK[fi]--;emit('vape',fi);if(STOCK[fi]<=0&&count>0){const was=flav[0];setFlav(fi,1);0}else if(fr%4===0)flavHUD();toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
   if(newsI<NEWS.length&&count<=NEWS[newsI][0]){newsEl.textContent='BREAKING: '+NEWS[newsI++][1];newsEl.classList.add('on');newsT=6}
   if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);for(let i=0;i<1500;i++)STOCK[ri(FLAV.length)]++;flavHUD();toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);voice('twist',1);if(!clip('sfx/slam',{vol:.9}))beep(120,.8,'sawtooth',.08)}
   if(count<=0){count=0;win()}}
@@ -558,21 +553,20 @@ function release(n,kind){if(held===n)held=null;const match=kind!=='passive'&&n.c
   if(kind==='perfect'){combo+=2;toast('PERFECT RIP',1);slow=.12;try{$('fx').animate([{background:'rgba(255,255,255,.4)'},{background:'rgba(255,255,255,0)'}],{duration:260})}catch(e){}if(tut===1)tut=2;sfx(1);voice('perfect');if(!BUF['sfx/perfect_sting']){beep(880,.1,'triangle',.05);beep(1320,.18,'triangle',.05,.09)}drain(n.t.rate*mult()*n.t.cap*.5)}
   else if(kind==='over'){combo=Math.floor(combo/2);toast('TOO MUCH — COUGHING FIT',1.4);sfx(0);voice('over');n.ex+=1.2;n.exI*=1.3;if(!BUF['sfx/fail_sting'])beep(110,.4,'sawtooth',.07)}
   else{combo++;if(kind==='ok'&&Math.random()<.3)voice('ok')}
-  if(tut===0)tut=1;if(kind!=='passive'&&holdN>0){const ge=$('gain');ge.textContent='−'+holdN.toLocaleString()+' vapes';ge.classList.remove('go');void ge.offsetWidth;ge.classList.add('go');holdN=0}
+  if(tut===0)tut=1;if(kind!=='passive'&&holdN>0){const ge=$('gain');ge.textContent='−'+holdN.toLocaleString();ge.classList.remove('go');void ge.offsetWidth;ge.classList.add('go');holdN=0}
   comboT=7;best=Math.max(best,mult());n.col.setHex(act.boost>0?0xff7a1a:flav[1]).lerp(whiteC,act.boost>0?.25:.5);n.emo=act.boost>0?'🔥':flav[2];
   say(n,pick(n.t.say),2.6);hit(n,kind);if(n.type==='tuba'&&!BUF['sfx/tuba'])beep(58,.7,'sawtooth',.09);setTimeout(()=>call(n,0),420);
-  if(match){toast('CRAVING MATCHED '+flav[2],1.3);combo+=2;drain(n.t.rate*mult()*n.t.cap*.6);for(let i=0;i<6;i++){const m=mouth(n,v3);emo('😍',m.x,m.y+.3,m.z,rand(-1,1),rand(1,2),rand(-1,1),.45)}if(!n.hooked)n.times=Math.max(n.times,n.t.hook);beep(990,.08,'triangle',.05);beep(1480,.12,'triangle',.05,.07)}
+  if(match){0;combo+=2;drain(n.t.rate*mult()*n.t.cap*.6);for(let i=0;i<6;i++){const m=mouth(n,v3);emo('😍',m.x,m.y+.3,m.z,rand(-1,1),rand(1,2),rand(-1,1),.45)}if(!n.hooked)n.times=Math.max(n.times,n.t.hook);beep(990,.08,'triangle',.05);beep(1480,.12,'triangle',.05,.07)}
   setCrave(n);emit('release',n,kind,match);
   if(!n.hooked&&n.times>=n.t.hook){n.hooked=true;for(const wm of n.H.Wh)wm.material=M(0xffc4c4);if(kind!=='passive'){say(n,'…ok I love it',2.6);if(Math.random()<.5)voice('hooked')}}}
 function soak(n,k,dt){n.inh+=dt*k;drain(n.t.rate*mult()*dt*.5);if(mode==='play'&&n.inh>=n.t.cap*.85)release(n,'passive')}
 const soakable=n=>n.state!=='held'&&n.state!=='exhale'&&n.cool<=0;
 function win(){mode='won';emit('win');hold=false;held=null;voice('win',1);clip('sfx/fanfare',{vol:.7});updMusic();if(document.exitPointerLock)document.exitPointerLock();$('hud').hidden=true;$('win').hidden=false;
   const m=Math.floor(time/60),s=Math.floor(time%60);$('stats').textContent=`${lungs.toLocaleString()} lungs visited · ${npcs.filter(n=>n.hooked).length} townsfolk hooked · ${m}:${String(s).padStart(2,'0')} · best combo x${best}`;try{const bt=+localStorage.getItem('tmv_best')||0;if(!bt||time<bt)localStorage.setItem('tmv_best',String(Math.round(time)));const b2=bt&&bt<time?bt:Math.round(time);$('stats').textContent+=` · fastest ${Math.floor(b2/60)}:${String(Math.floor(b2%60)).padStart(2,'0')}`}catch(e){}}
-function start(){if(!STOCK.some(s=>s>0)){fillStock(count);setFlav(ri(FLAV.length),1)}for(const n of npcs)if(n.crave==null)setCrave(n);mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();toast('GET RID OF THEM',2.5);emit('start');updMusic();clip('sfx/slam',{vol:.5});setTimeout(()=>{if(BUF['vo/start'])voice('start',1)},700)}
+function start(){if(!STOCK.some(s=>s>0)){fillStock(count);setFlav(ri(FLAV.length),1)}for(const n of npcs)if(n.crave==null)setCrave(n);mode='play';hold=false;$('intro').hidden=true;$('win').hidden=true;$('hud').hidden=false;if(touch){stick.hidden=false;vbtn.hidden=false}if(!AC)audio();emit('start');updMusic();clip('sfx/slam',{vol:.5});setTimeout(()=>{if(BUF['vo/start'])voice('start',1)},700)}
 function reset(){px=0;pz=5;yaw=pitch=0;count=5000;STOCK.fill(0);for(const n of npcs)n.crave=null;used=0;charge=1;combo=0;best=1;lungs=0;time=0;heat=0;twist=false;newsI=0;for(const k in act)act[k]=0;
   for(const n of npcs){n.state='wander';n.times=0;n.hooked=n.type==='gym';n.cool=0;n.inh=0;n.fl=0;for(const wm of n.H.Wh)wm.material=M(0xffffff);n.g.position.set(n.hx,0,n.hzz)}seedPicks();start()}
 $('go').onclick=start;$('vape').addEventListener('click',()=>cycleFlav(1));$('again').onclick=reset;
-if(touch)$('how').textContent='Left thumb moves, right thumb looks. Walk up to anything alive and hold VAPE to push it into its mouth. Let go in the green for a perfect rip. Grab the glowing crates.';
 const rc=$('radar').getContext('2d');
 function radar(){const S=208,h=104,sc=h/62,sn=Math.sin(yaw),cs=Math.cos(yaw);rc.clearRect(0,0,S,S);rc.fillStyle='rgba(20,15,28,.72)';rc.beginPath();rc.arc(h,h,h,0,7);rc.fill();
   const P=(x,z,col,sz,edge)=>{const dx=x-px,dz=z-pz;let X=(dx*cs-dz*sn)*sc,Y=(dx*sn+dz*cs)*sc;const l=Math.hypot(X,Y);if(l>h-8){if(!edge)return;X*=(h-8)/l;Y*=(h-8)/l}rc.fillStyle=col;rc.fillRect(h+X-sz/2,h+Y-sz/2,sz,sz)};
@@ -582,8 +576,11 @@ function radar(){const S=208,h=104,sc=h/62,sn=Math.sin(yaw),cs=Math.cos(yaw);rc.
 
 /* ================= NPC BRAIN ================= */
 let alertR=3;
-function go(n,tx,tz,sp,dt){const p=n.g.position,dx=tx-p.x,dz=tz-p.z,d=Math.hypot(dx,dz);if(d<.05)return d;p.x+=dx/d*sp*dt;p.z+=dz/d*sp*dt;
-  let a=Math.atan2(dx,dz)-n.g.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));n.g.rotation.y+=a*Math.min(1,dt*10);collide(p,n.r);n.ph+=sp*dt*3.2;return d}
+function go(n,tx,tz,sp,dt){const p=n.g.position;let dx=tx-p.x,dz=tz-p.z;const d=Math.hypot(dx,dz);if(d<.05){n.sp=0;return d}
+  // walk where you're facing: turn at a limited rate, ease speed up/down, slow while turning (no sideways gliding)
+  const av=n._av;if(av&&av[2]>0){dx=av[0];dz=av[1]}let e=Math.atan2(dx,dz)-n.g.rotation.y;e=Math.atan2(Math.sin(e),Math.cos(e));
+  const tr=(n.r<.4?6:4)*dt;n.g.rotation.y+=clamp(e,-tr,tr);n.sp=lerp(n.sp||0,sp*(.2+.8*Math.max(0,Math.cos(e))),Math.min(1,dt*3.5));
+  const ry=n.g.rotation.y,m=Math.min(n.sp*dt,d);p.x+=Math.sin(ry)*m;p.z+=Math.cos(ry)*m;collide(p,n.r);n.ph+=n.sp*dt*3.2;return d}
 /* pose(n, mv, arms, face): mv 0 stand / 1 walk / 2 run; arms 0 normal / 1 panic flail / 2 hooked zombie / 3 held + struggling / 4 exhale cough.
    face 0 neutral / 1 inhaling / 2 exhaling / 3 panic. Works on anything shaped like human()/quad() output; missing parts are skipped. */
 function pose(n,mv,arms,face,t,dt){const k=Math.min(1,dt*14),kb=Math.min(1,dt*25),H=n.H,rt=n.rt,ph=n.ph,s1=Math.sin(ph),c1=Math.cos(ph),
@@ -680,13 +677,13 @@ function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,
     n.sayT-=dt;if(n.sayT<0){n.sayT=rand(4,10);if(d<12){say(n,pick(ty.want),2);call(n,0)}}}
   else if(n.type==='cop'&&heat>.3&&d<48&&n.state!=='flee'){if(copT<=0&&d<30)clip('sfx/whistle',{vol:.35*(1-d/30)});copT=2;go(n,px,pz,ty.speed,dt);mv=2;n.sayT-=dt;if(n.sayT<0){n.sayT=rand(3,6);say(n,pick(['STOP! VAPE POLICE!','DROP THE MANGO','HANDS OFF THE PIGEON']),1.6)}
     if(d<1.4&&n.bust<=0&&stun<=0&&held!==n){n.bust=7;combo=Math.floor(combo/2);stun=.5;pvx=-dx/d*16;pvz=-dz/d*16;if(held)release(held,'ok');toast('BUSTED — HALF YOUR COMBO CONFISCATED',1.8);emit('bust',n);sfx(0);voice('busted',1);if(!clip('sfx/whistle',{vol:.55})){beep(200,.3,'sawtooth',.08);beep(150,.4,'sawtooth',.08,.15)}}}
-  else if(n.state==='flee'){n.tm-=dt;arms=1;face=3;let fx=dx/d,fz=dz/d;if(ty.zig){const w=Math.sin(t*5+n.ph)*.7;fx+=-dz/d*w;fz+=dx/d*w}
+  else if(n.state==='flee'){n.tm-=dt;arms=1;face=3;let fx=dx/d,fz=dz/d;if(ty.zig){const w=Math.sin(t*2.2+n.ph)*.35;fx+=-dz/d*w;fz+=dx/d*w}
     if(Math.abs(p.x)>B-8||Math.abs(p.z)>B-8){fx=-p.x;fz=-p.z}
-    n.fl+=dt;go(n,p.x+fx*5,p.z+fz*5,ty.speed*Math.max(.5,1-.12*n.times)*Math.max(.6,1-n.fl*.07),dt);mv=1;if(n.fl>5&&Math.random()<dt*.4)say(n,pick(['*wheeze*','ok… ok…','my lungs']),1.2);if(ty.hop)p.y=Math.abs(Math.sin(t*11+n.ph))*.6;if(n.tm<0&&d>alertR+4){n.state='wander';n.tm=0}}
+    n.fl+=dt;go(n,p.x+fx*5,p.z+fz*5,ty.speed*Math.max(.5,1-.12*n.times)*Math.max(.6,1-n.fl*.07),dt);mv=1;if(n.fl>5&&Math.random()<dt*.4)say(n,pick(['*wheeze*','ok… ok…','my lungs']),1.2);if(ty.hop)p.y=Math.abs(Math.sin(n.ph*1.6))*.18;if(n.tm<0&&d>alertR+4){n.state='wander';n.tm=0}}
   else{if(!ty.brave&&d<alertR&&n.cool<3){n.state='flee';n.tm=rand(2,4);call(n,1);if(Math.random()<.4)say(n,pick(['NOPE','not the vape guy','AAAA','run','he has MORE']),1.2)}
     n.vt-=dt;if(n.vt<0){n.vt=rand(7,24);call(n,0)}
     n.tm-=dt;if(n.tm<0){n.tm=rand(2,7);if(ty.roam)[n.tx,n.tz]=roadPt();else{const w=ty.stay?2:12;n.tx=n.hx+rand(-w,w);n.tz=n.hzz+rand(-w,w)}}
-    if(go(n,n.tx,n.tz,ty.speed*(ty.roam?.62:.3),dt)>.3)mv=ty.roam?2:1;else if(ty.roam)n.tm=0;p.y=Math.max(0,p.y-dt*3)}
+    if(go(n,n.tx,n.tz,ty.speed*(ty.roam?.62:.3),dt)>.3)mv=1;else{if(ty.roam)n.tm=0;n.sp=0}p.y=Math.max(0,p.y-dt*3)}
   pose(n,mv,arms,face,t,dt)}
 
 /* ================= MAIN LOOP ================= */
@@ -703,9 +700,9 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
     const holding=(hold||keys.Space)&&stun<=0;
     fwd.set(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch));
     tgt=null;if(!held){let bestA=9;for(const n of npcs){if(n.state==='exhale'||n.cool>0)continue;mouth(n,tmp).sub(cam.position);const d=tmp.length();if(d>(touch?5:4.3)+n.r)continue;const a=tmp.angleTo(fwd)-n.r/d*.6;if(a<(touch?.8:.55)+(d<2.6?.6:0)&&a<bestA){bestA=a;tgt=n}}}
-    if(holding&&!held&&tgt){held=tgt;held.state='held';held.inh=0;holdN=0;emit('grab',held)}
+    if(holding&&!held&&tgt){held=tgt;if(held.crave!=null&&STOCK[held.crave]>0)setFlav(held.crave,1);held.state='held';held.inh=0;holdN=0;emit('grab',held)}
     const lg=$('lung');
-    if(held){const n=held,fq=n.inh/n.t.cap;lg.classList.toggle('zone',fq>=.7&&fq<=1);lg.classList.toggle('over',fq>1);$('lungv').style.width=clamp(fq/1.25,0,1)*100+'%';$('lungt').textContent=fq>1?'TOO MUCH!!':fq>=.7?'LET GO NOW':'LET GO IN THE GREEN';
+    if(held){const n=held,fq=n.inh/n.t.cap;lg.classList.toggle('zone',fq>=.7&&fq<=1);lg.classList.toggle('over',fq>1);$('lungv').style.width=clamp(fq/1.25,0,1)*100+'%';
       if(!holding)release(n,fq>=.7?'perfect':'ok');else if(fq>=1.25)release(n,'over');else{n.inh+=dt;if(fq<1)drain(n.t.rate*mult()*dt);
         const m=mouth(n,tmp);pitch=lerp(pitch,Math.atan2(m.y-1.6,1),Math.min(1,dt*6));
         if(fq>.75&&Math.random()<dt*22)puff(m.x+rand(-.3,.3),m.y+.25,m.z+rand(-.3,.3),0,1.6,0,whiteC,.8,.1,.5);
@@ -724,15 +721,15 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
     comboT-=dt;if(comboT<0&&combo>0){combo=Math.max(0,combo-1);comboT=1.2}
     dingT-=dt;lT-=dt;tossT-=dt;copT-=dt;if(fr%20===0)updMusic();heat=Math.max(0,heat-dt*.012);alertR=3+13*heat;
     if(count!==shown||fr%6===0)drawLCD();if(count!==shown){shown=count;numEl.textContent=count.toLocaleString();numEl.classList.toggle('bump',!!held)}
-    $('multv').textContent='x'+(Math.round(mult()*10)/10);$('charge').style.width=clamp(charge,0,1)*100+'%';$('panicv').style.width=heat*100+'%';
-    const pr=$('prompt');pr.hidden=!(tgt&&!held);if(tgt&&!held)pr.textContent=(touch?'Hold VAPE':'Hold click')+' to vape the '+tgt.t.name+(tgt.crave!=null?(tgt.crave===fi?' — '+FLAV[tgt.crave][2]+' CRAVING MATCH!':' — craves '+FLAV[tgt.crave][2]):'');lg.hidden=!held;if(touch)vbtn.style.opacity=tgt||held?1:.6;
+    $('multv').textContent='x'+(Math.round(mult()*10)/10);$('charge').style.width=clamp(charge,0,1)*100+'%';{const hk=Math.min(100,Math.floor(used/50));$('panicv').style.width=hk+'%';if(hk!==hkP){hkP=hk;$('hookp').textContent=hk+'%'}}
+    const pr=$('prompt');const shp=tgt&&!held&&lungs<3;pr.hidden=!shp;if(shp)pr.textContent=touch?'Hold VAPE':'Hold click';lg.hidden=!held;if(touch)vbtn.style.opacity=tgt||held?1:.6;
     if(fr%3===0)radar();voxN=Math.max(0,voxN-dt*6);ambient(dt);
     if(tut===3){tutT-=dt;if(tutT<0)tut=4}
-    {const hs=['Walk up to anyone and hold '+(touch?'VAPE':'click')+' on their face','Let go while the bar is green for a PERFECT RIP','Grab a glowing crate for a power-up','Radar, top right: white dots are fresh lungs, green are hooked',''][Math.min(tut,4)],he=$('hint');if(he.textContent!==hs){he.textContent=hs;he.hidden=!hs}}
+    {const hs='',he=$('hint');if(he.textContent!==hs){he.textContent=hs;he.hidden=!hs}}
     if(newsT>0){newsT-=dt;if(newsT<=0)newsEl.classList.remove('on')}
   }
   if(toastT>0){toastT-=dt;if(toastT<=0)toastEl.classList.remove('on')}
-  for(const n of npcs){think(n,dt,t);if(n.cb){const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz),on=mode==='play'&&d<18&&n.state!=='held';n.cb.visible=on;if(on)n.cb.position.set(n.g.position.x,n.g.position.y+n.hy+(n.r>.55?1.2:.85)+Math.sin(t*3+n.ph)*.06,n.g.position.z)}}
+  for(const n of npcs){think(n,dt,t);if(n.cb){const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz),on=false;n.cb.visible=on;if(on)n.cb.position.set(n.g.position.x,n.g.position.y+n.hy+(n.r>.55?1.2:.85)+Math.sin(t*3+n.ph)*.06,n.g.position.z)}}
   waterM.map.offset.x=t*.03;for(const c of clouds){c.position.x+=dt*1.5;if(c.position.x>280)c.position.x=-280}
   for(const p of puffs){if(p.life<=0)continue;p.life-=dt;if(p.life<=0){p.s.visible=false;continue}const k=1-p.life/p.max,sc=p.a+(p.b-p.a)*k;p.s.scale.set(sc,sc,1);p.s.material.opacity=.7*(1-k)*Math.min(1,k*8);
     p.s.position.x+=p.vx*dt;p.s.position.y+=p.vy*dt;p.s.position.z+=p.vz*dt;const dm=1-1.6*dt;p.vx*=dm;p.vz*=dm;p.vy=p.vy*dm+.25*dt}
@@ -767,7 +764,7 @@ window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,
   get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
 Object.defineProperty(window.TMV,'slow',{get:()=>slow,set:v=>{slow=v}});
 {const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
-['world','mobile','crowds','juice','campaign'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
+['world','mobile','crowds','juice','story'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
 if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!labelMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
 })();
 </script>

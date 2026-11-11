@@ -113,7 +113,7 @@ function cineStep(dt){const c=cine,t=c.t+=dt,ev=c.ev,once=(k,at)=>!ev[k]&&t>=at&
   if(t>=1.5)setDoors(back((t-1.5)/.45));
   if(once('spill',1.62)){spillStart();for(let i=0;i<26;i++)J.beep(rand(1500,2800),.03,'square',.008,rand(0,1.4))}
   if(once('slam',1.82)){if(!J.clip('sfx/slam',{vol:.75}))J.beep(90,.5,'sawtooth',.08);shake(.55);punch(.06)}
-  if(once('title',2.75)){stinger('TOO MANY VAPES','5,000 TO GO');if(!J.clip('sfx/perfect_sting',{vol:.45}))J.beep(392,.4,'sawtooth',.05);shake(.25);punch(.05)}
+  if(once('title',2.75)){stinger('TOO MANY VAPES','');if(!J.clip('sfx/perfect_sting',{vol:.45}))J.beep(392,.4,'sawtooth',.05);shake(.25);punch(.05)}
   if(t>=CINE_LEN)cineEnd()}
 
 /* ---------- final-vape finish ---------- */
@@ -126,7 +126,7 @@ function finStart(){const n=J.held;fe.set(J.px,1.6,J.pz);
   if('slow' in J&&!rm())J.slow=2.2;
   J.armR.visible=false;J.armL.visible=false;cineOn(true);doFlash('#fff',.85,500);shake(.5);
   J.beep(55,1,'sine',.12);J.slide(900,120,1.3,'sine',.04);
-  stinger('THE LAST VAPE','is gone.');
+  stinger('ZERO','');
   for(let i=0;i<14;i++)J.emo(J.pick(['🎉','💨','🏆','✨']),ft.x,ft.y+.2,ft.z,rand(-2.5,2.5),rand(1.5,4),rand(-2.5,2.5),rand(.35,.6));
   for(let i=0;i<40;i++){const a=i/40*PI*2;J.puff(ft.x,ft.y,ft.z,Math.cos(a)*rand(3,6),rand(0,2.2),Math.sin(a)*rand(3,6),_c.setHSL(i/40,.95,.62),rand(1.8,3),.2,rand(.8,1.6))}}
 function finEnd(){if(!fin)return;const f=fin;fin=null;zoomBase=1;cineOn(false);J.armR.visible=true;title.classList.remove('go');if('slow' in J)J.slow=0;
@@ -145,13 +145,13 @@ const skip=()=>{if(cine&&cine.t>.35)cineEnd();else if(fin&&fin.t>.4)finEnd()};
 addEventListener('pointerdown',skip,true);addEventListener('keydown',e=>{if(!e.repeat)skip()},true);
 
 /* ---------- combo stamps ---------- */
-const TIERS=[[3,'TRIPLE CLOUD','#b6ff3c'],[5,'CLOUD FIVE','#5fd4ff'],[10,'TEN-LUNG STREAK','#ff3fa4'],[15,'HAZE CRAZE','#a070ff'],[20,'FOG LORD','#ff7a1a'],[30,'WEATHER EVENT','#ffe04a'],[50,'NATIONAL EMERGENCY','#ff3fa4']];
+const TIERS=[[5,'CLOUD FIVE','#5fd4ff'],[10,'TEN-LUNG STREAK','#ff3fa4'],[20,'FOG LORD','#ff7a1a'],[50,'NATIONAL EMERGENCY','#ff3fa4']];
 let tierI=0;
 function comboWatch(){const c=J.combo;while(tierI>0&&c<TIERS[tierI-1][0])tierI--;
   let hit=-1;while(tierI<TIERS.length&&c>=TIERS[tierI][0])hit=tierI++;
-  if(hit<0)return;const[n,label,col]=TIERS[hit];comboEl.style.setProperty('--c',col);comboEl.innerHTML='<b>x'+n+' COMBO</b><span>'+label+'</span>';
+  if(hit<0)return;const[n,label,col]=TIERS[hit];comboEl.style.setProperty('--c',col);comboEl.innerHTML='<b>x'+n+'</b>';
   comboEl.classList.remove('go');void comboEl.offsetWidth;comboEl.classList.add('go');
-  const base=[523,587,659,784,880,988,1175][hit];[1,1.26,1.5,2].forEach((m,i)=>J.beep(base*m,.12,'square',.022,i*.06));
+  const base=[587,784,988,1175][hit];[1,1.26,1.5,2].forEach((m,i)=>J.beep(base*m,.12,'square',.022,i*.06));
   try{$('mult').animate([{transform:'scale(1.6) rotate(-6deg)'},{transform:'scale(1)'}],{duration:380,easing:'cubic-bezier(.2,.9,.3,1.3)'})}catch(e){}
   punch(.03+hit*.006)}
 

@@ -174,14 +174,14 @@ function drive(c,dt,t){const p=c.g.position,dx=c.tx-p.x,dz=c.tz-p.z;if(Math.hypo
 /* =================== BIRDS: crows over town, gulls over the beach =================== */
 const NC=9,NG=12,NB=NC+NG,wingG=new T.BoxGeometry(1,.05,.42);wingG.translate(.5,0,0);
 const wings=new T.InstancedMesh(wingG,new T.MeshToonMaterial({gradientMap:GRAD,side:T.DoubleSide}),NB*2),bodies=new T.InstancedMesh(new T.BoxGeometry(.26,.24,.8),new T.MeshToonMaterial({gradientMap:GRAD}),NB);
-const birds=[];for(let i=0;i<NB;i++){const gull=i>=NC,col=gull?0xfdfdfd:0x2a2433;birds.push({gull,r:rand(5,gull?22:14),w:rand(.25,.45)*(Math.random()<.5?-1:1),ph:rand(0,PI*2),y:rand(-2,2),s:gull?rand(.8,1):rand(.6,.75),fp:rand(0,6),last:new T.Vector3()});
+const birds=[];for(let i=0;i<NB;i++){const gull=i>=NC,col=gull?0xfdfdfd:0x2a2433;birds.push({gull,r:rand(gull?14:12,gull?26:22),w:rand(.09,.16)*(Math.random()<.5?-1:1),ph:rand(0,PI*2),y:rand(-2,2),s:gull?rand(.8,1):rand(.6,.75),fp:rand(0,6),last:new T.Vector3()});
   wings.setColorAt(i*2,_c.setHex(col));wings.setColorAt(i*2+1,_c.setHex(col));bodies.setColorAt(i,_c.setHex(gull?0xeeeeee:0x2a2433))}
 wings.frustumCulled=bodies.frustumCulled=false;scene.add(wings,bodies);
 const _bp=new T.Vector3();
-function flock(t){const cx=Math.sin(t*.05)*40,cz=Math.cos(t*.037)*35,gx=Math.sin(t*.03)*55,gz=-114+Math.sin(t*.07)*6;
-  birds.forEach((b,i)=>{const a=b.ph+t*b.w;_bp.set((b.gull?gx:cx)+Math.cos(a)*b.r,(b.gull?13:28)+b.y+Math.sin(t*.7+b.fp)*1.2,(b.gull?gz:cz)+Math.sin(a)*b.r);
+function flock(t){const cx=Math.sin(t*.02)*40,cz=Math.cos(t*.015)*35,gx=Math.sin(t*.03)*55,gz=-114+Math.sin(t*.07)*6;
+  birds.forEach((b,i)=>{const a=b.ph+t*b.w;_bp.set((b.gull?gx:cx)+Math.cos(a)*b.r,(b.gull?13:28)+b.y+Math.sin(t*.35+b.fp)*.8,(b.gull?gz:cz)+Math.sin(a)*b.r);
     const yaw=Math.atan2(_bp.x-b.last.x,_bp.z-b.last.z);b.last.copy(_bp);
-    const flap=b.gull?.12+Math.max(0,Math.sin(t*2.2+b.fp))*.5*Math.sin(t*9+b.fp):Math.sin(t*11+b.fp)*.7,bank=-Math.sign(b.w)*(b.gull?.35:.25);
+    const flap=b.gull?.12+Math.max(0,Math.sin(t*2.2+b.fp))*.5*Math.sin(t*9+b.fp):.08+Math.max(0,Math.sin(t*1.6+b.fp))*.45*Math.sin(t*7+b.fp),bank=-Math.sign(b.w)*(b.gull?.35:.25);
     _q.setFromEuler(_e2.set(0,yaw,bank,'YXZ'));_m.compose(_bp,_q,_s.set(b.s,b.s,b.s));bodies.setMatrixAt(i,_m);
     for(const side of[0,1]){_q.setFromEuler(_e2.set(0,yaw,bank+(side?-flap:flap),'YXZ'));_s.set(side?-b.s*1.1:b.s*1.1,b.s,b.s);_m.compose(_bp,_q,_s);wings.setMatrixAt(i*2+side,_m)}});
   wings.instanceMatrix.needsUpdate=bodies.instanceMatrix.needsUpdate=true}

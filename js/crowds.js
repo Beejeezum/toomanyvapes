@@ -69,7 +69,7 @@ function steerPost(n,i,d,dt){const p=n.g.position,ty=n.t;let spd=0,dx=0,dz=0;
     dx=n.tx-p.x;dz=n.tz-p.z;if(dx*dx+dz*dz>.16)spd=ty.speed*(ty.roam?.62:.3)}
   if(!spd){n._av=null;return}
   if((fc+i)%3===0){const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;const f=n.r+1.5,c=boxAt(p.x+dx*f,p.z+dz*f,n.r+.15);if(c){const tg=avoid(n,c,p,dx,dz);n._av=[tg[0],tg[1],.6]}}
-  const a=n._av;if(!a)return;p.x+=a[0]*spd*dt;p.z+=a[1]*spd*dt;X.collide(p,n.r);a[2]-=dt;if(a[2]<=0)n._av=null}
+  const a=n._av;if(!a)return;a[2]-=dt;if(a[2]<=0)n._av=null}
 
 /* ================= CONGA LINE =================
    The player's path is kept as a breadcrumb ring buffer (one point per 0.4m). Hooked followers are ordered by
@@ -110,7 +110,7 @@ const card=document.createElement('div');card.id='bosscard';X.game.appendChild(c
 const bar=document.createElement('div');bar.id='bossbar';bar.hidden=true;bar.innerHTML='<div class="bn"><b></b><span></span></div><div class="bb"><i></i></div><small></small>';X.game.appendChild(bar);
 const barN=bar.querySelector('b'),barW=bar.querySelector('.bn span'),barI=bar.querySelector('.bb i'),barS=bar.querySelector('small');
 let cardT=0;
-function showCard(top,name,sub,where){card.innerHTML=`<small>${top}</small><b>${name}</b><span>${sub}</span>${where?`<em>${where}</em>`:''}`;card.classList.remove('go');void card.offsetWidth;card.classList.add('go');cardT=4.4}
+function showCard(top,name,sub,where){card.innerHTML=`<b>${name}</b>`;card.classList.remove('go');void card.offsetWidth;card.classList.add('go');cardT=4.4}
 const fanfare=()=>{if(!X.clip('sfx/slam',{vol:.7}))X.beep(110,.6,'sawtooth',.07);[392,523,659,784].forEach((f,i)=>X.beep(f,.22,'square',.035,.25+i*.12))};
 
 // builders: the core human()/BUILD helpers, scaled up, with props in the same toon materials (spawn() inkifies them)
@@ -207,8 +207,8 @@ function bossUI(){if(X.mode!=='play'){if(!bar.hidden)bar.hidden=true;return}let 
   for(const k in BOSS){const n=BOSS[k].n;if(!n||n.boss.dead)continue;const d=Math.hypot(n.g.position.x-X.px,n.g.position.z-X.pz);if(d<bd){bd=d;best=n}}
   const show=!!best&&(bd<45||X.held===best);if(bar.hidden===show)bar.hidden=!show;if(!show)return;
   const b=best.boss,c=b.cfg,cr=best.crave!=null&&X.FLAV[best.crave]?X.FLAV[best.crave][2]:'';
-  if(barN.textContent!==c.name)barN.textContent=c.name;const w='WEAK TO '+cr;if(barW.textContent!==w)barW.textContent=w;
-  bar.style.setProperty('--n',c.hp);barI.style.width=b.hp/c.hp*100+'%';const s=Math.ceil(b.hp-.001)+' PERFECT RIPS LEFT · MEGA-LUNG';if(barS.textContent!==s)barS.textContent=s}
+  if(barN.textContent!==c.name)barN.textContent=c.name;
+  bar.style.setProperty('--n',c.hp);barI.style.width=b.hp/c.hp*100+'%';}
 function radarMark(){const cv=X.$('radar');if(!cv||X.mode!=='play')return;const rc=cv.getContext('2d'),h=104,sc=h/62,sn=Math.sin(X.yaw),cs=Math.cos(X.yaw);
   for(const k in BOSS){const n=BOSS[k].n;if(!n||n.boss.dead)continue;const dx=n.g.position.x-X.px,dz=n.g.position.z-X.pz;let x=(dx*cs-dz*sn)*sc,y=(dx*sn+dz*cs)*sc;const l=Math.hypot(x,y);if(l>h-12){x*=(h-12)/l;y*=(h-12)/l}
     rc.fillStyle='#ffd23c';rc.strokeStyle='#140f1c';rc.lineWidth=3;rc.beginPath();rc.arc(h+x,h+y,9,0,7);rc.fill();rc.stroke();rc.font='13px sans-serif';rc.textAlign='center';rc.textBaseline='middle';rc.fillText('👑',h+x,h+y+1)}}
