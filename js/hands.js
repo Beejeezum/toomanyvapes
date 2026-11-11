@@ -97,7 +97,7 @@ X.on('prerender',gdt=>{const now=performance.now(),dt=Math.min(.1,(now-lastT)/10
   if(dual){show('D',FD[f]||FD.out);DV.style.transform=`translate(${(-tx).toFixed(1)}px,${ty.toFixed(1)}px) rotate(${(-rot).toFixed(2)}deg) scale(${sc.toFixed(3)})`}
   else if(cur.D){show('D',null);DV.style.transform='translateY(110%)'}
   // ---- left hand: only while grabbing someone; steps up (open → grip) toward their head, drops after
-  const want=(phase==='reach'||phase==='hold')&&X.mode==='play'&&up>.9&&!dual;
+  const want=false;// no left grab hand: just the right hand (user)
   lstep=want?Math.min(3,lstep+1):Math.max(0,lstep-1);
   if(lstep===0){L.style.transform='translateY(110%)';show('L',null)}
   else{show('L',lstep<2?FL.rest:FL.grab);const Wl=L.offsetWidth;
