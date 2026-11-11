@@ -67,7 +67,7 @@ function bedMake(){if(bed)return;try{bed=new Audio(BED);bed.preload='auto';bed.p
   bed.muted=true;const p=bed.play();if(p&&p.then)p.then(()=>{if(!fly){bed.pause();try{bed.currentTime=0}catch(e){}}bed.muted=false}).catch(()=>{bed.muted=false});else bed.muted=false}catch(e){bed=null}}
 function bedStart(){if(!bed)bedMake();if(!bed)return;try{const d=isFinite(bed.duration)&&bed.duration>1?bed.duration:8.06;
   bed.playbackRate=Math.min(1.1,Math.max(.75,d/(DUR-.15)));bed.currentTime=0;bed.muted=false;bed.volume=0;const p=bed.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
-function bedStep(t){if(!bed)return;const v=X.muted?0:.95*Math.min(1,t/.12)*Math.min(1,Math.max(0,(DUR-.1-t)/(DRESS_OUT-.1)));try{bed.volume=Math.max(0,Math.min(1,v))}catch(e){}}
+function bedStep(t){if(!bed)return;const v=X.muted?0:.55*Math.min(1,t/.12)*Math.min(1,Math.max(0,(DUR-.1-t)/(DRESS_OUT-.1)));try{bed.volume=Math.max(0,Math.min(1,v))}catch(e){}}
 function bedStop(){if(bed)try{bed.pause();bed.volume=0}catch(e){}}
 
 /* shadows + focus follow the shot: the clay mod centres a ±30 m shadow box on the player and racks focus at eye height, which

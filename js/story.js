@@ -349,7 +349,7 @@ function next(){const s=seq;if(!s)return;clearTimeout(s.tm);if(au){au.stop();au=
     if(talk&&!fb){next();return}
     const want=talk?(voEnd?voEnd-t0:readT(f)):voEnd?Math.max(1600,voEnd-t0+350):Math.max(hold,vd?(vd+.2)*1000:0);s.tm=setTimeout(next,Math.max(talk?0:120,want-el2))};
   const say=()=>{fb=true;if(!f.vo||au)return;voDone=false;au=sound(f.vo,ok=>{au=null;voDone=true;voEnd=ok?performance.now():0;arm()})};
-  if(f.vid){const audible=talk&&!X.muted;vid.muted=!audible;vid.volume=1;
+  if(f.vid){const audible=talk&&!X.muted;vid.muted=!audible;vid.volume=f.vol!=null?f.vol:(f.who?1:.5);/* shots with nobody talking: their background (birds, street) sits lower */
     vid.onloadedmetadata=()=>{vd=isFinite(vid.duration)?vid.duration:0;if(!live())return;if(talk){clearTimeout(s.tm);s.tm=setTimeout(()=>{if(live())next()},(vd+2.5)*1000)}else if(!f.vo)arm()};
     vid.onplaying=()=>{if(!live())return;vid.hidden=false;s.clipT=true;if(talk&&!vid.muted)clipOn()};
     vid.onended=()=>{if(!live())return;clipOff();clipDone=true;arm()};
