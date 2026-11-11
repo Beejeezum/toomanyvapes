@@ -1,5 +1,5 @@
 /* crowds mod: the town reacts as a crowd, hooked fans form a conga line, NPCs steer around buildings,
-   and three mega-lung bosses show up as the vape count drops. Talks to the game only through window.TMV.
+   and three mega-lung bosses (spawned per chapter by js/story.js via TMV.crowds.spawnBoss). Talks to the game only through window.TMV.
    Runs after the core think() each frame ('frame' event) and post-corrects positions/poses; positions are
    snapshotted in 'prerender' so a frozen or conga NPC can undo the core's movement for that frame. */
 (()=>{const X=window.TMV;if(!X){console.warn('[crowds] window.TMV missing');return}
@@ -87,7 +87,7 @@ function conga(list,dt,t){list.sort((a,b)=>a._cj-b._cj);let L=1.2,prev=null;cons
       p.x+=dx*sp*dt;p.z+=dz*sp*dt;X.collide(p,n.r);n.ph+=sp*dt*3.2;mv=1}
     if(prev)turn(n,prev.g.position.x,prev.g.position.z,dt*8);else turn(n,X.px,X.pz,dt*8);
     if(!n.t.lift)p.y=Math.abs(Math.sin(t*7-i*.7))*.13;pose(n,mv,n.A&&n.A.length?2:0,0,t,dt);prev=n}
-  if(n0>congaBest){if(n0>=3&&(congaBest<3||n0%5===0))X.toast('CONGA LINE ×'+n0,1.4);congaBest=n0}congaN=n0;
+  if(n0>congaBest)congaBest=n0;congaN=n0;
   chantT-=dt;if(chantT<0&&n0>=3){chantT=rand(3,6);X.say(pick(list),pick(CHANT),1.8)}}
 
 /* ================= BOSSES ================= */
@@ -136,25 +136,24 @@ for(const k in BUILD){X.BUILD[k]=BUILD[k];X.TYPES[k]=TYPES[k]}
 const knock={x:0,z:0},PV={x:0,z:0};
 function shove(n,sp,st){const p=n.g.position,dx=X.px-p.x,dz=X.pz-p.z,d=Math.hypot(dx,dz)||1;knock.x=dx/d*sp;knock.z=dz/d*sp;X.stun=Math.max(X.stun,st)}
 const BOSS={
- diva:{at:4300,x:-87.5,z:27.5,hp:4,reward:350,drops:['boost','chain'],emo:'🎶',col:0xc2253a,short:'THE DIVA',
+ diva:{chapter:2,x:-87.5,z:27.5,hp:4,reward:350,drops:['boost','chain'],emo:'🎶',col:0xc2253a,short:'THE DIVA',
   name:'LA DIVA LUNGAROTTI',sub:'Soprano. Four octaves. Lungs the size of a bass drum.',where:'📍 THE PARK GAZEBO',
   intro:'You dare interrupt my REHEARSAL?',hit:['MMMMM-AAAAAH ♪','*hits a note only dogs hear*','my DIAPHRAGM!','a lovely vintage…'],low:['my… final… aria…','the fat lady is about to sing'],
   over:['FORTISSIMO!!','*SONIC HIGH C*'],defeat:'…bravissimo. I am your fan now.',
   onHit(n){[1046,1318,1568,2093].forEach((f,i)=>X.beep(f,.18,'triangle',.03,i*.09));const m=X.mouth(n,V1);for(let i=0;i<6;i++)X.emo(pick(['🎶','🎵','🎼']),m.x,m.y,m.z,rand(-2,2),rand(1,2.5),rand(-2,2),.6);react(n,26,false)},
-  onOver(n){X.toast('HIGH C SONIC BOOM',1.6);shove(n,15,.35);X.slide(1800,2400,.5,'square',.04);const m=X.mouth(n,V1);for(let i=0;i<24;i++){const a=i/24*PI*2;X.puff(m.x,m.y,m.z,Math.cos(a)*7,rand(-.5,.5),Math.sin(a)*7,whiteC,1.2,.3,1.4)}}},
- prime:{at:3200,x:0,z:-84,hp:5,reward:500,drops:['rush','dual','boost'],emo:'💪',col:0xe02a2a,short:'PRIME',
+  onOver(n){shove(n,15,.35);X.slide(1800,2400,.5,'square',.04);const m=X.mouth(n,V1);for(let i=0;i<24;i++){const a=i/24*PI*2;X.puff(m.x,m.y,m.z,Math.cos(a)*7,rand(-.5,.5),Math.sin(a)*7,whiteC,1.2,.3,1.4)}}},
+ prime:{chapter:3,x:0,z:-84,hp:5,reward:500,drops:['rush','dual','boost'],emo:'💪',col:0xe02a2a,short:'PRIME',
   name:'GYM BRO PRIME',sub:'Never skipped lung day. Spots himself.',where:'📍 MUSCLE BEACH (NO BEACH)',
   intro:'COME AT ME, BRO. I\'LL WAIT.',hit:['THAT ALL YOU GOT?','*flexes so hard a cloud comes out*','FEEL THE BURN BRO','DO YOU EVEN RIP'],low:['bro… I think I\'m… hooked bro','LAST SET. LAST SET.'],
   over:['SPOTTED.','*bench-presses you*'],defeat:'…respect, king. RESPECT.',
   onHit(n){X.beep(98,.25,'sawtooth',.06);X.beep(65,.4,'sawtooth',.06,.1);for(const o of near(n.g.position.x,n.g.position.z,30,L2))if(o.type==='gym'&&Math.random()<.6)X.say(o,pick(['PRIME! PRIME! PRIME!','THE KING RIPS','LET HIM COOK']),1.6)},
-  onOver(n){X.toast('GYM BRO PRIME BENCH-PRESSED YOU',1.6);shove(n,20,.9);X.beep(70,.5,'sawtooth',.08)}},
- detecto:{at:2000,x:3,z:-11,hp:6,reward:700,drops:['free','fog','boost'],emo:'🚨',col:0xf2f2f2,short:'DETECTO',
+  onOver(n){shove(n,20,.9);X.beep(70,.5,'sawtooth',.08)}},
+ detecto:{chapter:5,x:3,z:-11,hp:6,reward:700,drops:['free','fog','boost'],emo:'🚨',col:0xf2f2f2,short:'DETECTO',
   name:'DETECTO',sub:'Mascot of the Smoke Detector Outlet. Detects smoke. Is now smoke.',where:'📍 ROAMING THE STREETS',
   intro:'*BEEP* SMOKE DETECTED *BEEP*',hit:['*BEEP BEEP BEEP*','ALARM ALARM ALARM','*battery chirp of shame*','EVACUATE. NOT YOU. EVERYONE ELSE.'],low:['*sad 9-volt chirp*','beep… beep……'],
   over:['FIRE DEPARTMENT NOTIFIED','*MAXIMUM ALARM*'],defeat:'*soft chirp* (I love vapes now)',
   onHit(n){for(let i=0;i<3;i++)X.beep(3100,.09,'square',.035,i*.16);X.heat=Math.min(1,X.heat+.08);react(n,30,false)},
-  onOver(n){X.toast('FIRE ALARM — EVERY COP IS COMING',1.8);X.heat=Math.min(1,X.heat+.3);for(let i=0;i<8;i++)X.beep(3100,.09,'square',.05,i*.13)}}};
-let bossCheckT=0;
+  onOver(n){X.heat=Math.min(1,X.heat+.3);for(let i=0;i<8;i++)X.beep(3100,.09,'square',.05,i*.13)}}};
 function spawnBoss(key){const c=BOSS[key];if(!c)return null;if(c.n)return c.n;TMP.x=c.x;TMP.z=c.z;if(cgN!==cols.length)buildCG();X.collide(TMP,1.3);
   X.spawn(key,TMP.x,TMP.z);const n=npcs[npcs.length-1];if(!n||n.type!==key)return null;
   n.boss={cfg:c,key,hp:c.hp,dead:0,met:0,sing:2};n.g.rotation.order='YXZ';n._tilt=0;n._bend=0;n.hooked=false;n.cool=0;n.fem=key==='diva';n.vp=key==='diva'?1.25:key==='prime'?.8:1.05;n.emo=c.emo;
@@ -168,8 +167,7 @@ function bossHit(n,kind,match){const b=n.boss,c=b.cfg;n.times=0;
   bar.classList.remove('hit');void bar.offsetWidth;bar.classList.add('hit');
   if(b.hp<=0)return defeat(n);
   if(kind==='over'){X.say(n,pick(c.over),2.4);c.onOver(n);return}
-  X.say(n,pick(b.hp<=1.01?c.low:c.hit),2.4);c.onHit(n,kind);
-  if(kind==='perfect')X.toast('PERFECT RIP — '+c.short+' STAGGERS',1.3);else if(kind==='ok')X.toast('TOO SHALLOW — MEGA-LUNGS NEED PERFECT RIPS',1.5)}
+  X.say(n,pick(b.hp<=1.01?c.low:c.hit),2.4);c.onHit(n,kind)}
 function defeat(n){const b=n.boss,c=b.cfg,p=n.g.position;b.dead=1;n.hooked=true;for(const wm of n.H.Wh||[])wm.material=X.M(0xffc4c4);
   if(c.beam)c.beam.visible=false;if(c.crown)c.crown.visible=false;X.say(n,c.defeat,3.5);
   showCard('★ MEGA-LUNG DEFEATED ★',c.name,'−'+c.reward.toLocaleString()+' VAPES · dropped '+c.drops.length+' power-ups','');
@@ -189,7 +187,7 @@ function bossHeld(n,dt){const p=n.g.position,g=n.g;X.armR.tip.getWorldPosition(V
 function unTilt(n,dt){if(n._hy0!==undefined){const k=Math.min(1,dt*6);n.hy=lerp(n.hy,n._hy0,k);n.hz=lerp(n.hz,n._hz0,k)}if(n._tilt>.001){n._tilt=lerp(n._tilt,0,Math.min(1,dt*6));n.g.rotation.x=n._tilt}n._bend=lerp(n._bend||0,0,Math.min(1,dt*6))}
 function bossFrame(n,d,dt,t){const b=n.boss,c=b.cfg,p=n.g.position;
   if(n.state==='flee'){n.state='wander';n.cool=Math.min(n.cool,1.6)}n.hooked=false;n.times=0;
-  if(!b.met&&d<16&&n.state==='wander'){b.met=1;X.say(n,c.intro,3.2);X.toast(c.name+' — '+c.hp+' PERFECT RIPS TO TAKE DOWN',2.4)}
+  if(!b.met&&d<16&&n.state==='wander'){b.met=1;X.say(n,c.intro,3.2)}
   if(n.state==='held'){bossHeld(n,dt);return}
   unTilt(n,dt);if(n.state!=='wander')return;
   const k=Math.min(1,dt*8);
@@ -230,12 +228,12 @@ X.on('frame',(dt,t)=>{now+=dt;fc++;if(cgN!==cols.length)buildCG();ngT-=dt;if(ngT
     steerPost(n,i,d,dt)}
   if(clist.length)conga(clist,dt,t);else congaN=0;
   if(fc%18===0)spread();
-  bossCheckT-=dt;cardT-=dt;if(bossCheckT<0){bossCheckT=.5;if(cardT<=0)for(const k in BOSS){const c=BOSS[k];if(!c.spawned&&X.count<=c.at){spawnBoss(k);break}}}});
+  cardT-=dt});
 X.on('prerender',t=>{for(const n of npcs){n._ox=n.g.position.x;n._oz=n.g.position.z}
   const tt=performance.now()/1000;
   for(const k in BOSS){const c=BOSS[k],n=c.n;if(!n)continue;const p=n.g.position;if(c.beam&&c.beam.visible){c.beam.position.set(p.x,35,p.z);c.crown.position.set(p.x,p.y+n.hy+1.9+Math.sin(tt*3)*.15,p.z)}
     if(n.led)n.led.material.color.setHex(!n.boss.dead&&Math.sin(tt*(n.state==='held'?30:6))>0?0xff2020:0x401010)}
   bossUI();radarMark()});
 X.on('win',()=>{bar.hidden=true});
-X.crowds={BOSS,spawnBoss,react,get conga(){return congaN}};
+X.crowds={BOSS,spawnBoss,despawn,defeat,react,get conga(){return congaN}};
 })();
