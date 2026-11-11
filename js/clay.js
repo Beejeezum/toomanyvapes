@@ -52,7 +52,7 @@ const CLAYT=(()=>{const n=256,a=clayHeight(n),b=paperGrain(n),d=new Uint8Array(n
    r = (corrugation ridges per unit, ridge depth, fuzzy felt sheen at grazing angles, per-sheet warp) */
 const KIND={
   clay:[.04,1.15,0,1,0,.24], vc:[.036,1.15,0,.8,0,.22], cloth:[.026,1.4,0,.5,.3,.15],
-  felt:[.07,2,.75,0,1,.1, .0045,.14,1,.9, 0,0,.2,.5], feltHill:[.07,2,.75,0,1,.1, 0,0,0,0, 0,0,.2,0],
+  felt:[.07,2,.75,0,1,.1, .0045,.14,1,.9, 0,0,.2,.5], feltHill:[.07,2,.75,0,1,.1, .006,.11,1,.6, 0,0,.2,.3],
   sand:[.05,2,1,.15,1,.08], cpaper:[.03,2.2,.7,0,1,.05], paint:[.05,2,.9,.7,1,.04], tile:[.04,1.6,.55,.15,1,.08, .007,.09,1,1, 0,0,0,4], wood:[.035,1.5,.7,.35,1,.08],
   leaf:[.06,1.3,.8,.6,0,.12], water:[.03,1,.65,1.2,0,.06], paper:[.018,2.5,.3,.1,1,.1], corr:[.045,1,.85,.3,1,.08], hay:[.06,2,.9,0,1,.1],
   wall:[.03,1,.3,.12,1,.1, 0,0,0,0, 5,.45,0,0], kraft:[.035,2,.5,.12,1,.1], sponge:[.07,2,.95,0,1,.06], fuzz:[.06,2.5,.8,0,1,.1, 0,0,0,0, 0,0,.45,0], flute:[.04,1,.9,.15,1,.06], stick:[.035,1.5,.6,.35,1,.08]};
@@ -174,7 +174,7 @@ function leaf(k,n){k.fillStyle='#7c7c7c';k.fillRect(0,0,n,n);const r0=n/22;let r
 function bark(k,n){k.fillStyle='#7d5638';k.fillRect(0,0,n,n);k.lineCap='round';
   for(let i=0;i<34;i++){const x=rand(0,n),c=Math.random()<.6;k.strokeStyle=c?'rgba(50,30,15,.45)':'rgba(190,140,100,.3)';k.lineWidth=rand(1,3);for(const o of[-n,0,n]){k.beginPath();k.moveTo(x+o,0);for(let y=0;y<=n;y+=8)k.lineTo(x+o+Math.sin(y*.09+x)*2.5,y);k.stroke()}}}
 // park pond: a hand mirror laid on the felt, sky and light streaks in the glass
-function water(k,n){const g=k.createLinearGradient(0,0,n,n);g.addColorStop(0,'#cfe2f2');g.addColorStop(.5,'#9fc4e4');g.addColorStop(1,'#dbe9f3');k.fillStyle=g;k.fillRect(0,0,n,n);
+function water(k,n){const g=k.createLinearGradient(0,0,n,n);g.addColorStop(0,'#8fc0ea');g.addColorStop(.5,'#5b93cf');g.addColorStop(1,'#9cc9ee');k.fillStyle=g;k.fillRect(0,0,n,n);
   for(let i=0;i<5;i++){const x=rand(0,n),w=rand(6,22);k.fillStyle=`rgba(255,255,255,${rand(.25,.5).toFixed(2)})`;for(const o of[-n,0,n]){k.beginPath();k.moveTo(x+o,0);k.lineTo(x+o+w,0);k.lineTo(x+o+w-n*.4,n);k.lineTo(x+o-n*.4,n);k.fill()}}
   for(let i=0;i<8;i++){const x=rand(0,n),y=rand(0,n),r=rand(6,16);blob(k,x,y,r,'rgba(255,255,255,.2)','rgba(255,255,255,0)')}}
 
@@ -255,12 +255,12 @@ const S=X.TXS||{},WT=(X.world&&X.world.tex)||{};
 repaint(S.grass,touch?256:512,(k,n)=>felt(k,n,112,46,31),'felt');repaint(S.tile,256,tile,'tile');repaint(S.leaf,256,leaf,'leaf');
 repaint(S.bark,128,bark,'wood');repaint(S.water,128,water,'water');repaint(S.plank,128,(k,n)=>sticks(k,n,false,true),'wood');repaint(S.hay,128,hay,'hay');repaint(S.corr,64,corr,'corr');
 repaint(WT.sand,256,sand,'sand');repaint(WT.sea,128,sea,'water');repaint(WT.plank,128,(k,n)=>sticks(k,n,true,false),'wood');
-// sheet sizes: ground felt in ~9 m sheets, plaza card in ~4 m panels; hills are one felt drape (streets are black paper sheets built in world.js)
+// sheet sizes: ground felt in ~9 m sheets, plaza card in ~4 m panels; hills are patchwork felt (streets are black paper sheets built in world.js)
 {const G=users.get(S.grass&&S.grass.image);if(G){for(const t of G.tex)if(t.repeat.x===70)t.repeat.set(42,42);for(const m of G.mats)if(m.map&&m.map.repeat.x===8)setKind(m,'feltHill')}
   const P=users.get(S.tile&&S.tile.image);if(P)for(const t of P.tex)if(t.repeat.x===40)t.repeat.set(31,31);
 }
 // shop fronts, signs and billboards painted in code: give them the hand-painted card treatment; building walls are painted corrugated card
-const FAC=new Set();W.traverse(o=>{const m=o.material;if(o.isMesh&&m&&m.map&&m.map.image&&m.map.image.width===256&&m.map.image.height===256&&o.geometry.type==='BoxGeometry'&&o.scale.y>4)FAC.add(m.map.image)});
+const FAC=new Set();W.traverse(o=>{const m=o.material,c=m&&m.map&&m.map.image;if(o.isMesh&&c&&(c.width===256||c.width===512)&&c.height===c.width&&o.geometry.type==='BoxGeometry'&&o.scale.y>4)FAC.add(c)});
 for(const[c,L]of users){if(repainted.has(c)||!c.getContext||c.width<256)continue; // 256+ wide = facades, signs, billboards (not the 64/128 face, cloth and label cut-outs)
   let world=false;for(const m of L.mats)if(m.isMeshToonMaterial&&!m.userData.clayKind)world=true;if(!world)continue;const wall=FAC.has(c);
   try{handmade(c,wall);for(const t of L.tex)t.needsUpdate=true;for(const m of L.mats)if(m.isMeshToonMaterial)setKind(m,wall?'wall':'paper')}catch(e){}}
