@@ -6,9 +6,26 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#140f1c">
+<title>Too Many Vapes · a claymation game you play in your browser</title>
+<meta name="description" content="A handmade claymation game set in a sleepy Florida beach town. The vape shop ordered 5,000 vapes by mistake, and it's your job to get the whole town hooked. Free, about 15 minutes, plays in your browser on phone or computer.">
+<link rel="canonical" href="https://toomanyvapes.com/">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="author" content="Bruce Pinchbeck">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Too Many Vapes">
+<meta property="og:url" content="https://toomanyvapes.com/">
 <meta property="og:title" content="Too Many Vapes">
-<meta property="og:description" content="You bought a shipping container filled with too many vapes. Get rid of them. Any way possible.">
-<title>Too Many Vapes</title>
+<meta property="og:description" content="The vape shop ordered 5,000 vapes by mistake. Get the whole town hooked. A handmade claymation game you play in your browser.">
+<meta property="og:image" content="https://toomanyvapes.com/assets/share/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Claymation surfer holding a neon vape in front of a shipping container spilling thousands of vapes, under the title Too Many Vapes">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Too Many Vapes">
+<meta name="twitter:description" content="The vape shop ordered 5,000 vapes by mistake. Get the whole town hooked.">
+<meta name="twitter:image" content="https://toomanyvapes.com/assets/share/og.jpg">
+<link rel="icon" href="assets/mobile/favicon-64.png" type="image/png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Too Many Vapes","url":"https://toomanyvapes.com/","image":"https://toomanyvapes.com/assets/share/og.jpg","description":"A handmade claymation game set in a sleepy Florida beach town. The vape shop ordered 5,000 vapes by mistake, and it's your job to get the whole town hooked.","genre":["Comedy","Adventure"],"gamePlatform":["Web browser","iOS","Android"],"applicationCategory":"Game","operatingSystem":"Any","playMode":"SinglePlayer","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Bruce Pinchbeck","url":"https://brucepinchbeck.com"}}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap">
 <style>
@@ -81,6 +98,8 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 .how{font-size:13px!important;font-weight:400!important;opacity:.85;max-width:48ch!important}
 #stats{font-variant-numeric:tabular-nums}
 @media (max-width:520px){#radar{width:78px;height:78px}#prompt{font-size:13px}}
+.ov .bruce{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) rotate(-1.5deg);font:600 12px/1 system-ui,sans-serif;letter-spacing:.04em;color:#15101d;background:#f3e3b0;padding:6px 10px;text-decoration:none;box-shadow:1px 2px 0 rgba(0,0,0,.3);opacity:.85;white-space:nowrap}
+.ov .bruce:hover{opacity:1}
 </style>
 
 </head>
@@ -108,11 +127,13 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
     <h1>Too Many Vapes</h1>
     <p class="loc">Get the whole town hooked</p>
     <button id="go">Play</button>
+    <a class="bruce" href="https://brucepinchbeck.com" target="_blank" rel="noopener">Another bad idea by Bruce</a>
   </div>
   <div id="win" class="ov" hidden>
     <h1>Zero Vapes</h1>
     <p id="stats"></p>
     <button id="again">Clock in again</button>
+    <a class="bruce" href="https://brucepinchbeck.com" target="_blank" rel="noopener">Another bad idea by Bruce</a>
   </div>
 </div>
 
