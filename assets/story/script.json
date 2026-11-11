@@ -40,6 +40,22 @@
      "mute": true
     },
     {
+     "img": "ch1_kid_v3",
+     "vid": "ch1_kid_v3",
+     "aud": true,
+     "who": "SAL",
+     "vo": "sal_ch1_kid",
+     "cap": "Kid! Oh, thank God you're here. I gotta sell all of these by Friday… or I'm closing the shop."
+    },
+    {
+     "img": "ch1_go_v3",
+     "vid": "ch1_go_v3",
+     "aud": true,
+     "who": "SAL",
+     "vo": "sal_ch1_go",
+     "cap": "So get out there. Get this town HOOKED!"
+    },
+    {
      "img": "ch1_v2_5_tail",
      "vid": "ch1_v2_5#t=5.3",
      "aud": true,
@@ -202,6 +218,12 @@
     ]
    },
    "out": [
+    {
+     "img": "ch3_chain",
+     "vid": "ch3_chain",
+     "aud": true,
+     "hold": 5
+    },
     {
      "img": "ch3_out_1",
      "who": "SAL",
