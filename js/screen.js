@@ -46,7 +46,7 @@ ios.addEventListener('click',()=>{ios.hidden=true});
 
 let dismissed=false;rot.addEventListener('click',()=>{dismissed=true;rot.hidden=true});
 const portrait=()=>innerHeight>innerWidth*1.05;
-function upd(){btn.hidden=standalone()||(!canFS&&!iOS);
+function upd(){btn.hidden=standalone()||(!canFS&&!iOS)||(touch&&X.mode==='play');// phones: out of the way during play (pause menu has add-to-home-screen)
   const cutOn=!!(D.getElementById('st')&&!D.getElementById('st').hidden);
   const show=touch&&!dismissed&&portrait()&&(cutOn||X.mode==='play'||X.mode==='cutscene');
   if(rot.hidden===show)rot.hidden=!show}

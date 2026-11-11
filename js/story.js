@@ -258,6 +258,9 @@ const stc=document.createElement('div');stc.id='stc';stc.hidden=true;stc.setAttr
 stc.innerHTML='<div class="fr"><div class="hd">'+PHONE+'</div><div class="pic"></div></div><div class="cap"></div>';X.game.appendChild(stc);
 const stcPic=stc.querySelector('.pic'),stcCap=stc.querySelector('.cap');
 let GW0=innerWidth,GH0=innerHeight;const measure=()=>{GW0=X.game.clientWidth||innerWidth;GH0=X.game.clientHeight||innerHeight};addEventListener('resize',measure);measure();
+// phones with a notch: the edge arrow keeps clear of the side safe areas
+const saP=document.createElement('i');saP.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)';document.body.appendChild(saP);
+let SAI=0;const saM=()=>{const c=getComputedStyle(saP);SAI=Math.max(parseFloat(c.paddingLeft)||0,parseFloat(c.paddingRight)||0)};addEventListener('resize',()=>setTimeout(saM,60));saM();
 const scrapCP=j=>X.paper&&X.paper.scrap?X.paper.scrap(j):'none';
 
 /* ================= 16mm FILM TREATMENT (grain, dust, hair, gate weave, flicker) ================= */
@@ -604,7 +607,7 @@ const VC=new T.Vector3(),VP=new T.Vector3();
 const ui={a:0,arrow:0,chev:0,near:null,list:[],scanT:0,tickT:0,tick:false,tq:0};
 function camSpace(x,y,z){VC.set(x,y,z).applyMatrix4(X.cam.matrixWorldInverse);return VC}
 function bearing(x,z){camSpace(x,1.6,z);return Math.atan2(VC.x,-VC.z)}// 0 = straight ahead, + = to the right
-function edgePos(b){const W=GW0,H=GH0,rx=W/2-44,ry=H*.39,cy=H*.55;return[W/2+Math.sin(b)*rx,cy-Math.cos(b)*ry]}
+function edgePos(b){const W=GW0,H=GH0,rx=W/2-Math.max(44,SAI+26),ry=H*.39,cy=H*.55;return[W/2+Math.sin(b)*rx,cy-Math.cos(b)*ry]}
 const qa=v=>v<.12?0:v<.55?.5:1;
 function setUI(e,x,y,rot,a){if(!ui.tick)return;a=qa(a);e.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${rot.toFixed(3)}rad)`;const o=a.toFixed(3);if(e.style.opacity!==o)e.style.opacity=o}
 const headY=n=>n.g.position.y+(n.hy||1.5)+(n.r>.55?1.2:.85);
