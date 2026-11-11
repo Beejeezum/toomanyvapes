@@ -68,11 +68,24 @@
    },
    "out": [
     {
-     "img": "ch1_out_1",
+     "img": "ch1_out_v2_1",
+     "vid": "ch1_out_v2_1",
+     "aud": true,
+     "hold": 5
+    },
+    {
+     "img": "ch1_out_v2_2",
+     "vid": "ch1_out_v2_2",
+     "aud": true,
      "who": "SAL",
      "vo": "sal_ch1_out_1",
-     "cap": "They're… coming back? They're coming BACK!",
-     "vid": "ch1_out_1"
+     "cap": "They're… coming back? They're coming BACK!"
+    },
+    {
+     "img": "ch1_out_v2_3",
+     "vid": "ch1_out_v2_3",
+     "aud": true,
+     "hold": 5
     }
    ]
   },
@@ -87,6 +100,12 @@
      "vo": "bro_ch2_in_1",
      "cap": "Park's full of grandmas, man. Grandmas love me.",
      "vid": "ch2_in_1"
+    },
+    {
+     "img": "ch2_boss",
+     "vid": "ch2_boss",
+     "aud": true,
+     "hold": 6
     }
    ],
    "call": {
@@ -128,6 +147,12 @@
      "vo": "sal_ch3_in_2",
      "cap": "Watch out for cops. And the big guy at the gym.",
      "vid": "ch3_in_2"
+    },
+    {
+     "img": "ch3_boss",
+     "vid": "ch3_boss",
+     "aud": true,
+     "hold": 6
     }
    ],
    "call": {
@@ -203,6 +228,12 @@
      "vo": "sal_ch5_in_1",
      "cap": "Last stretch! EMPTY THE CONTAINER!",
      "vid": "ch5_in_1"
+    },
+    {
+     "img": "ch5_boss",
+     "vid": "ch5_boss",
+     "aud": true,
+     "hold": 6
     }
    ],
    "call": {
@@ -228,11 +259,21 @@
    "vid": "end_1"
   },
   {
-   "img": "end_2",
-   "who": "BRO",
-   "vo": "bro_end_2",
-   "cap": "…Bro.",
-   "vid": "end_2"
+   "img": "end_v2_2",
+   "vid": "end_v2_2",
+   "aud": true,
+   "subs": [
+    {
+     "t": 0,
+     "cap": ""
+    },
+    {
+     "t": 3.7,
+     "who": "BRO",
+     "cap": "…Bro."
+    }
+   ],
+   "vo": "bro_end_2"
   }
  ],
  "calls": {
