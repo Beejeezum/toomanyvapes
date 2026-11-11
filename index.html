@@ -693,7 +693,7 @@ function voice(k,force){try{const now0=performance.now();if(BUF['vo/'+k]){if(now
 
 /* ================= RECORDED CLIPS =================
    Files in audio/ (made in Runway). Everything below falls back to the synth sounds when a clip is missing. */
-const BUF={},AMB={},HUMAN={worker:1,grandma:1,gym:1,kid:1,cop:1,jogger:1,tuba:1};let SFXB=null,MUS=null,MASTER=null,masterV=1,voS=null,inS=null,musK=null,musS=null,copT=0,tossT=0,ambLT=0,muted=false;const musV=touch?.26:.32;
+const BUF={},AMB={},HUMAN={worker:1,grandma:1,gym:1,kid:1,cop:1,jogger:1,tuba:1};let SFXB=null,MUS=null,MASTER=null,masterV=1,duckV=1,voS=null,inS=null,musK=null,musS=null,copT=0,tossT=0,ambLT=0,muted=false;const musV=touch?.26:.32;
 function loadClips(){const L=[],add=(dir,spec)=>spec.split(',').forEach(e=>{const[k,n]=e.split(':');if(n)for(let i=1;i<=+n;i++)L.push([dir+'/'+k,`${dir}/${k}_${i}`]);else L.push([dir+'/'+k,dir+'/'+k])});
   add('vo','start:2,perfect:7,ok:3,over:4,busted:3,hooked:2,twist:1,win:2,boost:2,dual:2,free:2,fog:2,chain:2,rush:2');
   add('sfx','inhale:3,exhale:3,cough:4,moo:2,bark:2,meow:2,pigeon:2,chicken:2,yelp_m:2,yelp_f:2,kid:1,grandma:1,baby:2,gym:1,mmph:2,whistle,perfect_sting,fail_sting,pickup,toss,slam,fanfare,tuba,fire,siren_far,crowd_panic');
@@ -710,7 +710,7 @@ function hit(n,kind){const p=spot(n.g.position.x,n.g.position.z,40);if(!BUF['sfx
   if(HUMAN[n.type]&&n.type!=='tuba')setTimeout(()=>clip(kind==='over'?'sfx/cough_4':small?'sfx/cough_3':n.fem?'sfx/cough_2':'sfx/cough_1',{vol:p.vol*.85,pan:p.pan,rate:rr}),260)}
 function updMusic(){if(!AC||!MUS)return;const k=mode!=='play'?'title':(copT>0||heat>(musK==='chase'?.45:.6))&&BUF['music/chase']?'chase':'main';if(k===musK||!BUF['music/'+k])return;
   musK=k;if(musS)fadeStop(musS,.5);musS=clip('music/'+k,{loop:true,vol:0,bus:MUS});if(musS)musS.g.gain.setTargetAtTime(1,AC.currentTime,.4)}
-function setMute(m){muted=m;if(MASTER)MASTER.gain.setTargetAtTime(m?0:masterV,AC.currentTime,.05)}
+function setMute(m){muted=m;if(MASTER)MASTER.gain.setTargetAtTime(m?0:masterV*duckV,AC.currentTime,.05)}
 function prime(){if(!AC)audio();else if(AC.state==='suspended')AC.resume()}
 addEventListener('pointerdown',prime);addEventListener('keydown',prime);addEventListener('touchstart',prime,{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend();else AC.resume()});
@@ -976,7 +976,7 @@ window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,
   get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
 window.TMV.sal=SALAPI;window.TMV.bake=bake;window.TMV.limb=limb;window.TMV.orb=orb;
 Object.defineProperty(window.TMV,'slow',{get:()=>slow,set:v=>{slow=v}});
-{const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
+{const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;TMV.duckAll=v=>{duckV=v;if(MASTER&&AC)MASTER.gain.setTargetAtTime(muted?0:masterV*v,AC.currentTime,.12)};Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
 TMV.TXS={grass:TXgrass,road:TXroad,tile:TXtile,leaf:TXleaf,bark:TXbark,water:TXwater,plank:TXplank,hay:TXhay,corr:TXcorr}; /* clay mod repaints these */
 ['world','clay','mobile','crowds','juice','story','paper','score','screen'].forEach(n=>{const s=document.createElement('script');s.async=false;s.src='js/'+n+'.js';s.onerror=()=>{};document.body.appendChild(s)});
 if(location.hash==='#dbg')window.tmv={near(ty){let b=null,bd=1e9;for(const n of npcs){if(n.type!==ty)continue;const d=Math.hypot(n.g.position.x-px,n.g.position.z-pz);if(d<bd){bd=d;b=n}}px=b.g.position.x;pz=b.g.position.z+2.2;yaw=0;pitch=-.1;b.tm=9;b.tx=b.g.position.x;b.tz=b.g.position.z;b.state='wander';heat=0},give(k){act[k]=PW[k].dur},s:()=>({faces:npcs.filter(n=>n.H.dec).length,fab:!!FAB,vape:!!labelMat.map,count,combo,heat,held:held&&held.type,lungs,clips:Object.keys(BUF).length,music:musK,amb:Object.keys(AMB).filter(k=>AMB[k]).length,ac:AC&&AC.state})};
