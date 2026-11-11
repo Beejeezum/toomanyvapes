@@ -312,7 +312,7 @@ cyl(W,9,.14,9,0xf2ead8,-90,.07,30);for(let i=0;i<6;i++)cyl(W,.25,3.6,.25,0xfff7e
 // farm
 box(W,10,6,8,TM(TXplank,5,1,0xd0403c),118,3,-30);{const r=box(W,7.2,7.2,8.4,0x6e1f1f,118,6,-30);r.rotation.z=PI/4}box(W,3,3.6,.2,0xfff7ea,118,1.8,-25.95);solid(118,-30,10,8);
 cyl(W,3.4,9,3.4,0xd9d9d9,127,4.5,-36);dome(W,3.4,3.4,3.4,0xb0b0b0,127,9,-36);solid(127,-36,3.4,3.4);
-const hayM=TM(TXhay,2,1);for(let i=0;i<9;i++){const h=cyl(W,1.5,1.4,1.5,hayM,rand(80,130),.75,rand(-48,48));h.rotation.z=PI/2;h.rotation.y=rand(0,3)}
+const hayM=TM(TXhay,2,1);for(let i=0;i<9;i++){const h=cyl(W,1.5,1.4,1.5,hayM,rand(80,130),.75,rand(-48,48));solid(h.position.x,h.position.z,1.5,1.5);h.rotation.z=PI/2;h.rotation.y=rand(0,3)}
 for(let x=70;x<=134;x+=8)for(const z of[-52,52])box(W,.3,1.3,.3,0x9a6a48,x,.65,z);for(let z=-52;z<=52;z+=8)for(const x of[70,134]){if(x===70&&Math.abs(z)<8)continue;box(W,.3,1.3,.3,0x9a6a48,x,.65,z)}
 for(const y of[.5,1])for(const z of[-52,52])box(W,64,.12,.12,0x9a6a48,102,y,z);for(const y of[.5,1]){box(W,.12,.12,104,0x9a6a48,134,y,0);box(W,.12,.12,44,0x9a6a48,70,y,-30);box(W,.12,.12,44,0x9a6a48,70,y,30)}
 for(let i=0;i<6;i++){box(W,22,.1,1.2,0x8a6a45,96,.05,20+i*4);for(let j=0;j<8;j++)ball(W,.7,.6,.7,0x3f9b4b,86.5+j*2.7,.35,20+i*4)}
@@ -323,6 +323,12 @@ box(W,1.2,2.4,1.2,0xffd23c,-36,1.2,78);{const s=box(W,1.1,.14,4.6,0xe0244a,-36,1
 {const s=box(W,4.4,.14,.5,0x3cd07a,-27,.7,97);s.rotation.z=.2}box(W,.4,.7,.4,0x666666,-27,.35,97);
 // muscle beach
 box(W,28,.1,20,0x8a3a3a,0,.05,-88);for(const x of[-9,-3,3,9]){box(W,.2,1.2,.2,0x444444,x-.8,.6,-90);box(W,.2,1.2,.2,0x444444,x+.8,.6,-90);const b=cyl(W,.1,3,.1,0xcccccc,x,1.25,-90);b.rotation.z=PI/2;for(const s of[-1,1]){const d=cyl(W,.9,.22,.9,0x222222,x+s*1.3,1.25,-90);d.rotation.z=PI/2}box(W,.6,.45,1.6,0x2a2433,x,.22,-88.6)}
+// props that creatures (and you) bump into instead of walking through: street lamps and hydrants, park benches, the gazebo's
+// columns, the palm behind the vape shop, farm fences (the gate stays open), playground frames and the muscle-beach benches
+for(const a of LINES)for(const b of LINES){if((a+b)%4)continue;solid(a+4,b+4,.3,.3);solid(a-4,b+4.4,.45,.45)}
+for(const[x,z]of[[-74,8],[-80,-22],[-112,14],[-84,20]])solid(x,z,2.2,.7);for(let i=0;i<6;i++)solid(-90+Math.cos(i*1.047)*4,30+Math.sin(i*1.047)*4,.3,.3);solid(-7.3,26,.6,.6);
+solid(102,-52,64,.3);solid(102,52,64,.3);solid(134,0,.3,104);solid(70,-30,.3,44);solid(70,30,.3,44);
+solid(-36,78,1.2,1.2);solid(-36,81.6,1.1,3.4);for(const sx of[-1,1])solid(-22+sx*2.5,78,.3,1.6);solid(-27,97,4.4,.5);for(const x of[-9,-3,3,9]){solid(x,-90,1.9,.25);solid(x,-88.6,.6,1.6)}
 // sky
 const skyM=new T.MeshBasicMaterial({color:0xffffff,fog:false}),clouds=[];
 for(let i=0;i<16;i++){const g=new T.Group();for(let j=0;j<4;j++)ball(g,rand(12,22),rand(6,9),rand(9,14),skyM,j*8-12+rand(-2,2),rand(-2,2),rand(-3,3));g.position.set(rand(-260,260),rand(70,110),rand(-260,260));scene.add(g);clouds.push(g)}
@@ -364,17 +370,17 @@ const TXkid=TX(16,(k,n)=>{k.fillStyle='#f6f1e8';k.fillRect(0,0,n,n);k.fillStyle=
  TXflam=TX(64,(k,n)=>{k.fillStyle='#2bb5a8';k.fillRect(0,0,n,n);const F=(x,y,s)=>{k.fillStyle='#f27fae';k.beginPath();k.ellipse(x,y,7*s,4.5*s,-.3,0,7);k.fill();k.strokeStyle='#f27fae';k.lineWidth=2.4*s;k.beginPath();k.moveTo(x+5*s,y-2*s);k.quadraticCurveTo(x+9*s,y-10*s,x+4*s,y-13*s);k.stroke();
    k.beginPath();k.arc(x+4*s,y-14*s,2.6*s,0,7);k.fill();k.strokeStyle='#d0607e';k.lineWidth=1.3*s;k.beginPath();k.moveTo(x-1*s,y+4*s);k.lineTo(x-1*s,y+13*s);k.moveTo(x+1*s,y+4*s);k.lineTo(x+3*s,y+9*s);k.stroke()};F(16,24,1);F(46,52,.9);F(48,16,.8);F(14,56,.8)});
 /* head: skull, two bead eyes (sclera Wh turns pink when hooked; o.bead = solid black bead), dark mouth H.m, two cheek balls H.C that puff out on the inhale */
-function eyeHead(g,d,skin,y,z,o){o=o||{};const h=new T.Group();h.position.set(0,y,z);g.add(h);if(!o.bare)orb(h,d,d*1.04,d,skin,0,0,0);const E=[],Wh=[],es=o.es||1;
+function eyeHead(g,d,skin,y,z,o){o=o||{};const h=new T.Group();h.position.set(0,y,z);g.add(h);if(!o.bare)orb(h,d,d*1.04,d*.95,skin,0,0,0);const E=[],Wh=[],es=(o.es||1)*1.1;
   for(const s of[-1,1]){const e=new T.Group();e.position.set(s*d*(o.ex||.21),d*(o.ey||.08),d*(o.ez||.4));if(o.ry)e.rotation.y=s*o.ry;h.add(e);E.push(e);let fz;
     if(o.bead){if(o.ring)orb(e,d*.27*es,d*.29*es,d*.1*es,o.ring,0,0,-d*.02*es);orb(e,d*.2*es,d*.22*es,d*.14*es,INKY,0,0,0);fz=d*.07*es}
     else{Wh.push(keep(orb(e,d*.27*es,d*.31*es,d*.15*es,0xffffff,0,0,0)));if(o.iris)orb(e,d*.2*es,d*.22*es,d*.08*es,o.iris,0,0,d*.04*es);orb(e,d*.13*es,d*.15*es,d*.08*es,INKY,0,0,d*.055*es);fz=d*.1*es}
-    orb(e,d*.065*es,d*.065*es,d*.03*es,HL,-d*.035*es,d*.045*es,fz);
+    orb(e,d*.085*es,d*.085*es,d*.035*es,HL,-d*.04*es,d*.05*es,fz);
     if(o.lid)bowl(e,d*.31*es,d*.2*es,d*.19*es,o.lid,0,d*.01,0)}
-  const m=keep(orb(h,d*.26,d*.065,d*.1,MOUTH,0,-d*.25,d*.42)),C=[];
+  const m=keep(orb(h,d*.34,d*.07,d*.1,MOUTH,0,-d*.26,d*.41)),C=[];
   if(o.cheek!==false)for(const s of[-1,1])C.push(keep(orb(h,d*.22,d*.2,d*.17,o.cheekC||skin,s*d*.24,-d*.19,d*.33)));
   return{h,E,m,d,Wh,C}}
 // a brow is a pivot (pose() rotates it for the expression) carrying a clay sausage at a resting tilt
-function brow(h,x,y,z,w,th,c,tilt){const b=new T.Group();b.position.set(x,y,z);h.add(b);const m=orb(b,w,th,th*1.1,c,0,0,0);m.rotation.z=tilt||0;return b}
+function brow(h,x,y,z,w,th,c,tilt){const b=new T.Group();b.position.set(x,y,z);b.userData.y0=y;h.add(b);const m=orb(b,w,th,th*1.1,c,0,0,0);m.rotation.z=tilt||0;return b}
 function stache(h,d,c,horse){orb(h,d*.44,d*.13,d*.15,c,0,-d*.15,d*.45);for(const s of[-1,1])orb(h,d*.2,d*.1,d*.12,c,s*d*.17,-d*.17,d*.42);
   if(horse)for(const s of[-1,1]){const m=limb(h,d*.22,d*.06,d*.05,c,s*d*.21,-d*.18,d*.4);m.rotation.z=s*.1}}
 function hair(h,st,c,d){if(!st||st==='bald'||st==='cap')return;
@@ -404,12 +410,13 @@ function human(o){const g=new T.Group(),L=[],A=[],w=(o.w||.5)*rand(.94,1.08),sk=
   const torso=keep(new T.Mesh(o.buff?TORV:TORSO,cm));torso.scale.set(w,.74,dp);torso.position.y=1.1;U.add(torso);if(!o.skirt&&!o.nobelt&&!o.shorts)tube(U,w*.88,.07,dp*.92,o.belt||0x2a2228,0,.79,0);
   const NK=new T.Group();NK.position.y=1.44;U.add(NK);tube(NK,.13,.2,.13,sk,0,.07,0);
   // arms: round shoulder, upper-arm capsule (+ short sleeve), forearm capsule, and a mitten hand on a wrist pivot
-  for(const s of[-1,1]){const p=new T.Group(),q=new T.Group(),h=new T.Group();p.position.set(s*(w*.46+at*.5),1.35,0);orb(p,(at+.018)*2,(at+.024)*2,(at+.018)*2,sl,0,.01,0);
+  for(const s of[-1,1]){const p=new T.Group(),q=new T.Group(),h=new T.Group();p.position.set(s*(w*.46+at*.5),1.35,0);orb(p,(at+.008)*2,(at+.014)*2,(at+.008)*2,sl,0,.01,0);
     if(o.short&&!o.tank){limb(p,.11,at*1.24,at*1.16,sl);limb(p,.27,at*.94,at*.84,sk)}else limb(p,.27,at*1.04,at*.92,sl);
     q.position.y=-.28;limb(q,.24,at*.88,at*.74,o.short?sk:sl);h.position.y=-.27;hand(h,hs,sk,s);q.add(h);p.add(q);p.k=q;p.h=h;U.add(p);A.push(p)}
   // head: slightly oversized, nose, ears, sculpted brows, hair
-  const d=o.head||.46,H=eyeHead(NK,d,sk,.1+d*.45,0,o.eye);orb(H.h,d*.17,d*.15,d*.18,sk,0,-d*.05,d*.5);for(const s of[-1,1])orb(H.h,d*.13,d*.22,d*.12,sk,s*d*.5,-d*.02,0);
-  H.B=[];for(const s of[-1,1])H.B.push(brow(H.h,s*d*.21,d*.3,d*.37,d*.27,d*.07,o.browC||hc,-s*.08));hair(H.h,o.hair||'top',hc,d);
+  const d=o.head||.46,H=eyeHead(NK,d,sk,.1+d*.45,0,o.eye);orb(H.h,d*.25,d*.22,d*.23,sk,0,-d*.07,d*.49);orb(H.h,d*.72,d*.15,d*.26,sk,0,d*.27,d*.33);
+  for(const s of[-1,1])orb(H.h,d*.22,d*.075,d*.08,dk,s*d*.22,-d*.1,d*.42);for(const s of[-1,1])orb(H.h,d*.13,d*.22,d*.12,sk,s*d*.5,-d*.02,0);
+  H.B=[];for(const s of[-1,1])H.B.push(brow(H.h,s*d*.22,d*.32,d*.44,d*.28,d*.075,o.browC||hc,-s*.08));hair(H.h,o.hair||'top',hc,d);
   if(o.beard)orb(H.h,d*.72,d*.32,d*.4,hc,0,-d*.42,d*.22);if(o.must)stache(H.h,d,o.mustC||hc,o.must===2);
   const b={g,L,A,H,r:.4,P,U,NK,torso,ao:o.buff?.22:.07,sk,dk,at,w};if(o.extra)o.extra(U,H,A,b);g.scale.setScalar(rand(.94,1.07));return b}
 // four-legged: thigh capsule, knee pivot, shin capsule, and a hoof or paw (ft: 'hoof' | 'paw', fc: foot colour)
@@ -427,7 +434,7 @@ const BUILD={
    extra:(U,H,A,b)=>{const d=H.d;for(const s of[-1,1]){const c=orb(U,.13,.05,.11,sh,s*.065,1.43,.13);c.rotation.set(-.5,0,s*.7)}
     // loosened tie, tired eye bags, briefcase in the right hand
     if(!f){const tc=pick([0x8a845e,0x8a2a2a,0x34507a]);orb(U,.075,.07,.06,tc,.012,1.37,.165);const t=limb(U,.27,.04,.055,tc,.02,1.34,.175);t.scale.z=.4;t.rotation.set(-.16,0,.14)}
-    for(const s of[-1,1])orb(H.h,d*.2,d*.07,d*.08,b.dk,s*d*.21,-d*.1,d*.43);
+
     const bc=new T.Group();bc.position.set(0,-.17,0);A[0].h.add(bc);rbox(bc,.11,.32,.44,0x6a3f26,-.03,-.16,0);rbox(bc,.115,.05,.12,0xc8a040,-.03,-.03,0);arc(bc,.14,.12,.3,0x4a2a18,-.03,0,0).rotation.y=PI/2}})},
  grandma:()=>{const card=pick([0xb89a76,0xa88f78,0xc4a582]),b=human({w:.52,depth:.36,pants:TM(TXflor,3,2),dress:1,skirt:1,shirt:TM(TXknit,4,2,card),sleeve:TM(TXknit,2,2,card),hair:'bun',hairC:pick([0xd8d8dc,0xc8c8cc,0xe8e6e0]),
    skin:pick([0xf2c9a0,0xe8b894,0xf0c8a8]),shoeS:'slip',shoe:0x6a4430,extra:(U,H,A,b)=>{const d=H.d;
@@ -448,7 +455,7 @@ const BUILD={
  cop:()=>human({pants:0x27407e,shirt:0x2f56b0,hair:'top',hairC:0x3a2414,belt:0x17151a,shoeS:'boot',shoe:0x141414,must:1,extra:(U,H,A,b)=>{const d=H.d;
    // peaked cap with badge, aviator shades, shirt badge, pocket flaps, tie, holster
    const cp=new T.Group();cp.position.set(0,d*.36,-d*.02);cp.rotation.x=-.12;H.h.add(cp);tube(cp,d*1.04,d*.22,d*1.04,0x1f2f5e,0,0,0);orb(cp,d*1.2,d*.34,d*1.14,0x2a3f7a,0,d*.16,-d*.02);orb(cp,d*.72,d*.08,d*.42,0x111111,0,-d*.08,d*.44);orb(cp,d*.18,d*.2,d*.06,0xd8d8e0,0,d*.12,d*.55);
-   for(const s of[-1,1])orb(H.h,d*.34,d*.26,d*.08,0x111111,s*d*.21,d*.08,d*.48);tube(H.h,d*.14,d*.04,d*.04,0x111111,0,d*.12,d*.52).rotation.z=PI/2;
+   for(const s of[-1,1])orb(H.h,d*.4,d*.3,d*.08,0x111111,s*d*.23,d*.08,d*.54);tube(H.h,d*.12,d*.04,d*.04,0x111111,0,d*.12,d*.57).rotation.z=PI/2;
    rbox(U,.09,.1,.03,0xd0d0d8,.12,1.3,.18);for(const s of[-1,1])rbox(U,.13,.045,.03,0x27407e,s*.12,1.24,.178);const t=limb(U,.26,.035,.045,0x17203e,0,1.38,.172);t.scale.z=.4;
    rbox(U,.08,.18,.13,0x111111,-.27,.74,.02);orb(U,.07,.06,.03,0xd8b040,0,.79,.17)}}),
  jogger:()=>human({pants:0x2d5fc8,shorts:1,short:1,tank:1,shirt:pick([0xff7a1a,0xff8a2a,0xf0702a]),hair:'top',hairC:pick([0x6a4426,0x4a2e18,0x8a5a2a]),sock:0xffffff,shoeS:'sneak',shoe:0x9a9aa2,
@@ -514,7 +521,11 @@ const BUILD={
    const tl=tailOf(g,Wc,0,1.42,-.9,.75,0,.045);orb(tl,.14,.22,.14,BK,0,.78,0);return{g,L:q.L,torso:q.torso,A:[],H,r:.95,tail:tl}}
 };
 const npcs=[],shM=new T.MeshBasicMaterial({color:0,transparent:true,opacity:.2,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),v3=new T.Vector3();
-function spawn(type,x,z){const b=BUILD[type](),t=TYPES[type],s=b.g.scale.x;bake(b.g);
+// giants (the crowds mod builds bosses at ~2x) swap the kit's spheres, tubes, domes, rings and cones for smoother ones before baking
+const GHI=new Map();function smoothen(root){if(!GHI.size)[[G.S,new T.SphereGeometry(.5,26,18)],[G.C,new T.CylinderGeometry(.5,.5,1,26)],[G.D,new T.SphereGeometry(.5,26,9,0,PI*2,0,PI/2)],[G.R,new T.TorusGeometry(.5,.12,12,40)],
+  [G.K,new T.ConeGeometry(.5,1,24)],[G.s,new T.SphereGeometry(.5,22,14)],[G.c,new T.CylinderGeometry(.5,.5,1,22)],[G.v,new T.CylinderGeometry(.5,.3,1,22)],[G.k,new T.ConeGeometry(.5,1,20)],[G.h,new T.SphereGeometry(.5,22,8,0,PI*2,0,PI/2)]].forEach(([k,v])=>GHI.set(k,v));
+  root.traverse(o=>{if(o.isMesh){const h=GHI.get(o.geometry);if(h)o.geometry=h}})}
+function spawn(type,x,z){const b=BUILD[type](),t=TYPES[type],s=b.g.scale.x;if(s>1.4)smoothen(b.g);bake(b.g);
   // everything hangs off an inner root so pose() can bounce, sway and lean the whole body without touching the gameplay position
   const rt=new T.Group();while(b.g.children.length)rt.add(b.g.children[0]);b.g.add(rt);b.rt=rt;b.H.h.userData.p0=b.H.h.position.clone();if(b.H.C)for(const c of b.H.C)c.userData.s0=c.scale.clone();
   b.g.position.set(0,0,0);b.g.rotation.y=0;b.g.updateMatrixWorld(true);b.H.m.getWorldPosition(v3);
@@ -533,14 +544,14 @@ populate();
 /* ================= SAL =================
    The boss, a short stocky clay puppet standing in the Cloud Kingz doorway. Not a creature: never in npcs, never vapable.
    Idles nervously (weight shifting, wiping his head, pointing out at the town). TMV.sal.setMood('scared'|'happy'|'greedy'|null) for the story. */
-const SAL=(()=>{const b=human({w:.66,depth:.52,head:.54,arm:.12,leg:.12,skin:0xc48a5c,hairC:0x3a2616,hair:'fringe',browC:0x3a2616,pants:0xf3f0e8,shirt:TM(TXflam,3,2),sleeve:TM(TXflam,1.5,1),short:1,shoeS:'loafer',shoe:0xf6f3ec,belt:0xe8e2d4,must:2,mustC:0x141012,
+const SAL=(()=>{const b=human({w:.74,depth:.56,head:.55,arm:.125,leg:.125,skin:0xc48a5c,hairC:0x3a2616,hair:'fringe',browC:0x3a2616,pants:0xf3f0e8,shirt:TM(TXflam,3,2),sleeve:TM(TXflam,1.5,1),short:1,shoeS:'loafer',shoe:0xf6f3ec,belt:0xe8e2d4,must:2,mustC:0x141012,
   extra:(U,H,A,b)=>{const d=H.d;
     // aviators pushed up on the bald head, gold chain on a bit of chest, open teal collar
     const av=new T.Group();av.position.set(0,d*.44,d*.2);av.rotation.x=-.8;H.h.add(av);for(const s of[-1,1]){orb(av,d*.3,d*.22,d*.06,0x2a2e36,s*d*.17,0,0);hoop(av,d*.32,d*.25,d*.2,0x9a9ca4,s*d*.17,0,0)}tube(av,d*.1,d*.03,d*.03,0x9a9ca4,0,d*.05,0).rotation.z=PI/2;
     orb(U,.16,.12,.06,b.sk,0,1.4,.2);const ch=arc(U,.22,.2,.3,0xe8c040,0,1.42,.2);ch.rotation.set(-.25,0,PI);for(const s of[-1,1]){const c=orb(U,.16,.05,.14,0x2bb5a8,s*.09,1.45,.14);c.rotation.set(-.5,0,s*.7)}
     b.smile=keep(arc(H.h,d*.34,d*.24,d*.3,MOUTH,0,-d*.2,d*.44));b.smile.rotation.z=PI}});
-  const g=b.g;g.scale.setScalar(.56);bake(g);const rt=new T.Group();while(g.children.length)rt.add(g.children[0]);g.add(rt);b.rt=rt;b.H.h.userData.p0=b.H.h.position.clone();for(const c of b.H.C)c.userData.s0=c.scale.clone();
-  mk('o',g,1.1/.56,1.1/.56,1,shM,0,.08/.56,0).rotation.x=-PI/2;g.position.set(1.75,0,16.45);g.rotation.y=PI;scene.add(g);solid(1.75,16.45,.8,.8);
+  const g=b.g;g.scale.setScalar(.68);bake(g);const rt=new T.Group();while(g.children.length)rt.add(g.children[0]);g.add(rt);b.rt=rt;b.H.h.userData.p0=b.H.h.position.clone();for(const c of b.H.C)c.userData.s0=c.scale.clone();
+  mk('o',g,1.15/.68,1.15/.68,1,shM,0,.08/.68,0).rotation.x=-PI/2;g.position.set(1.75,0,16.45);g.rotation.y=PI;scene.add(g);solid(1.75,16.45,.8,.8);
   return Object.assign(b,{type:'sal',t:{cap:1},inh:0,hooked:false,ph:0,ms:b.H.m.scale.clone(),ts:b.torso.scale.clone(),mood:null,act:0,actT:3,ak:0})})();
 const SALM={scared:1,happy:1,greedy:1};
 const SALAPI={g:SAL.g,setMood(m){SAL.mood=SALM[m]?m:null},get mood(){return SAL.mood}};
@@ -549,9 +560,9 @@ function salTick(dt,t){const S=SAL,p=S.g.position;if(Math.hypot(p.x-px,p.z-pz)>8
   if(!m&&S.actT<0){S.act=S.act?0:pick([1,1,2,3]);S.actT=S.act?rand(2.2,3):rand(1.8,3.6)}
   // per-arm targets: [rx, rz(outward), elbow, wrist x, wrist z, elbow twist toward the head]
   let a=[[0,.12,.25,0,0,0],[0,.12,.25,0,0,0]],hx=null,hy=null,hz=0,es=1,ey=1,bz=0,mo=0,sm=0,bob=0,sway=Math.sin(t*1.7)*.05;
-  if(m==='scared'){const r=Math.sin(t*26)*.04;a=[[-.35+r,2.15,1.95,.3,0,1.35],[-.35-r,2.15,1.95,.3,0,1.35]];es=1.35;bz=.55;mo=2.8;hy=Math.sin(t*21)*.06;sway=Math.sin(t*31)*.025}
-  else if(m==='happy'){const w=Math.sin(t*7);a=[[-.3,2.55+w*.12,.35,0,w*.4,0],[-.3,2.55-w*.12,.35,0,-w*.4,0]];ey=.45;bz=.4;sm=1;bob=Math.abs(Math.sin(t*7))*.09;hx=-.15}
-  else if(m==='greedy'){const r=Math.sin(t*11);a=[[-.75+r*.05,-.1,1.6,.2,r*.5,-1.1],[-.75-r*.05,-.1,1.6,.2,-r*.5,-1.1]];ey=.5;bz=-.3;sm=1;hx=-.32;hy=0}
+  let ln=0,bob2=0;if(m==='scared'){const r=Math.sin(t*26)*.05;a=[[-.35+r,2.15,1.95,.3,0,1.35],[-.35-r,2.15,1.95,.3,0,1.35]];es=1.5;bz=.65;mo=3.3;hy=Math.sin(t*9)*.35;sway=Math.sin(t*31)*.05;ln=.25;bob2=-.05}
+  else if(m==='happy'){const w=Math.sin(t*8);a=[[-.2,2.75+w*.3,.3,0,w*.7,0],[-.2,2.75-w*.3,.3,0,-w*.7,0]];ey=.4;bz=.45;sm=1;bob=Math.abs(Math.sin(t*5.5))*.22;hx=-.28;sway=Math.sin(t*5.5)*.08;ln=-.12}
+  else if(m==='greedy'){const r=Math.sin(t*16);a=[[-.85+r*.1,-.1,1.7,.2,r*.8,-1.1],[-.85-r*.1,-.1,1.7,.2,-r*.8,-1.1]];ey=.45;bz=-.3+Math.sin(t*9)*.3;sm=1;hx=-.1;hy=Math.sin(t*1.3)*.25;ln=.32;sway=Math.sin(t*3)*.04}
   else if(S.act===1){const r=Math.sin(t*8);a[0]=[-.5,2.2+r*.1,1.9,.3,r*.5,1.3];hx=.18;es=1.15;bz=.35}            // mopping the sweat off his head
   else if(S.act===2){a[1]=[-1.5,.18,.05,0,0,0];hx=-.05;hy=.25;mo=1.6+Math.sin(t*14)*.8}                          // pointing out at the town
   else if(S.act===3){const r=Math.sin(t*13);a=[[-.55,-.05,1.3,0,r*.5,-.9],[-.55,-.05,1.3,0,-r*.5,-.9]];es=1.2;bz=.3}      // fidgeting hands
@@ -560,7 +571,7 @@ function salTick(dt,t){const S=SAL,p=S.g.position;if(Math.hypot(p.x-px,p.z-pz)>8
   const Z=S.Z||(S.Z={a:[[0,.12,.25,0,0,0],[0,.12,.25,0,0,0]],hx:0,hy:0,hw:0,es:1,ey:1,bz:0,mo:1,mx:.8});
   for(let i=0;i<2;i++){const s=i?1:-1,q=a[i],z=Z.a[i],l=A[i];for(let j=0;j<6;j++)z[j]=lerp(z[j],q[j],k);l.rotation.set(z[0],0,s*z[1]);l.k.rotation.order='YXZ';l.k.rotation.set(-z[2],s*z[5],0);l.h.rotation.set(z[3],0,z[4])}
   Z.hw=lerp(Z.hw,hx!==null||hy!==null?1:0,k);Z.hx=lerp(Z.hx,hx===null?0:hx,k);Z.hy=lerp(Z.hy,hy===null?0:hy,k);H.h.rotation.x=lerp(H.h.rotation.x,Z.hx,Z.hw);H.h.rotation.y=lerp(H.h.rotation.y,Z.hy,Z.hw);
-  Z.rz=lerp(Z.rz||0,sway,k);Z.px=lerp(Z.px||0,m?0:Math.sin(t*1.7)*.05,k);Z.by=lerp(Z.by||0,bob,Math.min(1,dt*20));rt.rotation.z=Z.rz;rt.position.x=Z.px;rt.position.y=Z.by;
+  Z.rz=lerp(Z.rz||0,sway,k);Z.px=lerp(Z.px||0,m?0:Math.sin(t*1.7)*.05,k);Z.by=lerp(Z.by||0,bob+bob2,Math.min(1,dt*20));S.hunch=Z.ln=lerp(Z.ln||0,ln,k);rt.rotation.z=Z.rz;rt.position.x=Z.px;rt.position.y=Z.by;
   Z.es=lerp(Z.es,es,k);Z.ey=lerp(Z.ey,ey,k);Z.bz=lerp(Z.bz,bz,k);Z.mo=lerp(Z.mo,mo||1,k);Z.mx=lerp(Z.mx,mo?1.15:.8,k);
   for(const e of H.E)e.scale.set(Z.es,Z.es*Z.ey,1);for(let i=0;i<2;i++)H.B[i].rotation.z=(i?-1:1)*Z.bz;H.m.scale.set(S.ms.x*Z.mx,S.ms.y*Z.mo,S.ms.z);H.m.visible=!sm;S.smile.visible=!!sm}
 
@@ -588,52 +599,118 @@ const vapeMat=new T.MeshToonMaterial({color:flav[1],gradientMap:GRAD,emissive:0x
 const lcdC=document.createElement('canvas');lcdC.width=64;lcdC.height=32;const lcdK=lcdC.getContext('2d'),lcdT=new T.CanvasTexture(lcdC);lcdT.magFilter=T.NearestFilter;const lcdMat=new T.MeshBasicMaterial({map:lcdT,fog:false});
 function drawLCD(){lcdK.fillStyle='#08160d';lcdK.fillRect(0,0,64,32);lcdK.fillStyle='#b6ff3c';lcdK.font='bold 16px monospace';lcdK.textAlign='center';lcdK.textBaseline='middle';
   lcdK.fillText(count>=10000?Math.round(count/1000)+'K':count>=1000?(count/1000).toFixed(1)+'K':String(count),32,12);lcdK.strokeStyle='#b6ff3c';lcdK.strokeRect(6.5,23.5,51,6);lcdK.fillRect(8,25,Math.max(1,48*clamp(charge,0,1)),3);lcdT.needsUpdate=true}
-const SKIN=0xc98a5e,ROPE=0x8a6444,SHELL=0xf6e8d4,DARK=0x1d1a24;
-// clay finger segment: a capsule from the knuckle (0) up to a tip pivot (len); chains of these bend about z
-function cseg(p,r,len,c,x,y,z,rz,rx){const g=new T.Group();g.position.set(x||0,y||0,z||0);g.rotation.set(rx||0,0,rz||0);p.add(g);limb(g,len,r,r*.95,c).rotation.x=PI;
-  const tip=new T.Group();tip.position.y=len;g.add(tip);g.tip=tip;return g}
-/* first-person viewmodel: the surfer's bare tanned clay arm (rope bracelet with a shell), a soft blobby hand in a phone grip around the cube vape */
-function arm(side){const g=new T.Group(),S=side,sk=toon(SKIN);
-  limb(g,.86,.07,.088,sk,S*.006,-.1,-.32).rotation.x=-PI/2;orb(g,.14,.125,.15,sk,S*.008,-.105,-.33);
-  hoop(g,.152,.152,.32,toon(ROPE),S*.006,-.1,-.25);hoop(g,.15,.15,.28,toon(0x6a4a30),S*.006,-.1,-.225);{const sh=orb(g,.07,.06,.028,toon(SHELL),S*.006,-.024,-.24);sh.rotation.x=-.5;horn(g,.036,.026,.022,toon(SHELL),S*.006,-.05,-.24)}
-  // palm cupping the bottom, heel of the hand up the outer side, thumb mound on the inner side
-  orb(g,.16,.11,.27,sk,S*.02,-.11,-.45);orb(g,.075,.15,.23,sk,S*.083,-.075,-.43);orb(g,.095,.115,.18,sk,-S*.062,-.095,-.38);
-  // the vape: chunky cube body, label on top, rear cap, mouthpiece, LED strip and a live puff counter on the side facing you
+const SKIN=0xc98a5e,PALM=0xdca681,NAIL=0xd9a48c,ROPE=0x8a6444,SHELL=0xf6e8d4,DARK=0x1d1a24,Y1=new T.Vector3(0,1,0),Z1=new T.Vector3(0,0,1);
+/* viewmodel clay kit: the hands sit centimetres from the lens, so they get a smoother sphere and smoother capsules than the townsfolk */
+const HSG=new T.SphereGeometry(.5,28,20);
+function capH(L,a,b){const k='h'+L.toFixed(3)+'_'+a.toFixed(3)+'_'+b.toFixed(3);if(LG[k])return LG[k];const P=[];
+  for(let i=0;i<=8;i++){const q=-PI/2+i/8*PI/2;P.push([Math.cos(q)*b,-L+Math.sin(q)*b])}for(let i=0;i<=8;i++){const q=i/8*PI/2;P.push([Math.cos(q)*a,Math.sin(q)*a])}return lathe(k,P,28)}
+const hb=(p,w,h,d,c,x,y,z)=>{const m=new T.Mesh(HSG,typeof c==='number'?toon(c):c);m.scale.set(w,h,d);m.position.set(x||0,y||0,z||0);p.add(m);return m};
+// capsule from its base joint (radius a) out along +y to radius b
+const hcap=(p,L,a,b,c)=>{const m=new T.Mesh(capH(L,a,b),typeof c==='number'?toon(c):c);m.rotation.x=PI;p.add(m);return m};
+// clay finger joint: a pivot at the knuckle carrying a phalanx out along +y to the next pivot (tip); it bends about z (and splays about x)
+function cseg(p,r,len,c,x,y,z,rz,rx){const g=new T.Group();g.position.set(x||0,y||0,z||0);g.rotation.set(rx||0,0,rz||0);p.add(g);hcap(g,len,r,r*.94,c);
+  const tip=new T.Group();tip.position.y=len;g.add(tip);g.tip=tip;g.len=len;return g}
+// a finger: three phalanges with knuckle bumps on the back, a flat fingernail disc on the last one. dx = which local x side is the back of the finger
+function finger(p,r,L,x,y,z,a0,a1,a2,dx,sp){const s1=cseg(p,r,L[0],SKIN,x,y,z,a0,sp||0);
+  const s2=cseg(s1.tip,r*.95,L[1],SKIN,0,0,0,a1);hb(s2,r*2.06,r*1.9,r*1.96,SKIN,dx*r*.16,0,0);
+  const s3=cseg(s2.tip,r*.9,L[2],SKIN,0,0,0,a2);hb(s3,r*1.9,r*1.7,r*1.84,SKIN,dx*r*.1,0,0);hb(s3,r*.28,r*.95,r*1.02,NAIL,dx*r*.74,L[2]*.74,0);
+  return[s1,s2,s3]}
+/* first-person viewmodel: the surfer's bare tanned clay arm and a real hand around the cube vape.
+   The cube sits on the palm and the heel of the hand; four fingers run up the far side and curl over the top edge (knuckles and
+   nails showing), the thumb lies across the near face toward you, the wrist wears the rope-and-shell bracelet, and a tapered
+   forearm runs down and back out of the bottom corner of the screen (it never ends inside the frame). */
+function arm(side){const g=new T.Group(),S=side,sk=SKIN;
+  // the vape: chunky cube body, label on top, mouthpiece out the front; the near face (toward you) is the cream cap with the live puff counter and LED strip
   const V=new T.Group();V.position.set(0,.06,-.46);g.add(V);
   tk('b',V,.16,.24,.3,[vapeMat,vapeMat,labelMat,vapeMat,vapeMat,vapeMat],0,0,0,.014);
   tk('b',V,.166,.246,.012,0xfff7ea,0,0,.152,.01);tk('b',V,.166,.03,.302,DARK,0,-.11,0,.01);
   tk('v',V,.12,.1,.075,DARK,0,.065,-.2,.012).rotation.x=PI/2;mk('b',V,.055,.014,.01,new T.MeshBasicMaterial({color:0x000000}),0,.065,-.252);
-  mk('b',V,.11,.016,.006,new T.MeshBasicMaterial({color:0xb6ff3c,fog:false}),0,-.075,.162);
-  mk('b',V,.004,.07,.13,lcdMat,-S*.0815,.06,.05);
-  // four fat clay fingers wrapping up the outer side from underneath, tips curling in over the top edge (they squeeze in poseArm)
-  g.F=[];[[-.562,.032,1.1],[-.502,.033,1.05],[-.442,.032,.97],[-.385,.028,.82]].forEach(([z,r,L])=>{
-    const s1=cseg(g,r,.122*L,sk,S*.108,-.115,z,-S*.04),s2=cseg(s1.tip,r*.97,.1*L,sk,0,0,0,S*.12);cseg(s2.tip,r*.94,.052*L,sk,0,0,0,S*1.15);g.F.push(s2)});
-  // chunky thumb lying diagonally along the inner side that faces you, tip pressing toward the front, like thumbing a phone
-  const t1=cseg(g,.043,.085,sk,-S*.104,-.1,-.37,0,-.95),t2=cseg(t1.tip,.04,.065,sk,0,0,0,0,-.18);cseg(t2.tip,.037,.04,sk,0,0,0,0,-.12);g.TH=t1;
-  const tip=new T.Object3D();tip.position.set(0,.065,-.262);V.add(tip);g.tip=tip;
+  mk('b',V,.05,.014,.006,new T.MeshBasicMaterial({color:0xb6ff3c,fog:false}),-S*.045,-.084,.162);
+  mk('b',V,.104,.056,.006,lcdMat,-S*.018,.068,.161);
+  // wrist below the near-right corner; the forearm leaves it down and to the right, toward you, thickening toward the elbow
+  const W=new T.Vector3(S*.1,-.17,-.34),FD=new T.Vector3(S*.5,-.62,.78).normalize();
+  const fa=new T.Group();fa.position.copy(W);fa.quaternion.setFromUnitVectors(Y1,FD);g.add(fa);hcap(fa,2,.064,.1,sk);hb(fa,.15,.26,.13,sk,0,-.02,0);
+  hb(fa,.055,.55,.1,sk,S*.05,.45,-.03).rotation.z=-S*.05;                                   // a soft forearm muscle so it isn't a plain tube
+  // rope bracelet with a cowrie shell, just above the wrist bone
+  const br=new T.Group();br.position.copy(W).addScaledVector(FD,.075);br.quaternion.setFromUnitVectors(Z1,FD);g.add(br);
+  hoop(br,.148,.148,.1,toon(ROPE),0,0,0);for(let i=0;i<2;i++){const sh=hb(br,.04,.036,.016,SHELL,(i?.034:-.03)*S,.062,.006);sh.rotation.z=S*(i?-.5:.6)}
+  // the hand sits on the right face: heel under the near-right corner, palm pad on the side, back of the hand bulging out, thumb ball at the near edge
+  hb(g,.05,.2,.22,PALM,S*.09,-.01,-.43);hb(g,.085,.23,.26,sk,S*.125,-.03,-.43).rotation.z=S*.1;
+  {const th=hb(g,.085,.16,.085,sk,S*.104,-.06,-.29);th.rotation.z=S*.15}
+  // four fingers (index nearest you), up the right face and over the top edge, middle finger longest, tips staggered, knuckles and short nails showing
+  g.F=[];[[-.355,.03,1.05,.04],[-.418,.031,1.1,.044],[-.481,.03,1,.038],[-.54,.026,.84,.024]].forEach(([z,r,L,y0],i)=>{
+    const a0=S*.08,len0=(.208-y0)/Math.cos(.08);hb(g,r*2.25,r*2.15,r*2.25,sk,S*.135,y0,z);
+    const f=finger(g,r,[len0,.074*L,.05*L],S*.126,y0,z,a0,S*1.42,S*.5,S,(i-1.5)*-.03);f[1].userData.r0=f[1].rotation.z;f[2].userData.r0=f[2].rotation.z;g.F.push(f)});
+  // the thumb comes round the near-right edge and presses across the near face under the counter, nail toward you, bent at the knuckle
+  const t1=cseg(g,.045,.072,sk,S*.104,.012,-.272,S*1.42,-.1);
+  const t2=cseg(t1.tip,.042,.056,sk,0,0,0,S*.22,-.08);hb(t2,.088,.078,.086,sk,0,0,.004);hb(t2,.042,.046,.012,NAIL,0,.04,.035);g.TH=t2;
+  const tip=new T.Object3D();tip.position.set(0,.065,-.262);V.add(tip);g.tip=tip;g.V=V;
   bake(g);cam.add(g);return g}
 const armR=arm(1),armL=arm(-1);armL.visible=false;
-// the left hand that reaches around the target's head and grips the back of it (placed against the head every frame)
-const grab=new T.Group();grab.F=[];{const sk=toon(SKIN);limb(grab,1.05,.07,.092,sk,0,0,.06).rotation.x=-PI/2;hoop(grab,.152,.152,.32,toon(0x3a7ad0),0,0,.15);
-  orb(grab,.13,.13,.14,sk,0,0,.04);orb(grab,.095,.21,.25,sk,.012,0,-.09);
-  [.07,.024,-.024,-.068].forEach((y,i)=>{const r=i===3?.027:.032,L=i===3?.8:1,s1=cseg(grab,r,.085*L,sk,.02,y,-.19,0,-PI/2),s2=cseg(s1.tip,r*.95,.07*L,sk,0,0,0,-.7);cseg(s2.tip,r*.9,.045*L,sk,0,0,0,-.6);grab.F.push(s2)});
-  const t1=cseg(grab,.04,.09,sk,.03,.095,-.04,-.5,-.7);cseg(t1.tip,.037,.07,sk,0,0,0,-.4);bake(grab);cam.add(grab);grab.visible=false}
+/* the left hand that reaches in from the bottom-left and cups the back of the target's head.
+   gh is the hand in a palm frame (x = palm normal into the head, y = toward the fingertips, z = thumb side); the forearm is a separate
+   fixed-length tube re-aimed every frame from the wrist toward an elbow below-left of the camera, so it always enters from the
+   bottom-left corner, never stretches and never detaches. */
+const grab=new T.Group();grab.F=[];const gh=new T.Group(),gfa=new T.Group();grab.add(gh,gfa);
+{const sk=SKIN;hb(gh,.072,.21,.2,sk,-.006,-.005,0);hb(gh,.034,.17,.16,PALM,.024,0,-.005);hb(gh,.1,.11,.1,sk,.005,-.06,.07);
+  hb(gh,.11,.1,.13,sk,-.004,-.125,0);hcap(gh,.14,.066,.066,sk).position.y=-.235;
+  {const b=hoop(gh,.16,.16,.3,toon(0x3a7ad0),0,-.17,0);b.rotation.x=PI/2}
+  [[.066,.03,1],[.022,.031,1.08],[-.022,.03,1],[-.064,.026,.84]].forEach(([z,r,L],i)=>{hb(gh,r*2.3,r*2.2,r*2.3,sk,-.016,.098,z);
+    grab.F.push(finger(gh,r,[.074*L,.058*L,.042*L],0,.1,z,0,0,0,-1,(i-1.5)*.05))});
+  const t1=cseg(gh,.042,.075,sk,.004,-.035,.092,-.15,1.05);hb(t1,.094,.086,.09,sk,0,0,0);const t2=cseg(t1.tip,.039,.06,sk,0,0,0,-.3,.22);hb(t2,.084,.076,.082,sk,0,0,0);hb(t2,.013,.046,.04,NAIL,-.033,.04,0);grab.TH=t2;
+  hcap(gfa,1.6,.056,.08,sk);hb(gfa,.05,.5,.085,sk,.04,.42,-.03);
+  bake(gh);bake(gfa);cam.add(grab);grab.visible=false}
 const mark=cone(scene,.35,.5,.35,new T.MeshBasicMaterial({color:0xb6ff3c,fog:false}),0,-9,0);mark.rotation.x=PI;
 const glow=new T.PointLight(0xff7a1a,0,6);cam.add(glow);glow.position.set(0,-.1,-.8);
-let ext=0,swapT=0,gk=0,flk=0,tapT=3,tapK=0,wasH=null;const GV=new T.Vector3(),GT=new T.Vector3(-.4,-.1,-1.1);
-// per-frame timers: the release flick and the idle thumb tap
+let ext=0,swapT=0,gk=0,flk=0,tapT=3,tapK=0,wasH=null,rcl=0;
+// per-frame timers: the release flick, the idle thumb tap, and the push-in overshoot
 function vmTick(dt){if(wasH&&!held)flk=1;wasH=held;flk=Math.max(0,flk-dt*2.2);tapT-=dt;if(tapT<0){tapT=rand(2.5,6.5);if(ext<.2)tapK=1}tapK=Math.max(0,tapK-dt*2.6)}
-// idle: breathing + sway, thumb double-taps the counter; extended: squeeze + jitter; release: snap back toward you with an upward wrist flick
-function poseArm(g,side,t,bob){const k=ext,du=act.dual>0,id=1-k,j=k*Math.sin(t*26)*.03,br=Math.sin(t*1.9+side)*.007*id,sw=Math.sin(t*.8+side*2)*.006*id,
-  u=1-flk,fb=flk>0?Math.sin(Math.min(1,u*3.5)*PI/2)*(1-u)*(1-u):0,wb=flk>0?Math.sin(u*18)*(1-u)*(1-u)*.16:0,tp=tapK>0?Math.abs(Math.sin((1-tapK)*PI*2)):0;
-  if(g.F){for(let i=0;i<g.F.length;i++)g.F[i].rotation.z=side*(.12+k*.2)+Math.sin(t*21+i*1.7)*.04*k;g.TH.rotation.z=side*(tp*.45-k*.05)}
-  const xr=lerp(.36,du?.37:.34,k),ry=lerp(.44,.45,k);
-  g.position.set(side*(xr+sw+fb*.05),lerp(-.31,-.24,k)+bob+br-fb*.08,lerp(-.47,-.3,k)+j+fb*.3);
-  g.rotation.set(lerp(.32,.3,k)+fb*1.1+wb+br*2,side*(ry-fb*.2),side*(lerp(-.18,-.05,k)-fb*.45)+k*Math.sin(t*19)*.05)}
-function grabPose(dt,t){gk=lerp(gk,held&&act.dual<=0&&mode==='play'?1:0,Math.min(1,dt*12));grab.visible=gk>.03;if(!grab.visible)return;
-  if(held){cam.updateMatrixWorld();held.H.h.getWorldPosition(GV);cam.worldToLocal(GV);const r=held.H.d*.5*held.g.scale.x*held.H.h.scale.x;GT.set(GV.x-r*.85-.03,GV.y+r*.25,GV.z-r*.85);grab.scale.setScalar(clamp(r*5,.6,1.15))}
-  const e=1-gk;grab.position.set(GT.x-e*.45,GT.y-e*.6,GT.z+e*.6);grab.rotation.set(e*.2,-1.1+e*.9,.15+e*.5);
-  for(let i=0;i<grab.F.length;i++)grab.F[i].rotation.z=-.3-gk*(.55+Math.sin(t*23+i)*.06)}
+// idle: hand lifted to chest height, breathing + sway, thumb taps the counter; extended: push in toward the lips, squeeze + jitter;
+// release: a little recoil and a wrist flick back toward you. x is fitted to the screen's aspect so the hand stays just right of centre
+// on wide, 4:3 and phone (landscape or portrait) screens.
+function poseArm(g,side,t,bob){const k=ext,du=act.dual>0,id=1-k,j=k*Math.sin(t*26)*.01,br=Math.sin(t*1.9+side)*.008*id,sw=Math.sin(t*.8+side*2)*.008*id,sy=Math.sin(t*1.3+side)*.025*id,
+  u=1-flk,fb=flk>0?Math.sin(Math.min(1,u*3.5)*PI/2)*(1-u)*(1-u):0,wb=flk>0?Math.sin(u*18)*(1-u)*(1-u)*.16:0,tp=tapK>0?Math.abs(Math.sin((1-tapK)*PI*2)):0,
+  af=clamp(cam.aspect/1.6,.3,1.1),ps=clamp((1-cam.aspect)*.3,0,.12);
+  if(g.F){const sq=k*.14;for(let i=0;i<g.F.length;i++){const f=g.F[i],w=Math.sin(t*21+i*1.7)*.035*k;f[1].rotation.z=f[1].userData.r0+side*(sq+w);f[2].rotation.z=f[2].userData.r0+side*sq*.6}
+    g.TH.rotation.x=-.1+tp*.55-k*.06}
+  const xr=lerp(du?.27:.2,du?.27:.19,k)*af,ry=lerp(.14,.2,k)*(.5+.5*Math.min(1,af));
+  g.position.set(side*(xr+sw+fb*.05),lerp(-.2,-.19,k)-ps*.5+bob+br-fb*.08,lerp(-.44,-.4,k)+j+fb*.25-ps*1.3);
+  g.rotation.set(lerp(.34,.24,k)+fb*.9+wb+br*2,side*(ry+sy-fb*.2),side*(lerp(-.1,-.03,k)-fb*.4)+k*Math.sin(t*19)*.03)}
+// the support distance of a creature's head along a camera-space direction: sampled points of everything on the head (hats, hair, ears)
+const _hq=new T.Quaternion(),_cq=new T.Quaternion(),_hs=new T.Vector3(),_hv=new T.Vector3(),_hp=new T.Vector3();
+function headPts(n){if(n._hp)return n._hp;const h=n.H.h,inv=new T.Matrix4(),m=new T.Matrix4(),v=new T.Vector3(),pts=[];h.updateMatrixWorld(true);inv.copy(h.matrixWorld).invert();
+  h.traverse(o=>{if(!o.isMesh||o.material===INK||o===n.H.m)return;const P=o.geometry.attributes.position,st=Math.max(1,Math.floor(P.count/90));m.multiplyMatrices(inv,o.matrixWorld);
+    for(let i=0;i<P.count;i+=st){v.fromBufferAttribute(P,i).applyMatrix4(m);pts.push(v.x,v.y,v.z)}});return n._hp=new Float32Array(pts)}
+function headR(n,u){const P=headPts(n);n.H.h.matrixWorld.decompose(_hp,_hq,_hs);cam.getWorldQuaternion(_cq);_hv.copy(u).applyQuaternion(_cq).applyQuaternion(_hq.invert());
+  let b=0;for(let i=0;i<P.length;i+=3){const d=P[i]*_hv.x+P[i+1]*_hv.y+P[i+2]*_hv.z;if(d<=0)continue;if(d*d>.86*(P[i]*P[i]+P[i+1]*P[i+1]+P[i+2]*P[i+2])&&d>b)b=d}
+  return(b||n.H.d*.5)*_hs.x}
+const GC=new T.Vector3(),GB=new T.Vector3(),GL=new T.Vector3(),GU=new T.Vector3(),GD=new T.Vector3(),GF=new T.Vector3(),GZ=new T.Vector3(),GP=new T.Vector3(-.3,-.4,-.55),GW=new T.Vector3(),
+  GA=new T.Vector3(),GE=new T.Vector3(-.7,-.95,.04),GS=new T.Vector3(-.28,-.36,.02),GM=new T.Matrix4(),GQ=new T.Quaternion(),IP=new T.Vector3(),IQ=new T.Quaternion(),
+  GCU=[[.4,.6,.5],[.4,.6,.5],[.4,.6,.5],[.4,.6,.5]];let gs=1,gr=.25,gth=-.3;
+// the relaxed left hand: palm down at the lower left, fingers pointing forward-right and loosely curled
+{GD.set(.3,-.95,.05).normalize();GF.set(.42,-.1,-.9);GF.addScaledVector(GD,-GF.dot(GD)).normalize();GZ.crossVectors(GD,GF);GM.makeBasis(GD,GF,GZ);IQ.setFromRotationMatrix(GM);GQ.copy(IQ)}
+function grabPose(dt,t){const on=mode==='play'&&act.dual<=0&&armR.visible;grab.visible=on;if(!on){gk=0;return}
+  gk=lerp(gk,held?1:0,Math.min(1,dt*(held?11:7)));
+  const af=clamp(cam.aspect/1.6,.3,1.1);IP.set(-.3*af+Math.sin(t*.8)*.006,-.33+Math.sin(t*1.9)*.006-clamp((1-cam.aspect)*.45,0,.22),-.62+Math.sin(t*1.1)*.006);
+  if(held){cam.updateMatrixWorld();held.H.h.updateMatrixWorld();held.H.h.getWorldPosition(GC);cam.worldToLocal(GC);
+    // around the head: b away from you, l to your left, u up; the hand lands on the upper left side of the skull
+    // (or hat), fingers wrapping up and back round it, and is turned a little toward you so you see its back, knuckles and nails
+    GB.copy(GC).normalize();GL.crossVectors(Y1,GB).normalize();GU.crossVectors(GB,GL);GD.copy(GL).multiplyScalar(.82).addScaledVector(GB,.12).addScaledVector(GU,.5).normalize();
+    gr=lerp(gr,headR(held,GD),held.lockT>.1?.25:1);gs=clamp(gr*4.4,.6,1.12);GP.copy(GC).addScaledVector(GD,gr+.036*gs);
+    // never let the wrist bend back past ~70 degrees from the forearm
+    GF.copy(GU).addScaledVector(GB,.7);GF.addScaledVector(GD,-GF.dot(GD)).normalize();
+    for(let i=0;i<2;i++){GW.copy(GP).addScaledVector(GF,-.13*gs);GA.copy(GW).sub(GE).normalize();const c=GA.dot(GF);if(c>.34)break;GF.addScaledVector(GA,.34-c+.15);GF.addScaledVector(GD,-GF.dot(GD)).normalize()}
+    GW.copy(GP).addScaledVector(GF,-.13*gs);const rd=GW.distanceTo(GS);if(rd>1.7){GA.copy(GW).sub(GS).multiplyScalar(1.7/rd).add(GS);GP.add(GA.sub(GW))}
+    GD.addScaledVector(GB,-.7).normalize();GF.addScaledVector(GD,-GF.dot(GD)).normalize();GD.negate();GZ.crossVectors(GD,GF);GM.makeBasis(GD,GF,GZ);GQ.setFromRotationMatrix(GM);
+    // fingers curl to follow the skull: each joint bends by its length over the head's radius at the fingertips
+    GA.copy(GD).multiplyScalar(-.5).addScaledVector(GF,.87).normalize();const Rl=(Math.max(gr,headR(held,GA))+.03*gs)/gs;
+    for(const c of GCU){c[0]=clamp(.05/Rl,.15,.9);c[1]=clamp(.075/Rl,.25,1.25)+Math.sin(t*23)*.03;c[2]=clamp(.055/Rl,.2,1.1)}gth=-.3-clamp(.03/Rl,0,.3)}
+  // blend between the relaxed pose and the grip (eased), sliding through a point a little below the straight line so it reaches up and over
+  const e=gk*gk*(3-2*gk);gh.position.lerpVectors(IP,GP,e);gh.position.y-=Math.sin(e*PI)*.06;gh.quaternion.slerpQuaternions(IQ,GQ,e);gh.scale.setScalar(lerp(1,gs,e));
+  for(let i=0;i<4;i++){const f=grab.F[i],c=GCU[i],w=Math.sin(t*1.7+i)*.03*(1-e);f[0].rotation.z=-lerp(.12+i*.04+w,c[0],e);f[1].rotation.z=-lerp(.3+i*.05+w,c[1],e);f[2].rotation.z=-lerp(.22,c[2],e)}
+  grab.TH.rotation.z=lerp(-.2,gth,e);grab.position.set(0,0,0);
+  // forearm: from the wrist toward the elbow, fixed length
+  GW.set(0,-.235,0).multiplyScalar(gh.scale.x).applyQuaternion(gh.quaternion).add(gh.position);gfa.position.copy(GW);GA.copy(GE).sub(GW).normalize();gfa.quaternion.setFromUnitVectors(Y1,GA);const fs=lerp(1,gh.scale.x,.7);gfa.scale.set(fs,1,fs)}
 
 /* ================= SMOKE, EMOJI, LITTER ================= */
 const stex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,32,2,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.5,'rgba(255,255,255,.45)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new T.CanvasTexture(c)})();
@@ -821,13 +898,17 @@ function pose(n,mv,arms,face,t,dt){const k=Math.min(1,dt*14),kb=Math.min(1,dt*25
   if(hd)rx=q4||n.bird?0:.2;else if(cg){by=q4?0:-.04-cf*.03;rx=q4?cf*.14:0}
   else if(mv){by=(Math.abs(c1)-.5)*(run?.11:zb?.03:.05)*(q4?.6:1);if(n.bird)by=Math.abs(s1)*.03;if(!q4){rz=s1*(zb?.1:.035);ry=s1*(run?.07:.1)}else if(run)rx=Math.sin(ph*2)*.06}
   else if(!q4)rz=ws*.02;
-  if(rt){rt.position.y=lerp(rt.position.y,by,kb);rt.rotation.set(lerp(rt.rotation.x,rx,k),lerp(rt.rotation.y,ry,kb),lerp(rt.rotation.z,rz,kb))}
+  // squash and stretch: a startled rock-back before bolting, a satisfied slump after a big exhale, a dreamy sway when hooked
+  const stl=n.startle>0?Math.sin(clamp(1-n.startle/.32,0,1)*PI):0,sl=n.slump>0&&!mv?Math.min(1,n.slump):0;if(n.slump>0)n.slump-=dt*.7;
+  if(stl){rx-=.2*stl;by-=.05*stl}if(zb&&!mv&&!q4){rz=Math.sin(t*1.15+n.ph)*.09;rx=.04+Math.sin(t*.8+n.ph)*.04;by=Math.sin(t*2.3+n.ph)*.012}if(sl)by-=.03*sl;
+  if(rt){rt.position.y=lerp(rt.position.y,by,kb);rt.rotation.set(lerp(rt.rotation.x,rx,k),lerp(rt.rotation.y,ry,kb),lerp(rt.rotation.z,rz,kb));
+    const sy=1-.16*stl+(face===1?.05*Math.min(1,n.inh/n.t.cap):0)-(cg?cf*.07:0)-.05*sl,sx=1/Math.sqrt(sy);rt.scale.set(lerp(rt.scale.x,sx,kb),lerp(rt.scale.y,sy,kb),lerp(rt.scale.z,sx,kb))}
   // upper body hinges at the hips, shoulders counter-twist against the hips
   if(n.P){let px=0,py=0,pz=0;
     if(hd){px=.32+Math.sin(t*9)*.06;py=Math.sin(t*11)*.22;pz=Math.sin(t*7.3)*.1}else if(cg){px=.72+cf*.35;pz=Math.sin(t*3+n.ph)*.05}
     else if(fl){px=.16+Math.sin(t*9+n.ph)*.06;py=-s1*.25}else if(zb){px=.2+Math.sin(t*1.7+n.ph)*.05;pz=Math.sin(ph*.5+t*.8)*.12;py=-s1*.1}
     else if(mv){px=run?.28:.05;py=-s1*(run?.25:.2)}else px=Math.sin(t*1.8+n.ph)*.018;
-    px+=n.hunch||0;n.P.rotation.set(lerp(n.P.rotation.x,px,k),lerp(n.P.rotation.y,py,kb),lerp(n.P.rotation.z,pz,k))}
+    px+=(n.hunch||0)+.32*sl-.28*stl;n.P.rotation.set(lerp(n.P.rotation.x,px,k),lerp(n.P.rotation.y,py,kb),lerp(n.P.rotation.z,pz,k))}
   // arms: counter-swing, pumping run, panic flail overhead, zombie reach, struggle flap, cough fist + hand on knee
   for(let i=0;i<n.A.length;i++){const a=n.A[i],s=i?1:-1;let rx=0,rz=s*(.1+(n.ao||0)),el=.15,wx=0,wz=0;
     if(fl){rx=-2.75+Math.sin(t*16+i*PI)*.5;rz=s*(.35+Math.sin(t*13+i*2)*.3);el=.35+Math.sin(t*15+i)*.45;wz=Math.sin(t*30+i)*.6}
@@ -837,6 +918,7 @@ function pose(n,mv,arms,face,t,dt){const k=Math.min(1,dt*14),kb=Math.min(1,dt*25
     else if(n.hug){rx=-.5+Math.sin(t*2+i)*.04;rz=s*.28;el=1.3;wx=.3}
     else if(mv){const fw=(i?-1:1)*s1;rx=fw*(run?.95:.5);el=run?1.45:.22+Math.max(0,-fw)*.35;rz=s*(.1+(n.ao||0)+(run?.08:0))}
     else rx=Math.sin(t*1.8+n.ph+i)*.03;
+    if(stl&&!fl&&!hd){rx=-1.9*stl;rz=s*.35;el=1.6*stl;wx=-.4*stl}else if(sl&&!zb&&!hd&&!cg){rx=.08;rz=s*(.06+(n.ao||0));el=.04}
     if(!a.k&&!fl&&!hd&&!cg){rz=s*(1.3+Math.sin(t*3+i*2+n.ph)*.35);rx=-.3}
     a.rotation.x=lerp(a.rotation.x,rx,k);a.rotation.z=lerp(a.rotation.z,rz,k);if(a.k)a.k.rotation.x=lerp(a.k.rotation.x,-el,k);if(a.h){a.h.rotation.x=lerp(a.h.rotation.x,wx,k);a.h.rotation.z=lerp(a.h.rotation.z,wz,k)}}
   if(n.ts){const f=face===1?Math.min(1.25,n.inh/n.t.cap):0,v=lerp(n.torso.scale.x/n.ts.x,1+f*.45,k*.6);n.torso.scale.x=n.ts.x*v;n.torso.scale.z=n.ts.z*v}
@@ -846,33 +928,56 @@ function pose(n,mv,arms,face,t,dt){const k=Math.min(1,dt*14),kb=Math.min(1,dt*25
   else if(cg){hx=q4?.35+cf*.4:-.45+cf*.5;hz=Math.sin(t*5+n.ph)*.1}else if(fl){hy=Math.sin(t*19+n.ph)*.35;hx=-.15}
   else if(zb){hx=.28+Math.sin(t*1.3+n.ph)*.1;hz=.3+Math.sin(t*.9+n.ph)*.15}else if(mv)hx=Math.sin(ph*2)*.05-(run?.15:0);
   else{hy=Math.sin(t*.43+n.ph*3)*Math.sin(t*.27+n.ph)*1.1;hx=Math.sin(t*.6+n.ph)*.06}
+  hx+=.28*sl-.22*stl;if(zb&&!mv)hz+=Math.sin(t*1.15+n.ph+.6)*.12;
   const hk=hd?1:k;H.h.rotation.set(lerp(H.h.rotation.x,hx,hk),lerp(H.h.rotation.y,hy,hk),lerp(H.h.rotation.z,hz,hk));
   if(n.bird&&H.h.userData.p0)H.h.position.z=H.h.userData.p0.z+(mv&&!run?Math.max(0,Math.sin(ph*2))*.04:0);
   let es=1,ey=1,mx=1,my=1,hs=1;
   // mouth: an O on the inhale, a wide stretched cough on the exhale, a gasp in a panic; cheeks balloon out as the lungs fill
-  let cp=1;if(face===1){const f=Math.min(1,n.inh/n.t.cap);es=1.3;mx=.5;my=3.1;hs=1+.08*f;cp=1.25+f*.95}else if(face===2){ey=.25;mx=1.35;my=2.6;cp=.9}else if(face===3){es=1.3;mx=.95;my=3}else if(n.hooked)ey=.55;
+  let cp=1;if(face===1){const f=Math.min(1,n.inh/n.t.cap);es=1.3;mx=.5;my=3.1;hs=1+.08*f;cp=1.25+f*.95}else if(face===2){ey=.25;mx=1.35;my=2.6;cp=.9}else if(face===3){es=1.35;mx=.95;my=3.2}else if(n.hooked||sl){ey=sl?.4:.5;mx=1.3;my=.7}
   if(H.C)for(const c of H.C){const s0=c.userData.s0;if(s0){const v=lerp(c.scale.x/s0.x,cp,k);c.scale.set(s0.x*v,s0.y*v,s0.z*v)}}
   if(H.dec){const fi=face===1?2:face===3?1:(face===2||n.hooked)?3:0;if(n.fi!==fi){n.fi=fi;H.dec.material.map=FACE[fi]}}
   for(const e of H.E){e.scale.x=lerp(e.scale.x,es,k);e.scale.y=lerp(e.scale.y,es*ey,k)}
-  if(H.B){const bz=face===1||face===3?.5:face===2?-.35:0;for(let i=0;i<2;i++)H.B[i].rotation.z=lerp(H.B[i].rotation.z,(i?-1:1)*bz,k)}
+  if(H.B){const bz=face===1||face===3||stl?.5:face===2?-.35:n.hooked||sl?-.14:0,bl=(face===3||stl?.07:face===1?.03:n.hooked?.025:0)*H.d;
+    for(let i=0;i<2;i++){const b=H.B[i];b.rotation.z=lerp(b.rotation.z,(i?-1:1)*bz,k);if(b.userData.y0!==undefined)b.position.y=lerp(b.position.y,b.userData.y0+bl,k)}}
   H.m.scale.x=lerp(H.m.scale.x,n.ms.x*mx,k);H.m.scale.y=lerp(H.m.scale.y,n.ms.y*my,k);H.h.scale.setScalar(lerp(H.h.scale.x,hs,k));
   if(n.spin)n.spin.rotation.y+=dt*(mv?22:6);if(n.tail)n.tail.rotation.z=arms===2||face===1?Math.sin(t*16)*.7:Math.sin(t*2+n.ph)*.15;if(n.wh)for(const w of n.wh)w.rotation.y=-n.ph*2.6;
   if(n.Wg)for(let i=0;i<2;i++)n.Wg[i].rotation.z=(i?-1:1)*(face===3||face===1?-(.8+Math.sin(t*34)*.8):0);if(n.paci)n.paci.visible=face===0}
 // while someone is on the vape: hide any of their body parts that crowd the camera or sit well in front of their own mouth
-const NH=new T.Vector3(),NF=new T.Vector3();
+const NH=new T.Vector3(),NF=new T.Vector3(),NV=new T.Vector3();
 function nearHide(n,M){if(!n.np){n.np=[];n.g.traverse(o=>{if(!o.isMesh||o.material===INK||o.material===shM)return;let q=o;while(q&&q!==n.H.h)q=q.parent;if(!q)n.np.push(o)})}
-  const C=cam.position;NF.set(0,0,-1).applyQuaternion(cam.quaternion);const md=NF.x*(M.x-C.x)+NF.y*(M.y-C.y)+NF.z*(M.z-C.z);n.nhOn=1;
+  const C=cam.position;NF.set(0,0,-1).applyQuaternion(cam.quaternion);const md=NF.x*(M.x-C.x)+NF.y*(M.y-C.y)+NF.z*(M.z-C.z);n.nhOn=1;armR.V.getWorldPosition(NV);
   for(const o of n.np){const e=o.matrixWorld.elements;NH.set(e[12],e[13],e[14]);const r=.5*Math.max(Math.hypot(e[0],e[1],e[2]),Math.hypot(e[4],e[5],e[6]),Math.hypot(e[8],e[9],e[10])),
     dz=NF.x*(NH.x-C.x)+NF.y*(NH.y-C.y)+NF.z*(NH.z-C.z);
-    const dc=NH.distanceTo(C);if(dc<r*1.2+.3||r>dc*.45||dz<md-.3-r*.5){if(o.visible){o.visible=false;o.userData.nh=1}}else if(o.userData.nh){o.visible=true;o.userData.nh=0}}}
+    const dc=NH.distanceTo(C);if(dc<r*1.2+.3||r>dc*.45||dz<md-.3-r*.5||NH.distanceTo(NV)<r+.2){if(o.visible){o.visible=false;o.userData.nh=1}}else if(o.userData.nh){o.visible=true;o.userData.nh=0}}}
 function nearShow(n){n.nhOn=0;for(const o of n.np)if(o.userData.nh){o.visible=true;o.userData.nh=0}}
 // keep creatures from standing inside each other, inside you, or inside walls
 function sep(n,p,dt){let mx=0,mz=0;for(const o of npcs){if(o===n)continue;const q=o.g.position,dx=p.x-q.x,dz=p.z-q.z,r=(n.r+o.r)*.85;if(dx>r||dx<-r||dz>r||dz<-r)continue;
     const d=Math.hypot(dx,dz);if(d>=r||d<1e-4)continue;const w=o.state==='held'||o.state==='exhale'?1:.5;mx+=dx/d*(r-d)*w;mz+=dz/d*(r-d)*w}
-  {const dx=p.x-px,dz=p.z-pz,r=n.r*.85+.45,d=Math.hypot(dx,dz);if(d<r&&d>1e-4){mx+=dx/d*(r-d);mz+=dz/d*(r-d)}}
-  if(mx||mz){const f=Math.min(1,dt*10);p.x+=mx*f;p.z+=mz*f;collide(p,n.r)}}
+  {const dx=p.x-px,dz=p.z-pz,r=n.r+.75,d=Math.hypot(dx,dz);if(d<r&&d>1e-4){mx+=dx/d*(r-d)*4;mz+=dz/d*(r-d)*4}}
+  if(mx||mz){const f=Math.min(1,dt*12);p.x+=mx*f;p.z+=mz*f;collide(p,n.r)}}
+/* anti-clipping, run after every mod has moved its creatures for the frame (conga lines, bosses, crowd steering):
+   creatures don't overlap each other (the smaller one gives way), and they keep a hard personal space around you;
+   if a wall pins one inside it, you get nudged back instead */
+const UC=[];
+function unclip(){UC.length=0;for(const n of npcs){if(n===held||n.state==='held')continue;const p=n.g.position;if(Math.abs(p.x-px)+Math.abs(p.z-pz)<30)UC.push(n)}
+  for(let it=0;it<2;it++)for(let i=0;i<UC.length;i++){const a=UC[i],pa=a.g.position;
+    for(let j=i+1;j<UC.length;j++){const b=UC[j],pb=b.g.position,r=(a.r+b.r)*.9,dx=pa.x-pb.x,dz=pa.z-pb.z;if(dx>r||dx<-r||dz>r||dz<-r)continue;const d=Math.hypot(dx,dz);if(d>=r)continue;
+      const nx=d>1e-4?dx/d:1,nz=d>1e-4?dz/d:0,o=r-d,wa=b.r*b.r/(a.r*a.r+b.r*b.r);pa.x+=nx*o*wa;pa.z+=nz*o*wa;pb.x-=nx*o*(1-wa);pb.z-=nz*o*(1-wa);collide(pa,a.r);collide(pb,b.r)}}
+  for(const n of UC){const p=n.g.position,R=n.r+.75;let dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,dz);if(d>=R)continue;if(d<1e-4){dx=-Math.sin(yaw);dz=-Math.cos(yaw);d=1}
+    p.x=px+dx/d*R;p.z=pz+dz/d*R;collide(p,n.r);dx=p.x-px;dz=p.z-pz;d=Math.hypot(dx,dz);
+    if(d<R-.02&&d>1e-4){const o=R-d;v3.set(px-dx/d*o,0,pz-dz/d*o);collide(v3,.45);px=v3.x;pz=v3.z}}}
+// camera guard: the stop-motion mod draws creatures on twos (up to a frame behind the smooth camera), so as a last line of defence
+// hide any creature part that would sit inside the lens this frame. Hooked up after the mods load so it runs after their prerender.
+const CGV=new T.Vector3();
+function camGuard(){const C=cam.position;for(const n of npcs){if(n===held)continue;const p=n.g.position,dx=p.x-C.x,dz=p.z-C.z;
+  if(dx*dx+dz*dz>9){if(n.cgOn){n.cgOn=0;for(const o of n.cgp)if(o.userData.cg){o.visible=true;o.userData.cg=0}}continue}
+  if(!n.cgp){n.cgp=[];n.g.traverse(o=>{if(o.isMesh&&o.material!==shM)n.cgp.push(o)})}n.cgOn=1;n.g.updateMatrixWorld(true);
+  for(const o of n.cgp){const e=o.matrixWorld.elements;CGV.set(e[12],e[13],e[14]);const r=.5*Math.max(Math.hypot(e[0],e[1],e[2]),Math.hypot(e[4],e[5],e[6]),Math.hypot(e[8],e[9],e[10])),
+    h=CGV.distanceTo(C)<r+.2;if(h&&o.visible){o.visible=false;o.userData.cg=1}else if(!h&&o.userData.cg){o.visible=true;o.userData.cg=0}}}}
+
 const LK1=new T.Vector3(),LK2=new T.Vector3();
-function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,dz)||.01,ty=n.t;{const iv=d<42;if(n.inkV!==iv){n.inkV=iv;for(const h of n.inks)h.visible=iv}}n.cool-=dt;n.bust-=dt;if(n.state!=='flee')n.fl=Math.max(0,n.fl-dt*.5);
+function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,dz)||.01,ty=n.t;
+  if(n.state!==n._ls){if(n.state==='flee'&&n._ls==='wander')n.startle=.32;else n.startle=0;if(n._ls==='exhale'&&n.hooked)n.slump=1.4;n._ls=n.state}{const iv=d<42;if(n.inkV!==iv){n.inkV=iv;for(const h of n.inks)h.visible=iv}}n.cool-=dt;n.bust-=dt;if(n.state!=='flee')n.fl=Math.max(0,n.fl-dt*.5);
   if(d>130&&n.state!=='exhale')return;
   if(n.state==='held'){const s=Math.sin(yaw),c=Math.cos(yaw),dd=.98+n.hz,k=Math.min(1,dt*12);
     p.x=lerp(p.x,px-s*dd,k)+Math.sin(t*41)*.014;p.z=lerp(p.z,pz-c*dd,k)+Math.cos(t*37)*.014;p.y=lerp(p.y,ty.lift||0,k);
@@ -899,6 +1004,7 @@ function think(n,dt,t){const p=n.g.position,dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,
     n.sayT-=dt;if(n.sayT<0){n.sayT=rand(4,10);if(d<12){say(n,pick(ty.want),2);call(n,0)}}}
   else if(n.type==='cop'&&heat>.3&&d<48&&n.state!=='flee'){if(copT<=0&&d<30)clip('sfx/whistle',{vol:.35*(1-d/30)});copT=2;go(n,px,pz,ty.speed,dt);mv=2;n.sayT-=dt;if(n.sayT<0){n.sayT=rand(3,6);say(n,pick(['STOP! VAPE POLICE!','DROP THE MANGO','HANDS OFF THE PIGEON']),1.6)}
     if(d<1.4&&n.bust<=0&&stun<=0&&held!==n){n.bust=7;combo=Math.floor(combo/2);stun=.5;pvx=-dx/d*16;pvz=-dz/d*16;if(held)release(held,'ok');toast('BUSTED — HALF YOUR COMBO CONFISCATED',1.8);emit('bust',n);sfx(0);voice('busted',1);if(!clip('sfx/whistle',{vol:.55})){beep(200,.3,'sawtooth',.08);beep(150,.4,'sawtooth',.08,.15)}}}
+  else if(n.state==='flee'&&n.startle>0){n.startle-=dt;face=3;n.sp=0;n.g.rotation.y=Math.atan2(-dx,-dz)}   // a beat of surprise first
   else if(n.state==='flee'){n.tm-=dt;arms=1;face=3;let fx=dx/d,fz=dz/d;if(ty.zig){const w=Math.sin(t*2.2+n.ph)*.35;fx+=-dz/d*w;fz+=dx/d*w}
     if(Math.abs(p.x)>B-8||Math.abs(p.z)>B-8){fx=-p.x;fz=-p.z}
     n.fl+=dt;go(n,p.x+fx*5,p.z+fz*5,ty.speed*Math.max(.5,1-.12*n.times)*Math.max(.6,1-n.fl*.07),dt);mv=1;if(n.fl>5&&Math.random()<dt*.4)say(n,pick(['*wheeze*','ok… ok…','my lungs']),1.2);if(ty.hop)p.y=Math.abs(Math.sin(n.ph*1.6))*.18;if(n.tm<0&&d>alertR+4){n.state='wander';n.tm=0}}
@@ -968,7 +1074,7 @@ function frame(now){requestAnimationFrame(frame);let dt=Math.min(.05,(now-last)/
   for(const b of bubs){if(!b.n){if(!b.d.hidden)b.d.hidden=true;continue}b.t-=dt;if(b.t<=0||mode!=='play'){b.n=null;b.d.hidden=true;continue}
     tmp.copy(b.n.g.position);tmp.y+=b.n.hy+.6;const dist=tmp.distanceTo(cam.position);tmp.project(cam);
     if(tmp.z>1||dist>34){b.d.hidden=true;continue}b.d.hidden=false;b.d.style.transform=`translate(${(tmp.x*.5+.5)*w}px,${(-tmp.y*.5+.5)*h}px) translate(-50%,-100%)`}
-  if(mode==='play')emit('frame',dt,t);emit('prerender',dt,t);
+  if(mode==='play'){emit('frame',dt,t);unclip()}emit('prerender',dt,t);
   R.render(scene,cam);
 }
 requestAnimationFrame(frame);
@@ -985,6 +1091,7 @@ window.TMV={T,THREE:T,R,scene,cam,W,game,npcs,TYPES,BUILD,PW,act,FLAV,STOCK,BUF,
   set used(v){used=v},get twist(){return twist},set twist(v){twist=v},
   get alertR(){return alertR},set alertR(v){alertR=v},get ext(){return ext},get holding(){return !!(hold||keys.Space)},keys};
 window.TMV.sal=SALAPI;window.TMV.bake=bake;window.TMV.limb=limb;window.TMV.orb=orb;
+{let cg=0;on('start',()=>{if(!cg){cg=1;on('prerender',camGuard)}})} /* after the mods' prerender hooks (the stop-motion pose is applied by then) */
 Object.defineProperty(window.TMV,'slow',{get:()=>slow,set:v=>{slow=v}});
 {const th=think;think=(n,dt,t)=>{if(mode!=='paused')th(n,dt,t)}}TMV.setMute=setMute;TMV.duckAll=v=>{duckV=v;if(MASTER&&AC)MASTER.gain.setTargetAtTime(muted?0:masterV*v,AC.currentTime,.12)};Object.defineProperty(TMV,'muted',{get:()=>muted}); /* mobile: pause freezes creatures; mute toggle for mods */
 TMV.TXS={grass:TXgrass,road:TXroad,tile:TXtile,leaf:TXleaf,bark:TXbark,water:TXwater,plank:TXplank,hay:TXhay,corr:TXcorr}; /* clay mod repaints these */
