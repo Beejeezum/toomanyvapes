@@ -73,44 +73,119 @@ function steerPost(n,i,d,dt){const p=n.g.position,ty=n.t;let spd=0,dx=0,dz=0;
   const a=n._av;if(!a)return;a[2]-=dt;if(a[2]<=0)n._av=null}
 
 /* ================= CONGA LINE =================
-   The player's path is kept as a breadcrumb ring buffer (one point per 0.4m). Hooked followers are ordered by
-   when they joined and each walks to its own slot further back along that path, facing the one in front. */
+   The player's path is kept as a breadcrumb ring buffer (one point per 0.4m). Hooked followers are ordered by when they joined.
+   Walking, each gets a spot further back along that path with a comfortable gap: the first stands ~2 m behind you plus its own
+   radius (a cow or a big act further), each next one ~1.3-1.8 m behind the one ahead (more for big bodies); where your path doubles
+   back, a spot that would land on an earlier one (or on you) is skipped. Standing still, they gather in a loose staggered arc behind
+   you instead (rows of 2, 3, 4...), laid out once so turning to look at them doesn't shuffle them.
+   They ease into their spots (fast catch-up when far behind, slowing down on arrival), steer round buildings, each other and you:
+   walk back through the line and they step off your line instead of bumping into the lens. */
 const TN=320,STEP=.4,TRx=new Float32Array(TN),TRz=new Float32Array(TN);let ti=0,tn=0,congaN=0,congaBest=0,chantT=4;
 function trailPush(x,z){ti=(ti+1)%TN;TRx[ti]=x;TRz[ti]=z;if(tn<TN)tn++}
 function trail(){const px=X.px,pz=X.pz;if(!tn){trailPush(px,pz);return}let lx=TRx[ti],lz=TRz[ti],dx=px-lx,dz=pz-lz,d=Math.hypot(dx,dz);
   if(d>25){tn=0;trailPush(px,pz);return}while(d>=STEP){lx+=dx/d*STEP;lz+=dz/d*STEP;trailPush(lx,lz);d-=STEP}}
+// the player's own motion: smoothed velocity and how long you've stood still (a teleport is not a step)
+const PL={x:0,z:0,vx:0,vz:0,sp:0,still:0,arc:false,ax:0,az:1,cx:0,cz:0,n:-1};
+function playerMotion(dt){const jx=X.px-PL.x,jz=X.pz-PL.z,k=Math.min(1,dt*10);PL.x=X.px;PL.z=X.pz;
+  if(Math.abs(jx)+Math.abs(jz)>3||dt<=0){PL.vx=PL.vz=0}else{PL.vx=lerp(PL.vx,jx/dt,k);PL.vz=lerp(PL.vz,jz/dt,k)}
+  PL.sp=Math.hypot(PL.vx,PL.vz);PL.still=PL.sp<.5?PL.still+dt:0}
+// a body's reach: its collision radius undersells long animals (a cow's nose sticks out ~1.5 m from its middle) and arms
+const REACH={cow:1.6,dog:1.6,cat:1.6,pigeon:1.3,chicken:1.25,kid:1.5},reach=n=>n.reach||(n.reach=n.r*(REACH[n.type]||1.2));
+const lead=n=>1.6+reach(n),gapF=(a,b)=>Math.max(1.35,reach(a)+reach(b)+.45);// you → first follower; follower → the one ahead (centre to centre)
+function trailSlots(L){let k=0,ax=X.px,az=X.pz,i=0;
+  for(;i<L.length;i++){const n=L[i],need=i?gapF(L[i-1],n):lead(n),pr=lead(n)-.3;let ok=false;
+    for(;k<tn;k++){const j=(ti-k+TN)%TN,x=TRx[j],z=TRz[j];
+      if((x-ax)**2+(z-az)**2<need*need||(x-X.px)**2+(z-X.pz)**2<pr*pr)continue;
+      let cl=true;for(let m=0;m<i-1;m++){const o=L[m],q=reach(o)+reach(n)+.2;if((x-o._slx)**2+(z-o._slz)**2<q*q){cl=false;break}}
+      if(!cl)continue;n._slx=x;n._slz=z;ax=x;az=z;ok=true;break}
+    if(!ok)break}
+  // trail too short (just started, or after a teleport): the rest line up straight on behind, a little staggered
+  if(i<L.length){let ex=ax-X.px,ez=az-X.pz,el=Math.hypot(ex,ez);if(el<.5){ex=Math.sin(X.yaw);ez=Math.cos(X.yaw);el=1}ex/=el;ez/=el;
+    for(;i<L.length;i++){const n=L[i],need=i?gapF(L[i-1],n):lead(n),sd=i%2?.4:-.4;ax+=ex*need;az+=ez*need;n._slx=ax-ez*sd;n._slz=az+ex*sd}}}
+const AR=[];
+function arcSlots(L){const bx=PL.ax,bz=PL.az,qx=-bz,qz=bx,lat=n=>(n.g.position.x-X.px)*qx+(n.g.position.z-X.pz)*qz;PL.cx=X.px;PL.cz=X.pz;PL.n=L.length;
+  let i=0,row=0,R=0,pm=0;
+  while(i<L.length){const m=Math.min(row+2,L.length-i);let rm=0;AR.length=0;for(let j=0;j<m;j++){const n=L[i+j];rm=Math.max(rm,reach(n));AR.push(n)}
+    R=row?R+Math.max(1.35,pm+rm+.45):1.6+rm;const s=Math.max(1.3,2*rm+.4);AR.sort((a,b)=>lat(a)-lat(b));// left stays left: nobody crosses over
+    for(let j=0;j<m;j++){const a=(j-(m-1)/2)*s/R,c=Math.cos(a),sn=Math.sin(a),n=AR[j];TMP.x=X.px+(bx*c+qx*sn)*R;TMP.z=X.pz+(bz*c+qz*sn)*R;X.collide(TMP,n.r);n._slx=TMP.x;n._slz=TMP.z}
+    pm=rm;i+=m;row++}}
+// walk n toward its spot (sx,sz); returns its speed. Shared by the conga and the door queue.
+const NB=[];let FOL=[];
+function follow(n,sx,sz,dt){const p=n.g.position;let dx=sx-p.x,dz=sz-p.z,vx=0,vz=0;const d=Math.hypot(dx,dz),ux=p.x-X.px,uz=p.z-X.pz,du=Math.hypot(ux,uz)||1e-3,C=reach(n)+1.2;let kv=9;
+  if(d>.08){// stragglers scurry to catch up (up to sprint speed), then slow down into their spot
+    const sp=Math.min(d*2.4,Math.max(4.6,n.t.speed*(d>5?1.35:1),d>3?Math.min(12.5,4+d*.75):0));dx/=d;dz/=d;const f=n.r+1.2,c=boxAt(p.x+dx*f,p.z+dz*f,n.r+.1);
+    if(c){const tg=avoid(n,c,p,dx,dz);dx=dx*.3+tg[0];dz=dz*.3+tg[1];const l=Math.hypot(dx,dz);dx/=l;dz/=l}
+    // never straight through you: if the way to the spot runs at you, curve round you on the spot's side
+    if(du<C+2.5){const at=-(ux*dx+uz*dz)/du;if(at>0){let tx=-uz/du,tz=ux/du;if(tx*(sx-X.px)+tz*(sz-X.pz)<0){tx=-tx;tz=-tz}const w=clamp((C+2.5-du)/2,0,1)*at*2;dx+=tx*w;dz+=tz*w;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l}}
+    vx=dx*sp;vz=dz*sp}
+  // personal space: nobody stands in your face, and when you walk at them they step off your line, to the side they're already on
+  if(du<C){const k=(C-du)/C*7;vx+=ux/du*k;vz+=uz/du*k}
+  if(PL.sp>1){// you're walking at them: look ahead along your heading and clear the corridor, to the side they're already on
+    const hx=PL.vx/PL.sp,hz=PL.vz/PL.sp,al=ux*hx+uz*hz,la=ux*hz-uz*hx,W=C+.4,ahead=C+PL.sp*.8;
+    if(al>-.3&&al<ahead&&Math.abs(la)<W){const sd=la>=0?1:-1,u=clamp(1-(al-C)/(ahead-C),.35,1),w=PL.sp*1.4*u*(1-Math.abs(la)/W)+1.5;vx+=hz*sd*w;vz+=-hx*sd*w;kv=16}}
+  // and not in each other: a soft push apart before the core's hard separation pass has to step in
+  const rep=o=>{if(o===n||o===X.held||!o.g.parent)return;const q=o.g.position,ox=p.x-q.x,oz=p.z-q.z,want=Math.max(n.r+o.r+.35,(reach(n)+reach(o))*.8);if(Math.abs(ox)>want||Math.abs(oz)>want)return;const dd=Math.hypot(ox,oz);if(dd>=want)return;
+    const k=(want-dd)/want*4.5;if(dd<1e-3){vx+=k;return}vx+=ox/dd*k;vz+=oz/dd*k};
+  for(const o of FOL)rep(o);for(const o of near(p.x,p.z,n.r+2.2,NB))if(!o._cj&&!o._in)rep(o);
+  const k=Math.min(1,dt*kv);n._vx=lerp(n._vx||0,vx,k);n._vz=lerp(n._vz||0,vz,k);let v=Math.hypot(n._vx,n._vz);if(v>13){n._vx*=13/v;n._vz*=13/v;v=13}
+  if(v>.05){p.x+=n._vx*dt;p.z+=n._vz*dt;X.collide(p,n.r);n.ph+=v*dt*3.2}
+  return v}
 const CHANT=['CON-GA!','da da da da da da da HEY','*conga noises*','one more puff ✨','LEFT FOOT, VAPE FOOT','we follow the cloud','🎶 vape vape vape 🎶'];
-function conga(list,dt,t){list.sort((a,b)=>a._cj-b._cj);let L=1.2,prev=null;const n0=list.length;
-  for(let i=0;i<n0;i++){const n=list[i],p=n.g.position;L+=n.r+(prev?prev.r+.45:0);const k=Math.min(Math.round(L/STEP),tn-1),j=(ti-k+TN)%TN,tx=TRx[j],tz=TRz[j];
-    back(n);let dx=tx-p.x,dz=tz-p.z;const d=Math.hypot(dx,dz);let mv=0;
-    // a carried customer (n._carry, set by story.js) never drops out: one left far behind its slot pops back in on the trail
-    if(n._carry&&d>40){p.x=tx;p.z=tz;X.collide(p,n.r);n._ox=p.x;n._oz=p.z;dx=dz=0}
-    // stragglers scurry to catch up (up to sprint speed), so the line keeps pace with a walking or sprinting player
-    else if(d>.15){const sp=Math.min(d*3,Math.max(4.6,n.t.speed*(d>5?1.35:1),d>3?Math.min(12.5,4+d*.75):0));dx/=d;dz/=d;const f=n.r+1.2,c=boxAt(p.x+dx*f,p.z+dz*f,n.r+.1);
-      if(c){const tg=avoid(n,c,p,dx,dz);dx=dx*.3+tg[0];dz=dz*.3+tg[1];const l=Math.hypot(dx,dz);dx/=l;dz/=l}
-      p.x+=dx*sp*dt;p.z+=dz*sp*dt;X.collide(p,n.r);n.ph+=sp*dt*3.2;mv=1}
-    if(prev)turn(n,prev.g.position.x,prev.g.position.z,dt*8);else turn(n,X.px,X.pz,dt*8);
-    if(!n.t.lift)p.y=Math.abs(Math.sin(t*7-i*.7))*.13;pose(n,mv,n.A&&n.A.length?2:0,0,t,dt);prev=n}
+function conga(list,dt,t){list.sort((a,b)=>a._cj-b._cj);const n0=list.length,arc=PL.still>.6;
+  if(arc){if(!PL.arc||PL.n!==n0||Math.hypot(X.px-PL.cx,X.pz-PL.cz)>.8){// gather behind you, on the side you came from
+      if(!PL.arc||Math.hypot(X.px-PL.cx,X.pz-PL.cz)>.8){PL.ax=Math.sin(X.yaw);PL.az=Math.cos(X.yaw);for(let k=0;k<tn;k++){const j=(ti-k+TN)%TN,dx=TRx[j]-X.px,dz=TRz[j]-X.pz,d=Math.hypot(dx,dz);if(d>2.5){PL.ax=dx/d;PL.az=dz/d;break}}}
+      arcSlots(list)}}
+  else trailSlots(list);
+  PL.arc=arc;let prev=null;
+  for(let i=0;i<n0;i++){const n=list[i],p=n.g.position;back(n);const sx=n._slx,sz=n._slz;
+    // a carried customer (n._carry, set by story.js) never drops out: one left far behind its spot pops back in there
+    if(n._carry&&Math.hypot(sx-p.x,sz-p.z)>40){p.x=sx;p.z=sz;X.collide(p,n.r);n._ox=p.x;n._oz=p.z;n._vx=n._vz=0}
+    const v=follow(n,sx,sz,dt);
+    if(v>2.5)turn(n,p.x+n._vx,p.z+n._vz,dt*8);else if(prev&&!arc)turn(n,prev.g.position.x,prev.g.position.z,dt*6);else turn(n,X.px,X.pz,dt*6);
+    if(!n.t.lift)p.y=Math.abs(Math.sin(t*7-i*.7))*.13;pose(n,v>.3?1:0,n.A&&n.A.length?2:0,0,t,dt);prev=n}
   if(n0>congaBest)congaBest=n0;congaN=n0;
   chantT-=dt;if(chantT<0&&n0>=3){chantT=rand(3,6);X.say(pick(list),pick(CHANT),1.8)}}
 
 /* ================= WALK-IN (story.js delivers customers into Cloud Kingz) =================
-   walkIn(n, [[x,z],...], done): n leaves the conga, walks the path (steering round boxes, no collision on the last leg so it can
-   squeeze past Sal into the doorway), then squashes flat in a few held frames and is taken out of the world; done(n) fires then.
-   n.cool stays high meanwhile so nobody can grab it on the way in. */
-const gone=[];
-function walkIn(n,path,done){if(!n||!n.g||n._in)return false;n._in={path,i:0,sq:-1,done,s0:null,r0:n.r};n.state='wander';n.cool=99;n._cj=0;n._cw=null;n._av=null;
-  n.r=.05;// the core's unclip() would shove a full-size body off Sal and the others queuing at the door: walkers go through each other
-  return true}
+   walkIn(n, [[x,z],...], done): n leaves the conga and joins a single-file queue that starts at path[0] and runs off along the shop
+   front, on the side away from you, each spaced by its own size. The head of the queue walks the rest of the path once the doorway is
+   clear (no collision on that leg so it can squeeze past Sal), squashes flat in a few held frames and is taken out of the world;
+   done(n) fires then. n.cool stays high meanwhile so nobody can grab it on the way in. */
+const gone=[],WQ=[],WD={x:1,z:0};
+function walkIn(n,path,done){if(!n||!n.g||n._in||!path||!path.length)return false;
+  if(!WQ.length){const a=path[0],b=path[path.length-1];let ix=b[0]-a[0],iz=b[1]-a[1],il=Math.hypot(ix,iz);if(il<.01){ix=0;iz=1;il=1}ix/=il;iz/=il;
+    let lx=iz,lz=-ix;if(lx*(a[0]-X.px)+lz*(a[1]-X.pz)<0){lx=-lx;lz=-lz}// along the shop front, away from you, angled a little out from the wall
+    WD.x=lx*.95-ix*.3;WD.z=lz*.95-iz*.3;const l=Math.hypot(WD.x,WD.z);WD.x/=l;WD.z/=l}
+  n._in={path,i:0,st:0,sq:-1,done,s0:null,r0:n.r,t:0,k:0};n.state='wander';n.cool=99;n._cj=0;n._cw=null;n._av=null;WQ.push(n);return true}
 function removeNpc(n){scene.remove(n.g);if(n.cb)scene.remove(n.cb);const i=npcs.indexOf(n);if(i>=0)npcs.splice(i,1)}
+// once a frame: give everyone in the queue a spot; the head goes in when nobody is in the doorway
+function queuePlan(){for(let i=WQ.length-1;i>=0;i--)if(!WQ[i]._in||npcs.indexOf(WQ[i])<0)WQ.splice(i,1);if(!WQ.length)return;
+  let busy=false,dw=null;for(const n of WQ){const w=n._in;if(w.st!==1)continue;if(w.sq<.32)busy=true;if(!dw||w.sq<0)dw=n}
+  let k=0,ax=0,az=0,pr=null;
+  for(const n of WQ){const w=n._in;if(w.st)continue;
+    if(!k){ax=w.path[0][0];az=w.path[0][1];// the next one waits a body-length back while someone is still on the way in
+      if(dw){const c=n.r+dw._in.r0+.3,dd=Math.hypot(dw.g.position.x-ax,dw.g.position.z-az);if(dd<c){ax+=WD.x*(c-dd);az+=WD.z*(c-dd)}}}
+    else{const g=Math.max(1.25,pr.r+n.r+.45);ax+=WD.x*g;az+=WD.z*g}
+    TMP.x=ax;TMP.z=az;X.collide(TMP,n.r);w.qx=TMP.x;w.qz=TMP.z;w.k=k;
+    if(!k&&!busy&&Math.hypot(n.g.position.x-w.qx,n.g.position.z-w.qz)<.7){w.st=1;w.i=Math.min(1,w.path.length-1);w.t=0;n._vx=n._vz=0;busy=true;dw=n;continue}
+    pr=n;k++}}
 function walkStep(n,dt,t){const w=n._in,p=n.g.position;back(n);n.cool=99;
   if(w.sq>=0){// squeeze through the door: squash on held frames (5 steps), sliding into the doorway
     w.sq+=dt;const f=Math.min(5,Math.floor(w.sq/.42*5))/5,s=w.s0;n.g.scale.set(s.x*(1+.42*f),s.y*(1-.62*f),s.z*(1-.35*f));
     p.x=w.ex;p.z=w.ez+.2*f;p.y=0;pose(n,0,n.A&&n.A.length?2:0,0,t,dt);if(w.sq>=.42&&gone.indexOf(n)<0)gone.push(n);return}
-  w.t=(w.t||0)+dt;if(w.t>8){w.i=w.path.length-1;const e=w.path[w.i];p.x=e[0];p.z=e[1]}// wedged somewhere: in you go
+  w.t+=dt;
+  if(!w.st){// queueing: walk to your place in the line (stragglers hurry), wait your turn facing the door
+    if(w.qx===undefined){w.qx=w.path[0][0];w.qz=w.path[0][1]}
+    if(w.t>10+w.k*1.5&&Math.hypot(w.qx-p.x,w.qz-p.z)>1.5){p.x=w.qx;p.z=w.qz;n._vx=n._vz=0;w.t=0}// wedged somewhere: pop into line
+    const v=follow(n,w.qx,w.qz,dt),e=w.path[w.path.length-1];
+    if(v>1.5)turn(n,p.x+n._vx,p.z+n._vz,dt*10);else turn(n,e[0],e[1],dt*6);
+    if(!n.t.lift)p.y=v>.3?Math.abs(Math.sin(t*9))*.12:0;pose(n,v>.3?1:0,n.A&&n.A.length?2:0,0,t,dt);return}
+  for(const o of WQ)if(o!==n&&o._in&&o._in.sq>=0&&Math.hypot(o.g.position.x-p.x,o.g.position.z-p.z)<w.r0+o._in.r0+.1){pose(n,0,n.A&&n.A.length?2:0,0,t,dt);return}// the one ahead is still squeezing in
+  if(w.t>3){w.i=w.path.length-1;const e=w.path[w.i];p.x=e[0];p.z=e[1]}// wedged in the doorway: in you go
   const q=w.path[w.i],last=w.i===w.path.length-1;let dx=q[0]-p.x,dz=q[1]-p.z;const d=Math.hypot(dx,dz);
-  if(d<.3){if(!last){w.i++;return}w.sq=0;w.s0=n.g.scale.clone();w.ex=q[0];w.ez=q[1];turn(n,q[0],q[1]+5,1);return}
-  const sp=Math.min(d*4+.5,Math.max(3.4,n.t.speed*1.15,d>4?Math.min(9,3+d*.6):0));dx/=d;dz/=d;// stragglers hurry up to the door
+  if(d<.3){if(!last){w.i++;return}w.sq=0;w.s0=n.g.scale.clone();w.ex=q[0];w.ez=q[1];turn(n,q[0],q[1]+5,1);
+    n.r=n.reach=.05;return}// squeezing past Sal: the core's unclip() mustn't shove it back out of the doorway
+  const sp=Math.min(d*4+.5,Math.max(3.4,n.t.speed*1.15));dx/=d;dz/=d;
   if(!last){const r=w.r0||.5,c=boxAt(p.x+dx*(r+1),p.z+dz*(r+1),r+.1);if(c){const tg=avoid(n,c,p,dx,dz);dx=dx*.3+tg[0];dz=dz*.3+tg[1];const l=Math.hypot(dx,dz);dx/=l;dz/=l}}
   p.x+=dx*sp*dt;p.z+=dz*sp*dt;if(!last)X.collide(p,w.r0||.5);n.ph+=sp*dt*3.2;turn(n,q[0],q[1],dt*10);
   if(!n.t.lift)p.y=Math.abs(Math.sin(t*9))*.12;pose(n,1,n.A&&n.A.length?2:0,0,t,dt)}
@@ -312,12 +387,12 @@ function radarMark(){const cv=X.$('radar');if(!cv||X.mode!=='play')return;const 
 /* ================= WIRING ================= */
 X.on('grab',n=>{if(!n.boss)react(n,15,true)});
 X.on('release',(n,kind)=>{if(n.boss){if(!n.boss.dead)bossHit(n,kind);return}react(n,kind==='passive'?8:15,false)});
-X.on('start',()=>{for(const k in BOSS)despawn(BOSS[k]);now=0;tn=0;congaBest=0;knock.x=knock.z=0;for(const n of npcs){n._cw=null;n._cj=0;n._pt=0;n._av=null;n._scat=0;n._pin=null}});
+X.on('start',()=>{for(const k in BOSS)despawn(BOSS[k]);now=0;tn=0;congaBest=0;WQ.length=0;FOL=[];PL.still=0;PL.arc=false;PL.x=X.px;PL.z=X.pz;knock.x=knock.z=0;for(const n of npcs){n._cw=null;n._cj=0;n._pt=0;n._av=null;n._scat=0;n._pin=null}});
 const clist=[];
 X.on('frame',(dt,t)=>{now+=dt;fc++;if(cgN!==cols.length)buildCG();ngT-=dt;if(ngT<=0){ngT=.2;buildNG()}
   if(knock.x||knock.z){PV.x=X.px+knock.x*dt;PV.z=X.pz+knock.z*dt;X.collide(PV,.45);X.px=PV.x;X.pz=PV.z;const f=Math.max(0,1-6*dt);knock.x*=f;knock.z*=f;if(Math.abs(knock.x)+Math.abs(knock.z)<.2)knock.x=knock.z=0}
-  const px=X.px,pz=X.pz;trail();clist.length=0;const held=X.held;
-  for(let i=0;i<npcs.length;i++){const n=npcs[i],p=n.g.position,d=Math.hypot(p.x-px,p.z-pz);if(n._in){n._cj=0;walkStep(n,dt,t);continue}
+  const px=X.px,pz=X.pz;trail();playerMotion(dt);queuePlan();clist.length=0;const held=X.held;
+  for(let i=0;i<npcs.length;i++){const n=npcs[i],p=n.g.position,d=Math.hypot(p.x-px,p.z-pz);if(!n.reach&&n.r)reach(n);if(n._in){n._cj=0;walkStep(n,dt,t);continue}
     if(d>130&&!n._carry){n._cj=0;continue}
     if(n._pin){n._cj=0;pinStep(n,dt,t);continue}
     if(n.boss){if(!n.boss.dead){bossFrame(n,d,dt,t);continue}if(n.state!=='held'&&wonFrame(n,d,dt,t))continue}
@@ -328,7 +403,8 @@ X.on('frame',(dt,t)=>{now+=dt;fc++;if(cgN!==cols.length)buildCG();ngT-=dt;if(ngT
     n._cj=0;
     if(n._cw&&doGawk(n,dt,t))continue;
     steerPost(n,i,d,dt)}
-  if(clist.length)conga(clist,dt,t);else congaN=0;
+  if(clist.length)conga(clist,dt,t);else{congaN=0;PL.arc=false}
+  FOL=clist.concat(WQ);// next frame's soft push-apart checks these directly (the 5x/sec buckets lag behind fast walkers)
   if(gone.length){for(const n of gone){const w=n._in;n._in=null;removeNpc(n);try{w.done&&w.done(n)}catch(e){console.error('[crowds] walkIn',e)}}gone.length=0}
   if(fc%18===0)spread();
   cardT-=dt});
