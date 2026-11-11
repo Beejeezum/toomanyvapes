@@ -601,7 +601,7 @@ const skyP=document.createElement('canvas');skyP.width=SKW;skyP.height=SKH;{cons
 const zc=new T.Color(),mc=new T.Color(),hc=new T.Color(),gc=new T.Color(),hex=c=>'#'+c.getHexString();
 if(dome){dome.material.map=skyT;dome.material.needsUpdate=true}
 const sun0=new T.Vector3(150,150,-220),sun1=new T.Vector3(-40,45,-330),SUNDIR=sun0.clone().normalize();let K=0,NIGHT=0,lastK=-1;
-function timeOfDay(){const k=ss(0,1,Math.min(1,X.used/5000));K=k;
+function timeOfDay(){const k=ss(0,1,Math.min(1,typeof X.tod==='number'?X.tod:X.used/5000));K=k;// story.js sets TMV.tod per weekday (the colour script)
   if(Math.abs(k-lastK)>.003){lastK=k;kf(HOR,k,hc);kf(ZEN,k,zc);kf(MID,k,mc);kf(GLOW,k,gc);
     const g=skyK.createLinearGradient(0,0,0,SKH);g.addColorStop(0,hex(zc));g.addColorStop(.36,hex(mc));g.addColorStop(.47,hex(gc));g.addColorStop(.5,hex(hc));g.addColorStop(1,hex(hc));skyK.fillStyle=g;skyK.fillRect(0,0,SKW,SKH);skyK.drawImage(skyP,0,0);skyT.needsUpdate=true;
     if(cloudM)kf(CLD,k,cloudM.color);if(sunBall){kf(SUNC,k,sunBall.material.color);sunBall.position.lerpVectors(sun0,sun1,ss(.1,1,k));sunBall.scale.setScalar(34+16*k)}

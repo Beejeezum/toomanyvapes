@@ -332,8 +332,10 @@ function rayCols(ox,oz,dx,dz,tm){let t=tm;for(const c of X.cols){if(ox>c.a&&ox<c
 function focusTarget(){const cp=cam.position;if(X.held&&X.mouth){X.mouth(X.held,fv);return clamp(fv.distanceTo(cp),.4,30)}
   cam.updateMatrixWorld();cam.getWorldDirection(fdir);let best=1e9,bd=0;
   const look=(x,y,z,rad)=>{fto.set(x-cp.x,y-cp.y,z-cp.z);const d=fto.length(),al=fto.dot(fdir);if(al<.3||d>45)return 1e9;const sc=Math.sqrt(Math.max(0,d*d-al*al))/(rad+d*.05);if(sc<1&&sc<best){best=sc;bd=al}return sc};
-  const sal=X.sal&&X.sal.g;if(sal&&sal.parent&&sal.visible!==false){sal.getWorldPosition(fv);const sh=sal.scale.y*1.5;fto.set(fv.x-cp.x,fv.y+sh-cp.y,fv.z-cp.z);const d=fto.length(),al=fto.dot(fdir);
-    if(d<6.5&&al>0&&al/d>Math.cos(.42))return Math.max(al,.4);look(fv.x,fv.y+sh,fv.z,.6)}
+  // Sal stays crisp whenever he's near or in view (salKeep: the depth band is stretched to hold him; see the per-frame DOF below)
+  DOF.salKeep=0;const sal=X.sal&&X.sal.g;if(sal&&sal.parent&&sal.visible!==false){sal.getWorldPosition(fv);const sh=sal.scale.y*1.5;fto.set(fv.x-cp.x,fv.y+sh-cp.y,fv.z-cp.z);const d=fto.length(),al=fto.dot(fdir);
+    if(al>0&&(d<7||al/d>Math.cos(.7))&&d<24)DOF.salKeep=d;
+    if(d<9&&al>0&&al/d>Math.cos(.5))return Math.max(al,.4);look(fv.x,fv.y+sh,fv.z,.9)}
   for(const n of npcs){if(!n.g||!n.g.parent||!n.g.visible)continue;if(X.mouth)X.mouth(n,fv);else fv.copy(n.g.position);look(fv.x,fv.y-.2,fv.z,.65)}
   if(bd)return bd;let t=rayCols(cp.x,cp.z,fdir.x,fdir.z,60);if(fdir.y<-.005)t=Math.min(t,cp.y/-fdir.y);return clamp(t,.6,60)}
 
@@ -358,7 +360,8 @@ X.on('prerender',dt=>{const now=performance.now(),ft=now-last;last=now;
     const a=Math.round(tgtP.dot(rgt)/tx)*tx,b=Math.round(tgtP.dot(upv)/tx)*tx,cc=tgtP.dot(lit);tgtP.copy(rgt).multiplyScalar(a).addScaledVector(upv,b).addScaledVector(lit,cc);
     sun.target.position.copy(tgtP);sun.target.updateMatrixWorld();sun.position.copy(tgtP).addScaledVector(lit,90)}
   // depth of field: focus pulls to whoever you're aiming at / vaping, otherwise the middle distance
-  if(DOF.on){DOF.target=focusTarget();DOF.focus=lerp(DOF.focus,DOF.target,1-Math.exp(-dt*14));DOF.near=Math.min(DOF.focus*.5,1.5);DOF.far=Math.max(DOF.focus*2+1,7)}
+  if(DOF.on){DOF.target=focusTarget();DOF.focus=lerp(DOF.focus,DOF.target,1-Math.exp(-dt*14));DOF.near=Math.min(DOF.focus*.5,1.5);DOF.far=Math.max(DOF.focus*2+1,7);
+    if(DOF.salKeep){DOF.near=Math.min(DOF.near,Math.max(.4,DOF.salKeep*.6));DOF.far=Math.max(DOF.far,DOF.salKeep*1.6+3)}}
   // cotton puffs: soft tint, random tuft and spin, a firmer body that pops in and thins out at the end
   for(const P of puffs){if(P.life<=0){P._cl=0;continue}const m=P.s.material;if(!P._cl||P.life>P._cl+1e-4){if(TUFTS.indexOf(m.map)<0){m.map=TUFTS[(Math.random()*4)|0];m.needsUpdate=true}else m.map=TUFTS[(Math.random()*4)|0];m.rotation=rand(0,PI*2);m.color.lerp(WHITE,.78)}P._cl=P.life;
     const k=1-P.life/P.max;m.opacity=Math.min(1,k*14)*(1-k*k*k)*.95}

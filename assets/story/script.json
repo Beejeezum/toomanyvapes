@@ -1,9 +1,14 @@
 {
- "_note": "Story script + shot list. img = assets/story/clay/<img>.jpg, vo = audio/vo/<vo>.mp3 (missing files must be tolerated: fall back to showing the caption for a few seconds). who is the speaker label shown on the subtitle. Captions are subtitles of the spoken line only. call = Sal's goal line, phoned in as the chapter starts (pic/crop = the polaroid: assets/story/clay/<pic>.jpg cropped by background-position x%, y% and background-size %). calls = clear (goal met), nudge (wandering away from the district), hey (walking up to Sal at the shop; followed by the chapter's call).",
+ "_note": "Story script + shot list. img = assets/story/clay/<img>.jpg, vo = audio/vo/<vo>.mp3 (missing files must be tolerated: fall back to showing the caption for a few seconds). who is the speaker label shown on the subtitle. Captions are subtitles of the spoken line only. call = Sal's goal line, phoned in as the chapter starts (pic/crop = the polaroid: assets/story/clay/<pic>.jpg cropped by background-position x%, y% and background-size %). calls = clear (goal met), nudge (wandering away from the district), hey (walking up to Sal at the shop; followed by the chapter's call). day = the weekday on the chapter card (one chapter per day, Monday to Friday). mission = the big paper mission card [headline, second line]. why = an extra phone line after the goal call. Shot extras (no re-encode): flip:true mirrors the still and the clip; vid 'name#t=a,b' plays only a..b of the clip (a media fragment; the shot ends at b); mute:true silences the clip's own track; over = a vo line laid over the clip (a line over someone's back).",
  "chapters": [
   {
    "id": 1,
    "title": "The Typo",
+   "day": "Monday",
+   "mission": [
+    "HOOK 5 LOCALS",
+    "WALK 'EM TO CLOUD KINGZ"
+   ],
    "district": "downtown",
    "in": [
     {
@@ -30,29 +35,18 @@
     },
     {
      "img": "ch1_v2_4",
-     "vid": "ch1_v2_4",
+     "vid": "ch1_v2_4#t=0,2.4",
      "aud": true,
-     "who": "SAL",
-     "vo": "sal_ch1_kid",
-     "cap": "Kid! Oh, thank God you're here. I gotta sell all of these by Friday… or I'm closing the shop."
+     "mute": true
     },
     {
-     "img": "ch1_v2_5",
-     "vid": "ch1_v2_5",
+     "img": "ch1_v2_5_tail",
+     "vid": "ch1_v2_5#t=5.3",
      "aud": true,
-     "subs": [
-      {
-       "t": 0,
-       "who": "SAL",
-       "cap": "So get out there. Get this town HOOKED!"
-      },
-      {
-       "t": 4.1,
-       "who": "BRO",
-       "cap": "Say less, boss. I got you."
-      }
-     ],
-     "vo": "sal_ch1_go"
+     "mute": true,
+     "over": "bro_ch1_go",
+     "who": "BRO",
+     "cap": "Say less, boss. I got you."
     },
     {
      "img": "ch1_fly",
@@ -77,7 +71,8 @@
      "img": "ch1_out_v2_1",
      "vid": "ch1_out_v2_1",
      "aud": true,
-     "hold": 5
+     "hold": 5,
+     "flip": true
     },
     {
      "img": "ch1_out_v2_2",
@@ -93,11 +88,27 @@
      "aud": true,
      "hold": 5
     }
-   ]
+   ],
+   "why": {
+    "who": "SAL",
+    "vo": "sal_ch1_why",
+    "cap": "And kid? The invoice is due FRIDAY, or the bank takes Cloud Kingz. This town won Cleanest Air in Florida, 1994. Nobody here's ever SEEN a vape!",
+    "pic": "ch1_in_2",
+    "crop": [
+     50,
+     14,
+     305
+    ]
+   }
   },
   {
    "id": 2,
    "title": "Word of Mouth",
+   "day": "Tuesday",
+   "mission": [
+    "WIN OVER LA DIVA",
+    "THEN WALK 5 GRANDMAS TO CLOUD KINGZ"
+   ],
    "district": "park",
    "in": [
     {
@@ -106,7 +117,8 @@
      "vo": "bro_ch2_in_1",
      "cap": "Park's full of grandmas, man. Grandmas love me.",
      "vid": "ch2_in_1",
-     "aud": true
+     "aud": true,
+     "flip": true
     },
     {
      "img": "ch2_boss",
@@ -118,7 +130,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_2",
-    "cap": "The park, kid! Hook five more, grandmas, joggers, whoever, and walk 'em back here. And watch out for the opera lady!",
+    "cap": "The park, kid! Grandmas run this town: one grandma tells forty. But nobody walks out on the opera lady mid-song. Get her on our side, then walk me five!",
     "pic": "ch2_out_1",
     "crop": [
      46,
@@ -146,6 +158,11 @@
   {
    "id": 3,
    "title": "Home Turf",
+   "day": "Wednesday",
+   "mission": [
+    "OUT-LUNG PRIME: 3 REPS",
+    "THEN WALK 5 BROS TO CLOUD KINGZ"
+   ],
    "district": "beach",
    "in": [
     {
@@ -154,7 +171,8 @@
      "vo": "bro_ch3_in_1",
      "cap": "My beach, bro. Home turf.",
      "vid": "ch3_in_1",
-     "aud": true
+     "aud": true,
+     "flip": true
     },
     {
      "img": "ch3_in_2",
@@ -168,13 +186,14 @@
      "img": "ch3_boss",
      "vid": "ch3_boss",
      "aud": true,
-     "hold": 6
+     "hold": 6,
+     "flip": true
     }
    ],
    "call": {
     "who": "SAL",
     "vo": "sal_goal_3",
-    "cap": "Beach, kid! Hook five more and bring 'em back to the shop. And take down the big guy at the gym!",
+    "cap": "Beach, kid! Nobody on Muscle Beach breathes till Prime breathes first. Out-lung the big guy and his boys'll follow you anywhere. Five, back to the shop!",
     "pic": "ch2_out_1",
     "crop": [
      46,
@@ -196,6 +215,11 @@
   {
    "id": 4,
    "title": "Fresh Lungs",
+   "day": "Thursday",
+   "mission": [
+    "HOOK 5 FARM ANIMALS",
+    "WALK 'EM TO CLOUD KINGZ"
+   ],
    "district": "farm",
    "in": [
     {
@@ -218,7 +242,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_4",
-    "cap": "The farm, kid. Hook five and bring 'em home. …Yeah. Cows count.",
+    "cap": "Thursday, kid. Two thousand left and nobody left in town. …The farm. Five. Yeah. Cows count.",
     "pic": "ch3_out_1",
     "crop": [
      45,
@@ -240,6 +264,11 @@
   {
    "id": 5,
    "title": "Zero",
+   "day": "Friday",
+   "mission": [
+    "EMPTY THE CONTAINER",
+    "PUT DETECTO TO SLEEP"
+   ],
    "district": "square",
    "in": [
     {
@@ -260,7 +289,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_5",
-    "cap": "Empty the container, kid! Every last one! And somebody shut up that smoke detector!",
+    "cap": "Invoice is due at SUNDOWN, kid! Empty the container! And somebody shut up that smoke detector!",
     "pic": "ch3_out_1",
     "crop": [
      45,
@@ -456,6 +485,33 @@
    "x": 0,
    "z": 22,
    "_note": "proposed vape shop block, replaces the downtown building at grid (0, +1)"
+  }
+ },
+ "lines": {
+  "_note": "Short voice lines the bosses say in play (audio/vo/<key>.mp3); the caption shows under the crosshair while it plays.",
+  "diva_won": {
+   "who": "LA DIVA",
+   "cap": "Bravissima! BRAVISSIMA! Darling… does it come in MANGO?"
+  },
+  "diva_again": {
+   "who": "LA DIVA",
+   "cap": "Ah-ah-ah, darling. Not yet. Wait for the top of the phrase!"
+  },
+  "prime_intro": {
+   "who": "PRIME",
+   "cap": "Nobody breathes on my beach till PRIME breathes first. Lung set, bro. Three reps. Match me."
+  },
+  "prime_won": {
+   "who": "PRIME",
+   "cap": "…Respect, king. RESPECT. Take the chain. Boys? We follow him now."
+  },
+  "detecto_intro": {
+   "who": "DETECTO",
+   "cap": "SMOKE DETECTED. I am DETECTO, official mascot of Cleanest Air in Florida, 1994. Everybody: EVACUATE."
+  },
+  "detecto_sleep": {
+   "who": "DETECTO",
+   "cap": "Sensor… full. Low… battery. Beep. Beep… goodnight."
   }
  }
 }

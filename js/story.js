@@ -12,13 +12,19 @@
    the cloud sign blinking (held frames). Sal phones to bring them back (first follower, full order, then at most every 40 s
    while you walk away with them), counts them in live at the door ("Alright! That's one!"), nudges (sal_nudge) if you wander
    off, and greets you in person outside Cloud Kingz.
+   One chapter per weekday (Monday to Friday): the title card carries the day, the sky follows the storyboard's colour script (TMV.tod, read
+   by world.js), a big paper mission card says the goal in a few words, and a kraft objective panel (top-left) always names the next step
+   with live counts. The drop-off is a big felt circle on the pavement in front of Cloud Kingz. Sal can be talked to on purpose: close by
+   and looking at him, a felt "!" tag bobs over him and the action button replays what to do now.
+   Ch2 and ch3 hinge on an act that is won over, not beaten up (crowds.js): the park's grandmas are pinned to the benches by La Diva's aria,
+   the beach waits on Gym Bro Prime's lung set; the five pinned audience members join your line when the act is won.
    Cutscenes are full-screen stills (or short muted clips, shot.vid) with a 16mm film treatment, VO + subtitles.
    Missing art/VO is tolerated: soft placeholder backdrop, caption held for its reading time.
    Events for other mods: chapter(n, 'in'|'play'|'out'), cutscene(true|false) around every full-screen cutscene,
    vo(true|false) while any story voice line is audible (cutscene lines, calls, Sal's live count, his greeting).
-   TMV.story = {chapter, phase, goal, progress, hooked (delivered), carried, drop, play(shots, done), script}.
+   TMV.story = {chapter, phase, goal, progress, hooked (delivered), carried, drop, play(shots, done), script, line(vo), busy}.
    #dbg: window.tmvs = {chapter(n), win(), hook() (nearest eligible creature joins the line), home() (to the drop-off), skip(),
-   greet(), nudge(), s}. */
+   greet(), talk(), nudge(), s}. */
 (()=>{const X=window.TMV;if(!X)return;const $=X.$,T=X.T,PI=Math.PI,clamp=X.clamp,rand=X.rand;
 const RMq=matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -27,25 +33,31 @@ const L=(img,who,vo,cap,hold)=>({img,who,vo,cap,hold});
 const C=(vo,cap,pic,crop)=>({who:'SAL',vo,cap,pic,crop});
 const CROP={scared:[50,14,305],phone:[46,36,337],rich:[45,32,320]};
 let S={chapters:[
-  {id:1,title:'The Typo',district:'downtown',in:[{img:'ch1_v2_1',vid:'ch1_v2_1',aud:true,hold:6},
+  {id:1,title:'The Typo',day:'Monday',mission:['HOOK 5 LOCALS',"WALK 'EM TO CLOUD KINGZ"],district:'downtown',in:[{img:'ch1_v2_1',vid:'ch1_v2_1',aud:true,hold:6},
     {img:'ch1_v2_2',vid:'ch1_v2_2',aud:true,who:'BRO',vo:'bro_ch1_in_3',cap:"Duuude. That's like… a lot of vapes."},
     {img:'ch1_v2_3',vid:'ch1_v2_3',aud:true,who:'SAL',vo:'sal_ch1_phone',cap:'Fifty! I said FIFTY! Five, zero! Not five THOUSAND! …Hello? HELLO?!'},
-    {img:'ch1_v2_4',vid:'ch1_v2_4',aud:true,who:'SAL',vo:'sal_ch1_kid',cap:"Kid! Oh, thank God you're here. I gotta sell all of these by Friday… or I'm closing the shop."},
-    {img:'ch1_v2_5',vid:'ch1_v2_5',aud:true,subs:[{t:0,who:'SAL',cap:'So get out there. Get this town HOOKED!'},{t:3.3,who:'BRO',cap:'Say less, boss. I got you.'}],vo:'sal_ch1_go'}],
+    {img:'ch1_v2_4',vid:'ch1_v2_4#t=0,2.4',aud:true,mute:true},
+    {img:'ch1_v2_5_tail',vid:'ch1_v2_5#t=5.3',aud:true,mute:true,over:'bro_ch1_go',who:'BRO',cap:'Say less, boss. I got you.'},
+    {img:'ch1_fly',vid:'ch1_fly',aud:true,hold:8}],
    call:C('sal_goal_1',"Kid! Start right here, downtown. Hook me five customers and bring 'em back to the shop. Go!",'ch1_in_2',CROP.scared),
-   out:[L('ch1_out_1','SAL','sal_ch1_out_1',"They're… coming back? They're coming BACK!")]},
-  {id:2,title:'Word of Mouth',district:'park',in:[L('ch2_in_1','BRO','bro_ch2_in_1',"Park's full of grandmas, man. Grandmas love me.")],
-   call:C('sal_goal_2',"The park, kid! Hook five more, grandmas, joggers, whoever, and walk 'em back here. And watch out for the opera lady!",'ch2_out_1',CROP.phone),
-   out:[L('ch2_out_1','SAL','sal_ch2_out_1',"Kid! I sold out of mango! I've never sold out of ANYTHING!")]},
-  {id:3,title:'Home Turf',district:'beach',in:[L('ch3_in_1','BRO','bro_ch3_in_1','My beach, bro. Home turf.'),L('ch3_in_2','SAL','sal_ch3_in_2','Watch out for cops. And the big guy at the gym.')],
-   call:C('sal_goal_3',"Beach, kid! Hook five more and bring 'em back to the shop. And take down the big guy at the gym!",'ch2_out_1',CROP.phone),
-   out:[L('ch3_out_1','SAL','sal_ch3_out_1',"Two chains, kid. TWO. We're franchising.")]},
-  {id:4,title:'Fresh Lungs',district:'farm',in:[L('ch4_in_1','SAL','sal_ch4_in_1',"We're out of people, kid. …What about the cows?"),L('ch4_in_2','BRO','bro_ch4_in_2','…The cows, dude?')],
-   call:C('sal_goal_4',"The farm, kid. Hook five and bring 'em home. …Yeah. Cows count.",'ch3_out_1',CROP.rich),
-   out:[L('ch4_out_1','BRO','bro_ch4_out_1',"Can't even see the waves anymore, man.")]},
-  {id:5,title:'Zero',district:'square',in:[L('ch5_in_1','SAL','sal_ch5_in_1','Last stretch! EMPTY THE CONTAINER!')],
-   call:C('sal_goal_5','Empty the container, kid! Every last one! And somebody shut up that smoke detector!','ch3_out_1',CROP.rich),out:[]}],
- end:[L('end_1','SAL','sal_end_1','Zero. You did it, kid… So, uh. I ordered fifty thousand.'),L('end_2','BRO','bro_end_2','…Bro.')],
+   why:C('sal_ch1_why',"And kid? The invoice is due FRIDAY, or the bank takes Cloud Kingz. This town won Cleanest Air in Florida, 1994. Nobody here's ever SEEN a vape!",'ch1_in_2',CROP.scared),
+   out:[{img:'ch1_out_v2_1',vid:'ch1_out_v2_1',aud:true,hold:5,flip:true},{img:'ch1_out_v2_2',vid:'ch1_out_v2_2',aud:true,who:'SAL',vo:'sal_ch1_out_1',cap:"They're… coming back? They're coming BACK!"},{img:'ch1_out_v2_3',vid:'ch1_out_v2_3',aud:true,hold:5}]},
+  {id:2,title:'Word of Mouth',day:'Tuesday',mission:['WIN OVER LA DIVA','THEN WALK 5 GRANDMAS TO CLOUD KINGZ'],district:'park',
+   in:[{img:'ch2_in_1',vid:'ch2_in_1',aud:true,flip:true,who:'BRO',vo:'bro_ch2_in_1',cap:"Park's full of grandmas, man. Grandmas love me."},{img:'ch2_boss',vid:'ch2_boss',aud:true,hold:6}],
+   call:C('sal_goal_2',"The park, kid! Grandmas run this town: one grandma tells forty. But nobody walks out on the opera lady mid-song. Get her on our side, then walk me five!",'ch2_out_1',CROP.phone),
+   out:[{img:'ch2_out_v2',vid:'ch2_out_v2',aud:true,hold:5},{img:'ch2_out_1',vid:'ch2_out_1',aud:true,who:'SAL',vo:'sal_ch2_out_1',cap:"Kid! I sold out of mango! I've never sold out of ANYTHING!"}]},
+  {id:3,title:'Home Turf',day:'Wednesday',mission:['OUT-LUNG PRIME: 3 REPS','THEN WALK 5 BROS TO CLOUD KINGZ'],district:'beach',
+   in:[{img:'ch3_in_1',vid:'ch3_in_1',aud:true,flip:true,who:'BRO',vo:'bro_ch3_in_1',cap:'My beach, bro. Home turf.'},{img:'ch3_in_2',vid:'ch3_in_2',aud:true,who:'SAL',vo:'sal_ch3_in_2',cap:'Watch out for cops. And the big guy at the gym.'},{img:'ch3_boss',vid:'ch3_boss',aud:true,hold:6,flip:true}],
+   call:C('sal_goal_3',"Beach, kid! Nobody on Muscle Beach breathes till Prime breathes first. Out-lung the big guy and his boys'll follow you anywhere. Five, back to the shop!",'ch2_out_1',CROP.phone),
+   out:[{img:'ch3_out_1',vid:'ch3_out_1',aud:true,who:'SAL',vo:'sal_ch3_out_1',cap:"Two chains, kid. TWO. We're franchising."}]},
+  {id:4,title:'Fresh Lungs',day:'Thursday',mission:['HOOK 5 FARM ANIMALS',"WALK 'EM TO CLOUD KINGZ"],district:'farm',
+   in:[{img:'ch4_in_1',vid:'ch4_in_1',aud:true,who:'SAL',vo:'sal_ch4_in_1',cap:"We're out of people, kid. …What about the cows?"},{img:'ch4_in_2',vid:'ch4_in_2',aud:true,who:'BRO',vo:'bro_ch4_in_2',cap:'…The cows, dude?'}],
+   call:C('sal_goal_4',"Thursday, kid. Two thousand left and nobody left in town. …The farm. Five. Yeah. Cows count.",'ch3_out_1',CROP.rich),
+   out:[{img:'ch4_out_1',vid:'ch4_out_1',aud:true,who:'BRO',vo:'bro_ch4_out_1',cap:"Can't even see the waves anymore, man."}]},
+  {id:5,title:'Zero',day:'Friday',mission:['EMPTY THE CONTAINER','PUT DETECTO TO SLEEP'],district:'square',
+   in:[{img:'ch5_in_1',vid:'ch5_in_1',aud:true,who:'SAL',vo:'sal_ch5_in_1',cap:'Last stretch! EMPTY THE CONTAINER!'},{img:'ch5_boss',vid:'ch5_boss',aud:true,hold:6}],
+   call:C('sal_goal_5','Invoice is due at SUNDOWN, kid! Empty the container! And somebody shut up that smoke detector!','ch3_out_1',CROP.rich),out:[]}],
+ end:[{img:'end_1',vid:'end_1',aud:true,who:'SAL',vo:'sal_end_1',cap:'Zero. You did it, kid… So, uh. I ordered fifty thousand.'},{img:'end_v2_2',vid:'end_v2_2',aud:true,vo:'bro_end_2',subs:[{t:0,cap:''},{t:5.4,who:'BRO',cap:'…Bro.'}]}],
  calls:{clear:C('sal_clear',"That's the district, kid! Look at 'em all! LOOK at 'em!",'ch2_out_1',CROP.phone),
   back1:C('sal_back_1',"Kid! Bring 'em back to the shop! Bring 'em HERE!",'ch1_in_2',CROP.scared),
   back2:C('sal_back_2',"You got customers? Walk 'em over, kid! Cloud Kingz! I'm right here!",'ch2_out_1',CROP.phone),
@@ -55,6 +67,9 @@ let S={chapters:[
   hey:C('sal_hey',"Hey! Kid! You lost? Here's the deal.",'ch2_out_1',CROP.phone)},
  live:{alright:[{vo:'sal_alr_1',cap:'Alright!'},{vo:'sal_alr_2',cap:'ALRIGHT!!'},{vo:'sal_alr_3',cap:'Alright, alright, ALRIGHT!'},{vo:'sal_alr_4',cap:'Come in, come in! Welcome!'}],
   count:[{vo:'sal_n1',cap:"Alright! That's one!"},{vo:'sal_n2',cap:"ALRIGHT! That's two!"},{vo:'sal_n3',cap:'THREE!'},{vo:'sal_n4',cap:'Four! Ha!'},{vo:'sal_n5',cap:'FIVE! Yes! YES!'}]},
+ lines:{diva_won:{who:'LA DIVA',cap:'Bravissima! BRAVISSIMA! Darling… does it come in MANGO?'},diva_again:{who:'LA DIVA',cap:'Ah-ah-ah, darling. Not yet. Wait for the top of the phrase!'},
+  prime_intro:{who:'PRIME',cap:'Nobody breathes on my beach till PRIME breathes first. Lung set, bro. Three reps. Match me.'},prime_won:{who:'PRIME',cap:'…Respect, king. RESPECT. Take the chain. Boys? We follow him now.'},
+  detecto_intro:{who:'DETECTO',cap:'SMOKE DETECTED. I am DETECTO, official mascot of Cleanest Air in Florida, 1994. Everybody: EVACUATE.'},detecto_sleep:{who:'DETECTO',cap:'Sensor… full. Low… battery. Beep. Beep… goodnight.'}},
  districts:{downtown:{x0:-62,x1:62,z0:-62,z1:62},park:{x0:-142,x1:-66,z0:-76,z1:76},beach:{x0:-150,x1:150,z0:-150,z1:-78},farm:{x0:70,x1:134,z0:-52,z1:52},square:{x0:-16,x1:16,z0:-16,z1:16}}};
 const INLINE=S;
 const CH=n=>S.chapters.find(c=>c.id===n)||S.chapters[n-1]||{in:[],out:[]};
@@ -67,7 +82,7 @@ fetch('assets/story/script.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null)
 
 /* ================= TUNING (target: ~12-15 min run = ~1.5-2 min play per chapter + ~2 min of cutscenes) =================
    goal: creatures of the district's kinds (count) to hook inside the district. need: the chapter boss must be beaten too
-   (the ch2 diva is optional, a hazard Sal warns about). Vape use follows the goal, not raw rips: each chapter walks the
+   (ch2 La Diva, ch3 Prime, ch5 Detecto: won over, not beaten up; see js/crowds.js). Vape use follows the goal, not raw rips: each chapter walks the
    count from where it started down to its cap in step with goal progress (rips that run ahead are partly refunded,
    rips that lag take a bit extra), so a boss's huge lungs can't eat the next chapter's stock. floor is a hard safety
    net; on clear the count drops to at most cap (word of mouth sells the rest through the shop).
@@ -76,7 +91,7 @@ fetch('assets/story/script.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null)
 const PLAN={
  1:{goal:5,boss:null,     need:0,floor:4200,cap:4400,mood:'scared',col:0xff3fa4,pal:'#f6a6c1',at:[0,0],
     count:['worker','grandma','kid','cop','jogger'],icons:['worker','kid','cop','grandma','worker'],extra:[]},
- 2:{goal:5,boss:'diva',   need:0,floor:3400,cap:3600,mood:'happy', col:0xb6ff3c,pal:'#bfdc5a',at:[-104,4],
+ 2:{goal:5,boss:'diva',   need:1,floor:3400,cap:3600,mood:'happy', col:0xb6ff3c,pal:'#bfdc5a',at:[-104,4],
     count:['grandma','jogger','tuba'],icons:['grandma','jogger','grandma','tuba','grandma'],extra:[['grandma',7],['jogger',3],['dog',2]]},
  3:{goal:5,boss:'prime',  need:1,floor:2600,cap:2800,mood:'happy', col:0x5fd4ff,pal:'#9ccfee',at:[0,-100],
     count:['gym','jogger','cop'],icons:['gym','jogger','gym','cop','gym'],extra:[['gym',3],['jogger',3],['cop',2],['dog',2]]},
@@ -86,12 +101,12 @@ const PLAN={
     count:null,icons:[],extra:[['worker',6],['grandma',3],['kid',3],['dog',2]]}};
 const START=[5000,5000,4400,3600,2800,2000];   // count ceiling when a chapter is entered (debug jumps)
 const DETECTO_FLOOR=250,CH5_SECS=90;           // in ch5 the last 250 only go once Detecto is beaten (his defeat drains 700)
-const TAG_R=20,NUDGE_OUT=12,NUDGE_CD=45,SAL_R=3.5,SAL_CD=20,BOSS_DELAY=2.3;
+const TAG_R=20,NUDGE_OUT=12,NUDGE_CD=45,SAL_R=3.5,SAL_CD=20,BOSS_DELAY=7.4;// the act turns up (name card) once the mission card has gone
 /* delivery (ch1-4): hooking a creature that counts makes it a carried customer (it joins the conga for good); walking into the
    drop-off zone on the Cloud Kingz sidewalk sends carried customers one by one through the door, and only then do they count.
    Every district is a 13-17 s walk from the shop (measured), so all four chapters deliver to the shop itself.
    DROP: ring centre, ring radius, trigger radius round the centre, the path each customer walks in (last leg squeezes past Sal). */
-const DROP={x:-.3,z:15.2,r:1.75,trig:4.6,path:[[1.0,15.3],[1.15,16.75]],reach:32};
+const DROP={x:.1,z:13.9,r:3.3,trig:3.6,path:[[1.0,15.3],[1.15,16.75]],reach:32};
 const DEL_GAP=[.45,.6],BACK_CD=40,BACK_AWAY=5;
 
 /* ================= CUT-PAPER ICONS (24x24 silhouettes; .k = knocked-out detail in the token's paper colour) ================= */
@@ -153,10 +168,10 @@ const css=document.createElement('style');css.textContent=`
 #game #panic{display:none!important}
 #stg{display:flex;align-items:center;justify-content:center;gap:3px;margin-top:6px;pointer-events:none;min-height:30px}
 #stg[hidden]{display:none!important}
-#stch{font-weight:800;font-size:10px;letter-spacing:.06em;padding:1px 4px;border:1.5px solid var(--lime,#b6ff3c);color:var(--lime,#b6ff3c);margin-right:4px}
+#stch{font-weight:800;font-size:13px;letter-spacing:.06em;padding:2px 5px;border:1.5px solid var(--lime,#b6ff3c);color:var(--lime,#b6ff3c);margin-right:4px}
 #stg .tks{display:flex;align-items:center;gap:3px}
-#stg .tk{position:relative;flex:none;width:27px;height:29px;display:grid;place-items:center;color:#5d4a3a;--tkp:#d9c6a3;background:#d9c6a3;clip-path:var(--cp,none);rotate:var(--r,0deg);opacity:.62}
-#stg .tk>svg{width:20px;height:20px;fill:currentColor;opacity:.5}
+#stg .tk{position:relative;flex:none;width:38px;height:40px;display:grid;place-items:center;color:#5d4a3a;--tkp:#d9c6a3;background:#d9c6a3;clip-path:var(--cp,none);rotate:var(--r,0deg);opacity:.62}
+#stg .tk>svg{width:29px;height:29px;fill:currentColor;opacity:.55}
 #stg .tk svg .k{fill:var(--tkp)}
 #stg .tk.on{background:var(--bg,#f6a6c1);--tkp:var(--bg,#f6a6c1);color:#2b2233;opacity:1}
 #stg .tk.on>svg{opacity:1}
@@ -165,7 +180,7 @@ const css=document.createElement('style');css.textContent=`
 @keyframes stcy{0%{rotate:calc(var(--r,0deg) - 5deg);translate:0 0}50%{rotate:calc(var(--r,0deg) + 4deg);translate:0 -1px}}
 @media (prefers-reduced-motion:reduce){#stg .tk.cy{animation:none}}
 #stg .tkb{position:relative;flex:none;margin-left:5px;padding-top:7px}
-#stg .tkb .tk{width:36px;height:38px}#stg .tkb .tk>svg{width:28px;height:28px}
+#stg .tkb .tk{width:48px;height:50px}#stg .tkb .tk>svg{width:38px;height:38px}
 #stg .tkb .cr{position:absolute;left:50%;top:-1px;width:24px;height:14px;margin-left:-12px;fill:#eebd4b;z-index:1;rotate:-6deg;filter:drop-shadow(0 1px 0 rgba(60,38,16,.45))}
 #stg .tkb .cr .k{fill:#e4574d}
 #stg .tkb.on .cr{fill:#f6c935}
@@ -192,10 +207,29 @@ const css=document.createElement('style');css.textContent=`
 #stc .cap b{display:inline-block;margin-right:.4em}
 #stc.live{left:0;right:0;top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));justify-content:center;flex-direction:row;max-width:none}
 #stc.live .fr{display:none}#stc.live .cap{max-width:min(620px,calc(100vw - 32px));font-size:clamp(15px,2.2vw,21px);text-align:center}
-@media (max-width:520px){#stg .tk{width:22px;height:24px}#stg .tk>svg{width:16px;height:16px}#stg .tkb .tk{width:29px;height:31px}#stg .tkb .tk>svg{width:22px;height:22px}#stc{top:auto;bottom:calc(150px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:520px){#stg .tk{width:31px;height:33px}#stg .tk>svg{width:24px;height:24px}#stg .tkb .tk{width:38px;height:40px}#stg .tkb .tk>svg{width:30px;height:30px}#stc{top:auto;bottom:calc(150px + env(safe-area-inset-bottom,0px))}}
 @media (prefers-reduced-motion:reduce){#stt.go b{animation:none}#st img.kb,#st .ph{animation:none}#stc.ring .hd{animation:none}}
 #intro .loc{font:800 13px system-ui,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--lime,#b6ff3c);opacity:.9}
 #mPick,#mPickBg,#mInst,#mTip,#news,#hint,#right,#vape,#prompt,#toast,#bubs{display:none!important}
+#st .fr.flip img,#st .fr.flip video{scale:-1 1}
+#stt s{text-decoration:none;font:800 clamp(14px,2.4vw,22px)/1 system-ui,sans-serif;letter-spacing:.32em;color:var(--paper,#fff7ea);background:#2b2233;padding:.35em .7em .3em;margin-bottom:12px;rotate:2deg;text-transform:uppercase}
+#stmc{position:absolute;left:50%;top:58%;z-index:25;pointer-events:none;opacity:0;width:min(640px,92vw);margin-left:calc(min(640px,92vw) / -2);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 22px 20px;
+  background:#d8b585;color:#2b2233;clip-path:var(--cp,none);box-shadow:0 6px 0 rgba(43,34,51,.35);text-align:center;rotate:-1.5deg}
+#stmc .ic{display:flex;align-items:center;gap:10px}#stmc .ic svg{width:44px;height:44px;fill:#2b2233}#stmc .ic .ar{width:34px;height:34px;fill:#e4574d;rotate:90deg}
+#stmc b{font-family:var(--display,Impact,sans-serif);font-weight:400;font-size:clamp(30px,6vw,58px);line-height:.95;color:#2b2233;text-shadow:3px 3px 0 #fbf5e6}
+#stmc i{font-style:normal;font:800 clamp(15px,2.3vw,22px)/1.15 system-ui,sans-serif;background:#fbf5e6;padding:.3em .6em;rotate:1deg}
+#stmc.go{animation:stmcg 5.2s steps(1,end) forwards}
+@keyframes stmcg{0%{opacity:0;transform:scale(1.9) rotate(-6deg)}4%{opacity:1;transform:scale(.88) rotate(2deg)}8%{transform:scale(1.06) rotate(-1deg)}12%,86%{opacity:1;transform:scale(1) rotate(0)}90%{opacity:1;transform:scale(1.02) rotate(1deg) translateY(-8px)}95%,100%{opacity:0;transform:scale(.95) translateY(-30px)}}
+#stob{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:calc(max(12px,env(safe-area-inset-top,0px)) + 52px);z-index:21;pointer-events:none;width:clamp(200px,27vw,300px);padding:12px 16px 13px;
+  background:#d8b585;color:#2b2233;clip-path:var(--cp,none);rotate:-1deg;box-shadow:0 4px 0 rgba(43,34,51,.3)}
+#stob[hidden]{display:none!important}
+#stob .tg{display:inline-block;font:800 11px/1 system-ui,sans-serif;letter-spacing:.14em;background:#2b2233;color:#fbf5e6;padding:3px 6px 2px;margin-bottom:6px}
+#stob .st{display:block;font-family:var(--display,Impact,sans-serif);font-size:clamp(19px,2.3vw,26px);line-height:1;letter-spacing:.01em}
+#stob .ct{display:block;margin-top:7px;font:800 clamp(13px,1.5vw,16px)/1.15 system-ui,sans-serif;background:#fbf5e6;padding:4px 7px;rotate:.6deg}
+#stob.bump{animation:stobb .36s steps(3,end)}@keyframes stobb{0%{transform:scale(1.12) rotate(-3deg)}50%{transform:scale(.96) rotate(1deg)}100%{transform:none}}
+@media (max-height:500px){#stmc{top:52%;gap:3px;padding:8px 14px 10px;width:min(520px,80vw);margin-left:calc(min(520px,80vw) / -2)}#stmc b{font-size:clamp(24px,4.6vw,36px)}#stmc i{font-size:14px}#stmc .ic svg{width:28px;height:28px}#stmc .ic .ar{width:22px;height:22px}#stob{width:clamp(180px,24vw,240px);padding:8px 12px 9px}#stob .st{font-size:18px}#stob .ct{font-size:12px}}
+@media (max-width:520px){#stob{top:auto;bottom:calc(178px + env(safe-area-inset-bottom,0px));width:min(250px,60vw);padding:7px 9px 8px}#stmc{top:50%}}
+@media (prefers-reduced-motion:reduce){#stmc.go{animation:stmcr 5.2s steps(1,end) forwards}@keyframes stmcr{0%,92%{opacity:1}100%{opacity:0}}#stob.bump{animation:none}}
 `;
 document.head.appendChild(css);
 
@@ -204,7 +238,10 @@ el.innerHTML='<div class="fr"><div class="ph"></div><img alt=""><video muted pla
 X.game.appendChild(el);
 const fr=el.querySelector('.fr'),im=el.querySelector('img'),vid=el.querySelector('video'),capEl=el.querySelector('.cap'),vg=el.querySelector('.vg');
 vid.muted=true;vid.playsInline=true;vid.setAttribute('playsinline','');vid.setAttribute('webkit-playsinline','');
-const card=document.createElement('div');card.id='stt';card.setAttribute('aria-live','polite');card.innerHTML='<b data-paper="ransom"></b><i data-paper="ransom"></i>';X.game.appendChild(card);
+const card=document.createElement('div');card.id='stt';card.setAttribute('aria-live','polite');card.innerHTML='<s></s><b data-paper="ransom"></b><i data-paper="ransom"></i>';X.game.appendChild(card);
+// mission card (big paper strip after the title card) and the objective panel (kraft card, top-left; current step + live counts)
+const mcard=document.createElement('div');mcard.id='stmc';mcard.setAttribute('aria-live','polite');mcard.innerHTML='<div class="ic"></div><b></b><i></i>';X.game.appendChild(mcard);
+const obj=document.createElement('div');obj.id='stob';obj.hidden=true;obj.setAttribute('aria-live','polite');obj.innerHTML='<span class="tg"></span><span class="st"></span><span class="ct"></span>';X.game.appendChild(obj);
 // goal tokens: a row under the vapes-left counter (the chapter tag "n/5" leads it)
 const row=document.createElement('div');row.id='stg';row.hidden=true;row.innerHTML='<span id="stch"></span><span class="tks"></span>';
 const chEl=row.firstChild,tksEl=row.lastChild;{const c=$('count');if(c)c.appendChild(row)}
@@ -238,10 +275,12 @@ function filmTick(now){filmRaf=el.hidden?0:requestAnimationFrame(filmTick);if(no
 function filmOn(){if(!filmRaf){filmLast=0;filmRaf=requestAnimationFrame(filmTick)}}
 
 /* ================= VOICE (preloaded per chapter; emits vo true/false so the score can duck) ================= */
-const IMG=n=>'assets/story/clay/'+n+'.jpg',VID=n=>'assets/story/clay/'+n+'.mp4',VO=n=>'audio/vo/'+n+'.mp3';
+const IMG=n=>'assets/story/clay/'+n+'.jpg',VO=n=>'audio/vo/'+n+'.mp3';
+// a clip name may carry a media fragment ('ch1_v2_5#t=5.3' or '#t=0,2.4'): the browser plays only that span (trims without re-encoding)
+const VID=n=>{const i=n.indexOf('#');return 'assets/story/clay/'+(i<0?n:n.slice(0,i))+'.mp4'+(i<0?'':n.slice(i))};
 const VOA={};
 function getA(n){let a=VOA[n];if(!a||a.error){a=new Audio(VO(n));a.preload='auto';VOA[n]=a}return a}
-function warm(list){for(const f of list)if(f&&f.vo)try{getA(f.vo)}catch(e){}}
+function warm(list){for(const f of list){if(f&&f.vo)try{getA(f.vo)}catch(e){}if(f&&f.over)try{getA(f.over)}catch(e){}}}
 let voN=0;const voOn=()=>{if(voN++===0)X.emit('vo',true)},voOff=()=>{if(voN>0&&--voN===0)X.emit('vo',false)};
 /* plays one line; fin(true) when it ended, fin(false) when there was nothing to hear (missing file, muted, blocked) */
 function sound(n,fin){let done=false,on=false,cancel=false;const end=ok=>{if(done)return;done=true;if(on){on=false;voOff()}if(!cancel)fin(ok)};
@@ -258,7 +297,8 @@ function probe(u){if(u in okImg)return;okImg[u]=undefined;const i=new Image();i.
 function preload(){for(const c of S.chapters)for(const f of[...(c.in||[]),...(c.out||[])])if(f.img)probe(IMG(f.img));for(const f of S.end||[])if(f.img)probe(IMG(f.img));for(const k in FALL)probe('assets/clay/'+FALL[k]+'.jpg');
   for(const k of['ch1_in_2','ch2_out_1','ch3_out_1'])probe(IMG(k))}
 preload();
-function showStill(f,still){im.onerror=null;im.classList.remove('kb','soft');im.hidden=false;
+function showStill(f,still){fr.classList.toggle('flip',!!f.flip);// shot.flip: the still and the clip are mirrored with CSS (horizontal flop, no re-encode)
+  im.onerror=null;im.classList.remove('kb','soft');im.hidden=false;
   const fb='assets/clay/'+(FALL[f._d]||'loc_shop_int')+'.jpg';
   const soft=()=>{if(okImg[fb]===false){im.hidden=true;return}im.onerror=()=>{im.hidden=true};im.classList.remove('kb');im.classList.add('soft');im.src=fb};
   if(!f.img||okImg[IMG(f.img)]===false){soft();return}
@@ -279,7 +319,7 @@ function play(shots,done,dk,toPlay){shots=(shots||[]).map(f=>Object.assign({_d:d
   if(seq)finish(true);if(!shots.length){done&&done();return}
   callStop();seq={shots,i:-1,done,tm:0,toPlay};el.hidden=false;filmOn();requestAnimationFrame(()=>{if(seq)el.classList.add('on')});
   if(document.exitPointerLock&&document.pointerLockElement)document.exitPointerLock();X.emit('cutscene',true);next()}
-function finish(silent){const s=seq;if(!s)return;seq=null;clearTimeout(s.tm);if(au){au.stop();au=null}vid.pause();clipOff();
+function finish(silent){const s=seq;if(!s)return;seq=null;clearTimeout(s.tm);if(au){au.stop();au=null}if(overH){overH.stop();overH=null}vid.pause();clipOff();
   el.classList.remove('on');setTimeout(()=>{if(!seq){el.hidden=true;vid.removeAttribute('src');vid.hidden=true}},320);
   X.emit('cutscene',false);if(!silent&&s.done)s.done()}
 function next(){const s=seq;if(!s)return;clearTimeout(s.tm);if(au){au.stop();au=null}clipOff();s.i++;if(s.i>=s.shots.length){finish();return}
@@ -309,6 +349,18 @@ function next(){const s=seq;if(!s)return;clearTimeout(s.tm);if(au){au.stop();au=
   const nf=s.shots[my+1];if(nf){if(nf.img)probe(IMG(nf.img));if(nf.vo&&!nf.aud)getA(nf.vo);if(nf.vid){pv=pv||document.createElement('video');pv.muted=true;pv.preload='auto';pv.src=VID(nf.vid);try{pv.load()}catch(e){}}}
   if(f.vo&&!talk){au=sound(f.vo,ok=>{au=null;voDone=true;voEnd=ok?performance.now():0;arm()})}
   if(!talk)arm();if(!s.tm)s.tm=setTimeout(()=>{if(live())next()},talk?20000:14000)}
+/* shot extras, wired as listeners outside next(): a trimmed clip ('#t=a,b') 'ends' at b; mute:true silences the clip's own track (its
+   picture still drives the cut); over:'vo' lays a line over the clip as it starts (a line over someone's back) and may run past the cut */
+const curShot=()=>seq&&seq.shots[seq.i];
+let trimDone=false,overH=null;
+const clipBase=f=>{const n=f.vid||'',i=n.indexOf('#');return (i<0?n:n.slice(0,i))+'.mp4'};
+function trimChk(){const f=curShot();if(!f||!f.vid||trimDone)return;const m=/#t=[\d.]*,([\d.]+)/.exec(f.vid);if(!m)return;
+  if((vid.currentSrc||vid.src||'').indexOf(clipBase(f))<0)return;// an event from the clip before
+  if(vid.currentTime>=+m[1]-.06){trimDone=true;try{vid.pause()}catch(e){}vid.dispatchEvent(new Event('ended'))}}
+vid.addEventListener('loadstart',()=>{trimDone=false;const f=curShot();if(f&&f.mute)vid.muted=true});
+vid.addEventListener('timeupdate',trimChk);vid.addEventListener('pause',trimChk);
+vid.addEventListener('playing',()=>{const f=curShot();if(!f)return;if(f.mute)vid.muted=true;
+  if(f.over&&!f._overOn){f._overOn=1;if(overH)overH.stop();overH=sound(f.over,()=>{overH=null})}});
 function regrab(){if(X.touch)return;const c=X.R&&X.R.domElement;try{const p=c&&c.requestPointerLock&&c.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function advance(byUser){const s=seq;if(!s)return;const last=s.i>=s.shots.length-1;if(byUser&&last&&s.toPlay)regrab();next()}
 el.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();advance(true)});
@@ -316,8 +368,43 @@ addEventListener('keydown',e=>{if(e.repeat)return;if(seq&&(e.code==='Space'||e.c
 
 /* ================= CHAPTER TITLE CARD (non-blocking: play already runs underneath) ================= */
 let cardTm=0;
-function showCard(n){const c=CH(n);card.firstChild.textContent=n;card.lastChild.textContent=c.title||'';card.classList.remove('go');void card.offsetWidth;card.classList.add('go');
+function showCard(n){const c=CH(n);card.children[0].textContent=(c.day||'');card.children[0].hidden=!c.day;card.children[1].textContent=n;card.children[2].textContent=(c.day?c.day.toUpperCase()+' · ':'')+(c.title||'');card.classList.remove('go');void card.offsetWidth;card.classList.add('go');
   clearTimeout(cardTm);cardTm=setTimeout(()=>card.classList.remove('go'),2000)}
+
+/* ================= MISSION CARD + OBJECTIVE PANEL =================
+   The mission card stamps in under the title card at the start of play (the goal in a few words, with cut-paper icons); the objective panel
+   (kraft card, top-left; bottom-left on phones) always says the next thing to do and the live counts, and stamps when the step changes. */
+const SHOPI='<path d="M5.5 18.5h13.2a4.3 4.3 0 0 0 .3-8.6 5.8 5.8 0 0 0-11.2-1.2A4.9 4.9 0 0 0 5.5 18.5Z"/><path class="k" d="M10.2 12.4h3.6v3.4h-3.6Z"/>';
+let mcTm=0;
+function showMission(n){const c=CH(n),m=c.mission||[];if(!m.length)return;const P=PLAN[n],I=t=>svg('0 0 24 24',ICON[t]||ICON.worker);
+  const who=n===2?I('diva')+I('grandma'):n===3?I('prime')+I('gym'):n===5?I('detecto'):I((P.icons||[])[0]);
+  mcard.firstChild.innerHTML=n===5?who:who+'<svg class="ar" viewBox="0 0 40 50" aria-hidden="true"><path d="M20 2 38.5 22.5H27.4V47.5H12.6V22.5H1.5Z"/></svg>'+svg('0 0 24 24',SHOPI);
+  mcard.children[1].textContent=m[0]||'';mcard.children[2].textContent=m[1]||'';mcard.children[2].hidden=!m[1];mcard.style.setProperty('--cp',scrapCP(4));
+  mcard.classList.remove('go');void mcard.offsetWidth;mcard.classList.add('go');clearTimeout(mcTm);mcTm=setTimeout(()=>mcard.classList.remove('go'),5400);
+  if(!X.muted)try{X.beep(140,.08,'square',.04);X.beep(520,.08,'triangle',.03,.06)}catch(e){}}
+const DNAME={downtown:'DOWNTOWN',park:'THE PARK',beach:'MUSCLE BEACH',farm:'THE FARM',square:'THE SQUARE'},WHO={1:'LOCALS',2:'GRANDMAS',3:'BROS',4:'ANIMALS'};
+function objText(){const n=st.ch;if(!n)return null;const dk=CH(n).district,c=carriedN(),out=n<5&&!inD(dk,X.px,X.pz),dS=Math.hypot(DROP.x-X.px,DROP.z-X.pz);
+  if(st.phase==='out'||st.phase==='end')return['DONE! NICE WORK, KID',n<5?'DELIVERED '+st.goal+' / '+st.goal:'0 VAPES LEFT'];
+  if(st.phase!=='play')return['GET READY…',''];
+  const b=bossN(n),bd=b?Math.hypot(b.g.position.x-X.px,b.g.position.z-X.pz):1e9,done=b?b.boss.cfg.goal-b.boss.hp:0;
+  if(n===5){const left=Math.max(0,X.count).toLocaleString()+' VAPES LEFT';if(st.bossBeat)return['VAPE THEM ALL! EMPTY IT!',left];
+    return[X.count<=DETECTO_FLOOR+5?'PUT DETECTO TO SLEEP':'VAPE THE CROWD · SHUSH DETECTO','DETECTO '+done+' / 3 · '+left]}
+  const cnt='FOLLOWING '+c+' · DELIVERED '+Math.min(st.got,st.goal)+' / '+st.goal;
+  if(audOn(n)){if(out)return['GO TO '+DNAME[dk],cnt];
+    if(n===2)return[bd<15?'ONE PUFF AT THE TOP OF HER NOTE':'FIND LA DIVA AT THE GAZEBO',cnt];
+    return[bd<15?"MATCH PRIME'S CLOUD · REP "+Math.min(3,done+1)+' / 3':'FIND PRIME AT THE GYM',cnt]}
+  if(c>0&&st.got+c>=st.goal)return[dS<DROP.trig+1?'IN THEY GO!':dS<14?'STEP INTO THE PINK CIRCLE':'WALK THEM TO CLOUD KINGZ',cnt];
+  if(st.walk.length)return['IN THEY GO!',cnt];
+  if(c>0)return[dS<14?'STEP INTO THE PINK CIRCLE':'HOOK '+(st.goal-st.got-c)+' MORE · OR DROP THEM OFF',cnt];
+  if(out)return['GO TO '+DNAME[dk],cnt];
+  return['VAPE '+(st.goal-st.got)+' '+WHO[n]+' · LET GO IN THE GREEN',cnt]}
+let obT=0,obLast='';
+function objBump(){obT=0;obLast=''}
+function objStep(dt){if((obT-=dt)>0)return;obT=.2;const live=st.ch>0&&st.phase!=='idle'&&X.mode!=='intro'&&X.mode!=='won'&&!seq;const t=live?objText():null;
+  if(!t){if(!obj.hidden)obj.hidden=true;return}if(obj.hidden){obj.hidden=false;obj.style.setProperty('--cp',scrapCP(3))}
+  const c=CH(st.ch),tg=((c.day||'').slice(0,3)+' · '+(c.title||'')).toUpperCase(),key=t[0]+'|'+t[1];
+  if(obj.children[0].textContent!==tg)obj.children[0].textContent=tg;if(obj.children[2].textContent!==t[1])obj.children[2].textContent=t[1];obj.children[2].hidden=!t[1];
+  if(obj.children[1].textContent!==t[0]){obj.children[1].textContent=t[0];if(obLast&&!RMq.matches){obj.classList.remove('bump');void obj.offsetWidth;obj.classList.add('bump')}}obLast=key}
 
 /* ================= SAL'S CALLS (phone polaroid in a corner, or subtitles only in person) ================= */
 const cl={tok:0,h:null,tm:0,busy:false,live:false};
@@ -423,12 +510,37 @@ function add(ty,dk,away){if(!X.BUILD[ty])return null;let[x,z]=spot(dk);
 function populate(n){if(spawned[n])return;spawned[n]=1;const dk=CH(n).district;for(const[ty,k]of PLAN[n].extra)for(let i=0;i<k;i++)add(ty,dk)}
 /* only the district's kinds count, once each, while unhooked and inside the district */
 const counts=(c,n)=>{const P=PLAN[n];return !!(P&&P.count&&P.count.includes(c.type))};
-const elig=(c,n)=>!c.boss&&!c.hooked&&!credited.has(c)&&counts(c,n)&&inD(CH(n).district,c.g.position.x,c.g.position.z);
-function topUp(n,away){const P=PLAN[n];if(!P.count)return;const dk=CH(n).district;let have=0;for(const c of X.npcs)if(elig(c,n))have++;
+const elig=(c,n)=>!c.boss&&!c._pin&&!c.hooked&&!credited.has(c)&&counts(c,n)&&inD(CH(n).district,c.g.position.x,c.g.position.z);
+function topUp(n,away){const P=PLAN[n];if(!P.count||audOn(n))return;const dk=CH(n).district;let have=0;for(const c of X.npcs)if(elig(c,n))have++;
   const pool=P.count.filter(t=>t!=='tuba'&&X.BUILD[t]),want=Math.max(0,P.goal-st.got-carriedN())+4;for(let i=0;have<want&&i<16;i++)if(add(pool[(i+st.got)%pool.length],dk,away))have++}
+/* ---------- captive audiences (ch2 La Diva, ch3 Prime) ----------
+   Nobody walks out on La Diva mid-aria: five grandmas are pinned to the benches round the gazebo (hands over their ears), and every other
+   park local of the chapter's kinds freezes where they stand to listen. On Muscle Beach nobody breathes till Prime breathes first: five
+   gym bros ring him for the lung set, the rest wait. Pinned folk can't be hooked (crowds.js holds them in place, untargetable). When the act
+   is won over, the five join your conga as carried customers and the rest are free again. */
+const AUD={2:{dk:'park',kind:'grandma',fx:-90,fz:30,pose:'ears',seats:[[-84.55,20.75],[-83.45,20.75],[-96.05,20.75],[-94.95,20.75],[-101,23.25]]},
+  3:{dk:'beach',kind:'gym',fx:0,fz:-82,pose:'cheer',seats:[78,129,180,231,282].map(a=>[Math.sin(a*PI/180)*5.6,-82+Math.cos(a*PI/180)*5.6])}};
+const audOn=n=>!!AUD[n]&&st.ch===n&&!st.bossBeat&&st.phase!=='out'&&st.phase!=='idle';
+function audStart(n){const A=AUD[n];if(!A)return;const busy=new Set();
+  for(const[x,z]of A.seats){let best=null,bd=1e9;for(const c of X.npcs){if(c.type!==A.kind||c.boss||c._pin||c._carry||credited.has(c)||busy.has(c))continue;const d=Math.hypot(c.g.position.x-x,c.g.position.z-z);if(d<bd){bd=d;best=c}}
+    if(!best||bd>90)best=add(A.kind,A.dk);if(!best)continue;busy.add(best);unhook(best);best.g.position.set(x,0,z);best._pin={x,z,fx:A.fx,fz:A.fz,pose:A.pose};best._aud=n}
+  if(n===2)for(const c of X.npcs)if(c.type==='tuba'&&Math.hypot(c.g.position.x+90,c.g.position.z-30)<6)c._pin={x:-85,z:25.5,fx:-90,fz:30,pose:'still'};// the tuba steps out of the gazebo for her
+  audFreeze(n)}
+function audFreeze(n){const A=AUD[n];if(!audOn(n)&&st.phase!=='in')return;for(const c of X.npcs){if(c._pin||c.boss||c.hooked||c._carry||c._in||credited.has(c)||!counts(c,n))continue;const p=c.g.position;if(!inD(A.dk,p.x,p.z))continue;
+  c._pin={x:p.x,z:p.z,fx:A.fx,fz:A.fz,pose:'still'}}}
+function audRelease(n){for(const c of X.npcs){if(!c._pin)continue;const mine=c._aud===n;c._pin=null;c._aud=0;c.state='wander';c.cool=0;c.tm=0;
+    if(mine&&!credited.has(c)){c.hooked=true;c.times=Math.max(c.times,c.t.hook||0);if(c.H&&c.H.Wh)for(const wm of c.H.Wh)wm.material=X.M(0xffc4c4);carryAdd(c)}}}
+function unpinAll(){for(const c of X.npcs){c._pin=null;c._aud=0}}
+// Prime's gold chain ends up on Sal ("Two chains, kid. TWO."): a second, chunkier chain over his own from chapter 4 on
+let salCh=null;
+function salChain(on){const g=X.sal&&X.sal.g;if(!g)return;if(!salCh){let mine=null;g.traverse(o=>{if(!mine&&o.isMesh&&o.geometry&&o.geometry.type==='TorusGeometry'&&o.material&&o.material.color&&o.material.color.getHex()===0xe8c040)mine=o});
+    if(!mine)return;salCh=new T.Group();mine.parent.add(salCh);const c2=mine.clone();c2.material=X.M(0xffd23c);c2.scale.multiplyScalar(1.32);c2.position.y-=.07;c2.position.z+=.02;salCh.add(c2);
+    const md=X.mk('C',salCh,.1,.03,.1,0xffd23c,mine.position.x,mine.position.y-.2,mine.position.z+.06);md.rotation.x=PI/2}
+  salCh.visible=!!on}
 function unhook(n){n.hooked=false;n.times=0;if(n.H&&n.H.Wh)for(const wm of n.H.Wh)wm.material=X.M(0xffffff)}
-function prep(n){populate(n);
+function prep(n){populate(n);audStart(n);
   if(n===3)for(const c of X.npcs)if(c.type==='gym'&&!c.boss&&c.hooked&&!credited.has(c)&&inD('beach',c.hx,c.hzz))unhook(c);// gym bros start hooked; make them earnable
+  if(n===4||n===5)salChain(true);
   if(n===5){// everyone already hooked comes back for seconds: they pour into the square during the cutscene
     let k=0;for(const c of X.npcs){if(!c.hooked||c.boss||k>=36||c.state==='held')continue;const[x,z]=spot('square');c.g.position.set(x,0,z);c.state='wander';c.cool=0;c.tm=0;c.tx=x;c.tz=z;k++}}
   topUp(n)}
@@ -464,6 +576,13 @@ const salTex=paperTex(g=>{const b=(dx,dy,c)=>{g.beginPath();g.ellipse(64+dx,64+d
   g.fillStyle='#2b2233';for(const x of[40,64,88]){g.beginPath();g.arc(x,66,7.5,0,PI*2);g.fill()}});
 const tagPool=[];for(let i=0;i<8;i++){const m=new T.SpriteMaterial({transparent:true,depthWrite:false,fog:false,opacity:0}),s=new T.Sprite(m);s.scale.set(.56,.7,1);s.visible=false;s.renderOrder=3;X.scene.add(s);tagPool.push({s,m,n:null,a:0,ph:rand(0,6)})}
 const salB=new T.Sprite(new T.SpriteMaterial({map:salTex,transparent:true,depthWrite:false,fog:false,opacity:0}));salB.scale.set(.62,.78,1);salB.visible=false;salB.renderOrder=3;X.scene.add(salB);
+// "talk to me" cue: a hot-pink felt tag with a stitched cream "!" (shown when you're close and looking at him)
+const salXTex=paperTex(g=>{const tag=(dx,dy,c)=>{g.beginPath();g.moveTo(30+dx,14+dy);g.lineTo(98+dx,10+dy);g.quadraticCurveTo(112+dx,12+dy,110+dx,28+dy);g.lineTo(106+dx,112+dy);g.quadraticCurveTo(104+dx,124+dy,90+dx,124+dy);
+    g.lineTo(76+dx,124+dy);g.lineTo(64+dx,150+dy);g.lineTo(54+dx,124+dy);g.lineTo(34+dx,124+dy);g.quadraticCurveTo(20+dx,122+dy,20+dx,108+dy);g.lineTo(18+dx,28+dy);g.quadraticCurveTo(18+dx,14+dy,30+dx,14+dy);g.closePath();g.fillStyle=c;g.fill()};
+  tag(4,6,'rgba(45,28,12,.38)');tag(0,0,'#ff4fa0');g.save();g.clip();fleck(g,220);g.restore();
+  g.strokeStyle='rgba(255,246,234,.85)';g.lineWidth=2.5;g.setLineDash([6,5]);g.beginPath();g.moveTo(30,24);g.lineTo(98,20);g.lineTo(96,112);g.lineTo(32,114);g.closePath();g.stroke();g.setLineDash([]);
+  g.fillStyle='#fff6ea';g.beginPath();g.moveTo(54,32);g.lineTo(74,31);g.lineTo(70,84);g.lineTo(58,85);g.closePath();g.fill();g.beginPath();g.arc(64,101,9,0,PI*2);g.fill()});
+const salX=new T.Sprite(new T.SpriteMaterial({map:salXTex,transparent:true,depthWrite:false,fog:false,opacity:1}));salX.scale.set(.52,.65,1);salX.visible=false;salX.renderOrder=3;X.scene.add(salX);
 
 /* ---------- objective direction (arrow / chevron / tags), refreshed every frame in prerender ---------- */
 const VC=new T.Vector3(),VP=new T.Vector3();
@@ -476,6 +595,7 @@ function setUI(e,x,y,rot,a){if(!ui.tick)return;a=qa(a);e.style.transform=`transl
 const headY=n=>n.g.position.y+(n.hy||1.5)+(n.r>.55?1.2:.85);
 const toShop=()=>st.ch>=1&&st.ch<=4&&st.phase==='play'&&carriedN()>0&&st.got+carriedN()>=st.goal;
 function scan(){const n=st.ch;ui.list.length=0;ui.near=null;if(!n||st.phase!=='play')return;let bd=1e9;
+  if(audOn(n)){ui.near=bossN(n);return}// the park / the beach waits on its act: point at La Diva / Prime first
   if(n<5&&st.got+carriedN()>=st.goal){if(PLAN[n].need)ui.near=bossN(n);return}// everyone's on the way: only the boss is left to point at
   if(n<5){for(const c of X.npcs){if(!elig(c,n))continue;const d=Math.hypot(c.g.position.x-X.px,c.g.position.z-X.pz);ui.list.push([d,c]);if(d<bd){bd=d;ui.near=c}}
     ui.list.sort((a,b)=>a[0]-b[0]);ui.list.length=Math.min(ui.list.length,tagPool.length);
@@ -512,17 +632,29 @@ function uiStep(dt,t){const n=st.ch,live=X.mode==='play'&&st.phase==='play'&&!se
     tg.s.position.set(p.x,headY(tg.n)+Math.sin(t*3.2+tg.ph)*.09+.15,p.z);{const k=1+Math.hypot(p.x-X.px,p.z-X.pz)/28;tg.s.scale.set(.56*k,.7*k,1)}tg.m.opacity=qa(tg.a*ui.a)*.95;tg.s.visible=tg.m.opacity>.01}}
 
 /* ---------- Sal in person: walk up to the Cloud Kingz doorway to hear the deal again ---------- */
-const sal={look:0,yaw0:null,ba:0};
+const sal={look:0,yaw0:null,ba:0,can:false,cd:0},SAL_TALK=5;
 function salStep(dt,t){const s=X.sal;if(!s||!s.g)return;const g=s.g,p=g.position;if(sal.yaw0===null)sal.yaw0=g.rotation.y;
   const d=Math.hypot(p.x-X.px,p.z-X.pz),live=X.mode==='play'&&st.phase==='play'&&!seq;
+  // close (< 5 m) and looking his way: the felt "!" tag bobs over him on held frames, and the action button talks to him
+  {const fx=-Math.sin(X.yaw),fz=-Math.cos(X.yaw),dot=((p.x-X.px)*fx+(p.z-X.pz)*fz)/(d||1);sal.can=live&&d<SAL_TALK&&dot>.82&&!cl.busy&&!X.held&&!X.tgt&&performance.now()>sal.cd;
+    salX.visible=sal.can;if(sal.can){const q=Math.floor(t*10)%6;salX.position.set(p.x,p.y+1.62+[0,.05,.09,.1,.07,.03][q],p.z);const k=q===0?1.08:1;salX.scale.set(.52*k,.65/k,1)}}
   const ready=live&&!cl.busy&&!X.held&&!rv.h&&!carriedN()&&performance.now()>st.salAt&&performance.now()>st.delAt+15000;
   // tiny paper speech bubble over his head when you're close and he has something to say
-  const ba=ready&&d<9?clamp((9-d)/3,0,1):0;sal.ba+=clamp(ba-sal.ba,-dt*4,dt*3);salB.material.opacity=qa(sal.ba);salB.visible=salB.material.opacity>.01;
+  const ba=ready&&d<9&&!sal.can?clamp((9-d)/3,0,1):0;sal.ba+=clamp(ba-sal.ba,-dt*4,dt*3);salB.material.opacity=qa(sal.ba);salB.visible=salB.material.opacity>.01;
   if(salB.visible)salB.position.set(p.x,p.y+1.75+Math.sin(Math.floor(t*10)/10*3)*.06,p.z);
   if(ready&&d<SAL_R){const fx=-Math.sin(X.yaw),fz=-Math.cos(X.yaw),dot=((p.x-X.px)*fx+(p.z-X.pz)*fz)/(d||1);if(dot>.55)salGreet()}
   // he turns to face you while talking, then back to the town
   sal.look=Math.max(0,sal.look-dt);const want=sal.look>0?Math.atan2(X.px-p.x,X.pz-p.z):sal.yaw0;
   let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>.002)g.rotation.y+=da*Math.min(1,dt*6)}
+// talk to Sal on purpose: he turns, perks up (greedy when you've brought customers) and repeats what to do right now
+function salTalk(){const n=st.ch;if(!n)return;const now=performance.now();sal.cd=now+3500;st.salAt=Math.max(st.salAt,now+8000);sal.look=30;
+  st.moodOv=carriedN()?'greedy':'happy';setMood();const my=st.run;setTimeout(()=>{if(st.run===my&&st.moodOv){st.moodOv=null;setMood()}},3200);
+  if(!X.muted)try{X.beep(660,.06,'triangle',.03);X.beep(990,.08,'triangle',.03,.06)}catch(e){}
+  const L=n<5&&carriedN()?[CALL('back2')]:[GOALCALL(n),n===1?CH(1).why:null].filter(Boolean);
+  callPlay(L,{live:true},()=>{sal.look=1.2})}
+const salKey=e=>{if(e.code==='Space'&&!e.repeat&&sal.can&&!seq){salTalk()}};addEventListener('keydown',salKey,true);
+X.game.addEventListener('pointerdown',e=>{if(!sal.can||seq||e.button>0)return;const tgEl=e.target;if(X.touch){const w=X.game.clientWidth||innerWidth;if(e.clientX<w*.35&&!(tgEl&&tgEl.id==='vbtn'))return}
+  if(tgEl&&tgEl.closest&&tgEl.closest('button,#pause,#menu,a,input')&&!(tgEl.id==='vbtn'))return;salTalk()},true);
 function salGreet(){const n=st.ch;if(!n)return;st.salAt=performance.now()+SAL_CD*1000;sal.look=30;st.moodOv='happy';setMood();
   const my=st.run;setTimeout(()=>{if(st.run===my&&st.moodOv==='happy'){st.moodOv=null;setMood()}},2600);
   callPlay([CALL('hey'),GOALCALL(n)],{live:true},()=>{sal.look=1.2;st.salAt=performance.now()+SAL_CD*1000});
@@ -533,7 +665,7 @@ function carryAdd(c){if(!c||c._carry||credited.has(c))return;c._carry=1;st.carry
   if(!st.backSaid){st.backSaid=1;if(!st.want){st.want='back1';st.wantAt=now+1400}}
   if(!st.enoughSaid&&st.got+carriedN()>=st.goal){st.enoughSaid=1;st.want='enough';st.wantAt=now+1400}}
 // chapter change: leftovers stop being customers (they stay hooked fans); anyone mid-walk already made it inside
-function flushCarry(){for(const c of st.carry)c._carry=0;for(const c of st.walk){c._carry=0;if(c._in){c._in=null;if(X.crowds&&X.crowds.removeNpc)X.crowds.removeNpc(c)}}
+function flushCarry(){unpinAll();for(const c of st.carry)c._carry=0;for(const c of st.walk){c._carry=0;if(c._in){c._in=null;if(X.crowds&&X.crowds.removeNpc)X.crowds.removeNpc(c)}}
   st.carry.length=0;st.walk.length=0;st.want=null;st.backSaid=st.enoughSaid=0;st.backAt=0;rv.said=rv.pend=0;rv.alr=0}
 /* Sal phones once when the first customer tags along, once when the order is complete, then at most every 40 s while you're
    carrying people away from the shop (never when you're already at the door; the door does the talking there). */
@@ -552,7 +684,7 @@ function deliverStep(){if(!st.carry.length||!X.crowds||!X.crowds.walkIn)return;c
   for(const c of st.carry){if(c===X.held||c.state==='held')continue;const d=Math.hypot(c.g.position.x-p0[0],c.g.position.z-p0[1]);if(d<bd){bd=d;best=c}}
   if(!best)return;const tok=st.run,n=st.ch;st.carry.splice(st.carry.indexOf(best),1);st.walk.push(best);
   if(!X.crowds.walkIn(best,DROP.path.map(q=>q.slice()),c=>delivered(c,tok,n))){st.walk.pop();st.carry.push(best);return}
-  dvNext=now+rand(DEL_GAP[0],DEL_GAP[1])*1000;sal.look=Math.max(sal.look,2.5)}
+  dvNext=now+rand(DEL_GAP[0],DEL_GAP[1])*1000;sal.look=Math.max(sal.look,2.5);if(ind)ind.stamp=3}
 const WHITE=new T.Color(1,1,1);
 function delivered(c,tok,n){const i=st.walk.indexOf(c);if(i>=0)st.walk.splice(i,1);c._carry=0;if(tok!==st.run||st.ch!==n)return;
   credited.add(c);st.delAt=performance.now();st.salAt=Math.max(st.salAt,st.delAt+SAL_CD*1000);sal.look=Math.max(sal.look,2);
@@ -573,7 +705,7 @@ function rvPlay(){if(rv.h||rv.pend<=rv.said)return;if(cl.busy||seq||performance.
   rv.h=sound(v,()=>{rv.h=null;rv.last=performance.now()})}
 
 /* ---------- the drop-off indicator: a chunky clay arrow bobbing over the door (grows with distance so it clears the rooftops),
-   a ring of felt pads on the sidewalk that chase round, the cloud sign blinking pink. All on held frames (~11 fps) with a little
+   a big drop circle on the pavement (the checkpoint), the cloud sign blinking pink. All on held frames (~11 fps) with a little
    jitter; it pops in when you carry someone and out when you don't. ---------- */
 let ind=null;
 function indBuild(){const g=new T.Group(),mat=(c,kind,fog)=>{const m=new T.MeshToonMaterial({color:c});if(fog===false)m.fog=false;try{if(X.clay&&X.clay.setKind)X.clay.setKind(m,kind)}catch(e){}return m};
@@ -583,21 +715,34 @@ function indBuild(){const g=new T.Group(),mat=(c,kind,fog)=>{const m=new T.MeshT
   const put=(p,geo,m,x,y,z,sx,sy,sz,rx,rz)=>{const o=new T.Mesh(geo,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.rotation.set(rx||0,0,rz||0);p.add(o);return o};
   put(A,CO,pk,0,1.05,0,1.5,2.1,1.05,PI);put(A,CY,pk,0,3.35,0,.6,2.7,.48);put(A,SG,pk,0,4.7,0,.6,.32,.48);put(A,CY,cr,0,2.5,0,.68,.34,.56);
   put(A,SG,pk2,.62,1.5,.32,.32,.2,.14,0,.4);put(A,SG,pk2,-.5,1.85,-.3,.26,.16,.12,0,-.3);put(A,SG,cr,.12,3.9,.42,.14,.1,.06);// thumb lumps
-  const R=new T.Group();R.position.set(DROP.x,0,DROP.z);g.add(R);const fp=mat(0xff7ab4,'cloth'),fc=mat(0xfff6ea,'cloth'),pads=[];
-  for(let i=0;i<14;i++){const a=i/14*PI*2,x=Math.cos(a)*DROP.r,z=Math.sin(a)*DROP.r,o=put(R,SG,i%2?fc:fp,x,DROP.z+z>13.65?.15:.04,z,.46,.08,.28);o.rotation.y=-a-PI/2;o.userData.y0=o.position.y;pads.push(o)}
+  /* the drop circle: a big felt disc laid on the pavement in front of the door, a thick hot-pink card border with an ink edge, eight yellow card
+     chevrons that step in toward the middle, a dashed paper ring that turns in held frames. Walk into it and the line peels off into the shop. */
+  const R=new T.Group();R.position.set(DROP.x,.14,DROP.z);g.add(R);const r=DROP.r;
+  const flat=(geo,m,y,p)=>{const o=new T.Mesh(geo,m);o.rotation.x=-PI/2;o.position.y=y||0;o.userData.noCast=1;(p||R).add(o);return o};
+  const fillM=mat(0xffd9e8,'felt'),bordM=mat(0xff3fa4,'cpaper'),edgeM=mat(0x2b2233,'cpaper'),chevM=mat(0xffd23c,'cpaper'),dashM=mat(0xfff6ea,'cpaper');
+  for(const m of[fillM,bordM,edgeM,chevM,dashM]){m.polygonOffset=true;m.polygonOffsetFactor=-2;m.polygonOffsetUnits=-2}
+  flat(new T.CircleGeometry(r-.3,48),fillM,0);flat(new T.RingGeometry(r+.04,r+.2,64),edgeM,.004);const bord=flat(new T.RingGeometry(r-.62,r+.06,64),bordM,.01);
+  const sh=new T.Shape();sh.moveTo(-.5,-.12);sh.lineTo(0,.38);sh.lineTo(.5,-.12);sh.lineTo(.5,-.38);sh.lineTo(0,.1);sh.lineTo(-.5,-.38);sh.closePath();const shG=new T.ShapeGeometry(sh);
+  const CHV=[];for(let i=0;i<8;i++){const pv=new T.Group();pv.rotation.y=i/8*PI*2;R.add(pv);const o=flat(shG,chevM,.018,pv);o.position.z=r-1.05;CHV.push(o)}
+  const D=new T.Group();D.position.y=.022;R.add(D);const DG=new T.BoxGeometry(1,1,1);for(let i=0;i<14;i++){const a=i/14*PI*2,o=new T.Mesh(DG,dashM);o.scale.set(.5,.03,.16);o.position.set(Math.cos(a)*r*.42,0,Math.sin(a)*r*.42);o.rotation.y=-a+PI/2;D.add(o)}
   const Sg=new T.Group();Sg.position.set(0,5.12,16.6);g.add(Sg);const sp=mat(0xff3fa4,'clay',false);
-  for(const[x,y,r]of[[-1.3,-.1,.56],[-.55,.27,.7],[.45,.36,.66],[1.3,0,.57],[0,-.22,.64]])put(Sg,SG,sp,x,y,0,r,r*.82,.1);
-  g.visible=false;X.scene.add(g);ind={g,A,R,pads,Sg,k:0,f:0,tk:0,pk:0}}
+  for(const[x,y,rr]of[[-1.3,-.1,.56],[-.55,.27,.7],[.45,.36,.66],[1.3,0,.57],[0,-.22,.64]])put(Sg,SG,sp,x,y,0,rr,rr*.82,.1);
+  g.visible=false;X.scene.add(g);ind={g,A,R,CHV,D,bord,bordM,chevM,Sg,k:0,f:0,tk:0,pk:0,stamp:0}}
 function indStep(dt){const want=st.ch>=1&&st.ch<=4&&(st.phase==='play'&&carriedN()>0||st.walk.length>0)&&X.mode!=='intro'&&X.mode!=='won';
   if(!ind){if(!want)return;indBuild()}
   if((ind.tk-=dt)>0)return;ind.tk=1/11;ind.f++;
   ind.k=want?Math.min(3,ind.k+1):Math.max(0,ind.k-1);ind.g.visible=ind.k>0;if(!ind.g.visible){ind.pk=0;return}
   const pop=ind.k===3&&ind.pk===2?1.22:[0,.45,.8,1][ind.k];ind.pk=ind.k;
-  const j=RMq.matches?0:1,d=Math.hypot(DROP.x-X.px,DROP.z-X.pz),far=clamp(d/24,1,4),b=ind.f%8,bob=[0,.3,.6,.8,.85,.7,.45,.15][b]*j;
+  const j=RMq.matches?0:1,d=Math.hypot(DROP.x-X.px,DROP.z-X.pz),far=clamp(d/24,1,4),b=ind.f%8,bob=[0,.3,.6,.8,.85,.7,.45,.15][b]*j,close=d<10,inside=d<DROP.trig;
   const A=ind.A,sq=b===0&&j?1:0;A.scale.set(pop*far*(1+.1*sq),pop*far*(1-.14*sq),pop*far*(1+.1*sq));
   A.position.y=7.3+(far-1)*4+bob*far+rand(-.04,.04)*j;/* far away it rides higher, over the rooftops */A.rotation.set(0,Math.floor(ind.f/2)*.42*j,rand(-.05,.05)*j);
-  for(let i=0;i<ind.pads.length;i++){const o=ind.pads[i],on=((i-ind.f)%7+7)%7<2;o.scale.y=on?.2:.08;o.position.y=o.userData.y0+(on?.08:0)}
-  ind.R.scale.setScalar(pop*(ind.f%6<3?1:1.08));ind.R.rotation.y=rand(-.02,.02)*j;
+  // the circle: chevrons step in (4 held frames), the dashed ring turns a notch every other frame; close by it throbs, inside it flashes,
+  // and each customer that peels off into the shop stamps it (a stepped squash and bounce)
+  const ph=Math.floor(ind.f/(inside?1:2))%4;for(const o of ind.CHV)o.position.z=DROP.r-.75-ph*.2*j;
+  ind.D.rotation.y=-Math.floor(ind.f/2)*.16*j;
+  const st0=ind.stamp>0?[1,1.06,1.16,1.24][ind.stamp--]||1:1;
+  ind.R.scale.set(pop*st0*(close&&ind.f%6<3?1.04:1),1,pop*st0*(close&&ind.f%6<3?1.04:1));ind.R.rotation.y=rand(-.02,.02)*j;
+  ind.bordM.color.setHex(inside?(ind.f%2?0xff8ac0:0xff3fa4):close&&ind.f%6<3?0xff6fb4:0xff3fa4);ind.chevM.color.setHex(inside&&ind.f%2?0xfff6ea:0xffd23c);
   ind.Sg.visible=ind.f%7<4;ind.Sg.scale.setScalar(pop)}
 
 /* ================= FLOW ================= */
@@ -616,7 +761,7 @@ X.on('prerender',()=>{if(killCine&&!X.cine){killCine=false;if(X.mode==='story')X
 function ensureStarted(n,cb){if(X.mode==='intro'||X.mode==='won')earlyStart();if(killCine||X.cine){onIntro=cb;return}cb()}
 function enter(n){const tok=st.run,P=PLAN[n];flushCarry();st.ch=n;st.phase='in';st.got=0;st.types=[];st.goal=P.goal;st.bossBeat=false;st.mood=P.mood;st.moodOv=null;setMood();
   if(X.mode==='play'||X.mode==='paused')freeze();callStop();X.emit('chapter',n,'in');prep(n);buildHud(n);hud();
-  warm([...(CH(n).in||[]),...(CH(n).out||[]),GOALCALL(n),CALL('clear'),CALL('nudge'),CALL('hey'),...((CH(n+1)||{}).in||[])]);
+  warm([...(CH(n).in||[]),...(CH(n).out||[]),GOALCALL(n),CH(n).why,CALL('clear'),CALL('nudge'),CALL('hey'),...((CH(n+1)||{}).in||[])]);
   if(n<5)warm([CALL('back1'),CALL('back2'),CALL('back3'),CALL('enough'),...LIVE('count').map(vo=>({vo})),...LIVE('alright').map(vo=>({vo}))]);
   play(CH(n).in,()=>{if(tok!==st.run)return;ensureStarted(n,()=>{if(tok===st.run)begin(n)})},CH(n).district,true);
   if(X.mode==='intro'||X.mode==='won')setTimeout(()=>{if(tok===st.run&&seq)earlyStart()},450)}// once the cutscene covers the screen
@@ -625,7 +770,8 @@ function begin(n){const tok=st.run;st.phase='play';if(X.mode==='cutscene'&&!X.ci
   if(n===5){st.c5=Math.max(1,X.count);st.t5=0;st.p5=0;lvShown=-1}
   beaconOn(n);X.emit('chapter',n,'play');hud();showCard(n);ui.scanT=0;ui.home=false;arw.style.setProperty('--stc',PLAN[n].pal);
   // Sal phones in the goal while the title card is still up; the boss turns up as he names it
-  setTimeout(()=>{if(tok===st.run&&st.ch===n&&st.phase==='play')callPlay([GOALCALL(n)])},420);
+  setTimeout(()=>{if(tok===st.run&&st.ch===n&&st.phase==='play')callPlay([GOALCALL(n),CH(n).why].filter(Boolean))},420);
+  setTimeout(()=>{if(tok===st.run&&st.ch===n&&st.phase==='play')showMission(n)},2050);objBump()
   const k=PLAN[n].boss;if(k)setTimeout(()=>{if(tok!==st.run||st.ch!==n||st.phase!=='play'||!X.crowds||!X.crowds.spawnBoss)return;
     try{X.crowds.spawnBoss(k)}catch(e){console.warn('[story] boss',e)}},BOSS_DELAY*1000)}
 function check(){if(st.phase==='play'&&st.ch>=1&&st.ch<=4&&st.got>=st.goal&&bossDone(st.ch))clear()}
@@ -633,14 +779,14 @@ function clear(){const n=st.ch,tok=st.run,late=performance.now()-st.bossT<600?13
   setTimeout(()=>{if(tok===st.run&&st.phase==='out')stampCheck()},late);
   let went=false;const go=()=>{if(went)return;went=true;if(tok!==st.run||st.phase!=='out')return;freeze();capCount(PLAN[n].cap);
     // an optional boss nobody beat (the ch2 diva) leaves with the chapter
-    const b=bossCfg(n);if(b&&!PLAN[n].need&&b.n&&!b.n.boss.dead&&X.crowds.despawn)X.crowds.despawn(b);
+    const b=bossCfg(n);if(b&&b.n&&X.crowds.despawn)X.crowds.despawn(b);if(n===3)salChain(true);
     play(CH(n).out,()=>{if(tok===st.run)enter(n+1)},CH(n).district,false)};
   // Sal finishes his live count ("FIVE! Yes! YES!") before he phones the clear
   const t0=performance.now(),call=()=>{if(tok!==st.run||st.phase!=='out')return;if((rv.h||rv.pend>rv.said)&&performance.now()-t0<5000){rvPlay();setTimeout(call,120);return}
     callPlay([CALL('clear')],null,()=>setTimeout(go,150))};
   setTimeout(call,380+late);
   setTimeout(go,13000+late)}
-function newRun(){flushCarry();st.run++;credited=new Set();st.phase='idle';st.ch=0;st.moodOv=null;onIntro=null;clearTimeout(cardTm);card.classList.remove('go');callStop();beaconOff(true);freeHide(false);buildHud(0);sal.look=0}
+function newRun(){flushCarry();salChain(false);st.run++;credited=new Set();st.phase='idle';st.ch=0;st.moodOv=null;onIntro=null;clearTimeout(cardTm);card.classList.remove('go');callStop();beaconOff(true);freeHide(false);buildHud(0);sal.look=0}
 
 $('go').onclick=()=>{$('intro').hidden=true;newRun();enter(1)};
 $('again').onclick=()=>{$('win').hidden=true;newRun();enter(1)};
@@ -652,7 +798,9 @@ X.on('start',()=>{X.twist=true});// the story has its own twist (the end): no su
 X.on('release',n=>{if(st.phase!=='play'||st.ch<1||st.ch>4||n.boss||n.hooked||n._carry||credited.has(n)||!counts(n,st.ch))return;
   if(!(n.times>=n.t.hook))return;const dk=CH(st.ch).district,p=n.g.position;
   if(!inD(dk,p.x,p.z)&&!inD(dk,X.px,X.pz))return;carryAdd(n)});
-X.on('boss',(n,what)=>{if(what!=='defeat'||!st.ch||!n.boss||n.boss.key!==PLAN[st.ch].boss)return;st.bossBeat=true;st.bossT=performance.now();hud();check()});
+X.on('boss',(n,what)=>{if(what!=='defeat'||!st.ch||!n.boss||n.boss.key!==PLAN[st.ch].boss)return;st.bossBeat=true;st.bossT=performance.now();
+  if(AUD[st.ch])audRelease(st.ch);// the act is won over: the audience follows you
+  objBump();hud();check()});
 // pacing: where the count "should" be right now; ahead of it → refund some vapes, behind → take a few extra
 function expected(){if(st.ch===5){const k=clamp(st.t5/CH5_SECS,0,1);return DETECTO_FLOOR+(st.c5-DETECTO_FLOOR)*(1-k)}
   const P=PLAN[st.ch];return st.c0-pace()*Math.max(0,st.c0-P.cap)}
@@ -673,19 +821,22 @@ function nudgeStep(dt){const n=st.ch;if(n<1||n>4)return;const P=PLAN[n],dk=CH(n)
   if(st.outT>NUDGE_OUT&&!closing&&!cl.busy&&!X.held&&performance.now()>st.nudgeAt)nudge()}
 function nudge(){st.nudgeAt=performance.now()+NUDGE_CD*1000;callPlay([CALL('nudge')])}
 X.on('frame',(dt)=>{
-  if(st.phase==='play'){check();
+  if(st.phase==='play'){check();if(audOn(st.ch)&&(audT-=dt)<=0){audT=.5;audFreeze(st.ch)}
     if(st.ch===5){st.t5+=dt;X.act.free=Math.max(X.act.free,1.5);freeHide(true)}
     else{nudgeStep(dt);callStep(dt);deliverStep();if((topT-=dt)<=0){topT=4;topUp(st.ch,true)}}}
   if(rv.pend>rv.said)rvPlay();
   // spawned roamers (joggers) stay in their district
   for(const n of X.npcs){if(!n._home||n.state!=='wander'||(n.tx===n._sx&&n.tz===n._sz))continue;if(!inD(n._home,n.tx,n.tz)){const[x,z]=spot(n._home);n.tx=x;n.tz=z}n._sx=n.tx;n._sz=n.tz}
   hud()});
-let moodT=0,topT=4;
+let moodT=0,topT=4,audT=0;
+const TOD={1:[0,.06],2:[.15,.2],3:[.3,.36],4:[.55,.62],5:[.8,.9]};let todV=null;
+function todStep(dt){const r=st.ch&&TOD[st.ch];if(!r||st.phase==='idle'){X.tod=undefined;todV=null;return}
+  const w=st.phase==='end'?.92:st.phase==='out'?r[1]:r[0]+(r[1]-r[0])*progress();todV=todV==null||st.phase==='in'?w:todV+clamp(w-todV,-dt*.05,dt*.05);X.tod=todV}
 // the pause menu holds Sal's call (line and polaroid) until you're back
 let callPaused=false;
 function pauseStep(){const p=X.mode==='paused';if(p===callPaused)return;callPaused=p;stc.style.visibility=p?'hidden':'';
   const a=cl.h&&cl.h.a;if(a){if(p)a.pause();else{const q=a.play();if(q&&q.catch)q.catch(()=>{})}}}
-X.on('prerender',(dt,t)=>{const d=Math.min(.05,dt||.016),tt=performance.now()/1000;beaconStep(d,tt);uiStep(d,tt);salStep(d,tt);indStep(d);pauseStep();moodT-=d;if(moodT<0){moodT=.5;setMood()}});
+X.on('prerender',(dt,t)=>{const d=Math.min(.05,dt||.016),tt=performance.now()/1000;beaconStep(d,tt);uiStep(d,tt);salStep(d,tt);indStep(d);pauseStep();todStep(d);objStep(d);moodT-=d;if(moodT<0){moodT=.5;setMood()}});
 // ending: after the final-vape slow-mo (juice), the end cutscene, then the win screen
 X.on('win',()=>{const tok=st.run,t0=performance.now();st.phase='end';callStop();if(st.ch)X.emit('chapter',st.ch,'out');beaconOff();freeHide(false);hud();
   const wait=()=>{if(tok!==st.run||X.mode!=='won')return;const w=$('win');
@@ -694,7 +845,9 @@ X.on('win',()=>{const tok=st.run,t0=performance.now();st.phase='end';callStop();
 
 /* ================= API ================= */
 X.story={get chapter(){return st.ch},get phase(){return st.phase},get goal(){return st.ch===5?st.c5:st.goal},
-  get progress(){return progress()},get hooked(){return st.got},get carried(){return carriedN()},drop:DROP,play:(shots,done)=>play(shots,done),get script(){return S}};
+  get progress(){return progress()},get hooked(){return st.got},get carried(){return carriedN()},drop:DROP,play:(shots,done)=>play(shots,done),get script(){return S},
+  // a short in-play voice line with its caption under the crosshair (bosses use it; see lines in script.json)
+  line(n){const L=(S.lines&&S.lines[n])||(INLINE.lines&&INLINE.lines[n])||{};callPlay([{who:L.who,vo:n,cap:L.cap}],{live:true})},get busy(){return cl.busy||!!seq}};
 
 if(location.hash==='#dbg')window.tmvs={
   chapter(n){n=clamp(n|0,1,5);if(seq)finish(true);newRun();
@@ -710,6 +863,6 @@ if(location.hash==='#dbg')window.tmvs={
     if(!b)return 'none';b.times=Math.max(b.times,b.t.hook);b.hooked=true;if(b.H&&b.H.Wh)for(const wm of b.H.Wh)wm.material=X.M(0xffc4c4);carryAdd(b);return st.got+' in, '+carriedN()+' carried /'+st.goal},
   home(){X.px=DROP.x;X.pz=DROP.z-2.5;X.yaw=PI;X.pitch=0;return 'at the drop-off'},
   skip(){if(seq){finish();return 'cutscene'}if(X.cine){dispatchEvent(new KeyboardEvent('keydown',{code:'KeyK'}));return 'intro'}return 'nothing'},
-  greet(){st.salAt=0;salGreet();return 'greet'},nudge(){nudge();return 'nudge'},
+  greet(){st.salAt=0;salGreet();return 'greet'},talk(){salTalk();return 'talk'},nudge(){nudge();return 'nudge'},
   get s(){return{ch:st.ch,phase:st.phase,got:st.got,goal:st.goal,boss:st.bossBeat,count:X.count,floor:floor(),mode:X.mode,progress:progress(),carried:carriedN(),walking:st.walk.length,want:st.want,eligible:st.ch&&st.ch<5?X.npcs.filter(c=>elig(c,st.ch)).length:0,call:cl.busy,vo:voN}}};
 })();

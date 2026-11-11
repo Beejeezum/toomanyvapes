@@ -307,7 +307,7 @@ function tree(x,z,s){cyl(W,.5*s,2.4*s,.5*s,barkM,x,1.2*s,z);const c=pick(LEAF);b
 cyl(W,26,.08,19,waterM,-98,.04,-8);cyl(W,27.5,.05,20.5,0xd9c79a,-98,.02,-8);for(let i=0;i<8;i++)cyl(W,1.1,.1,1.1,0x3f9b4b,-98+rand(-9,9),.08,-8+rand(-6,6));
 for(let i=0;i<46;i++){const x=rand(-140,-68),z=rand(-75,75);if(Math.hypot((x+98)/15,(z+8)/11.5)<1.15||Math.hypot(x+90,z-30)<7||Math.abs(z)<5&&x>-80)continue;tree(x,z,rand(.8,1.4))}
 for(let i=0;i<70;i++)ball(W,.3,.3,.3,pick([0xff3fa4,0xffd23c,0xffffff,0xa070ff,0xff7a1a]),rand(-138,-66),.15,rand(-74,74));
-for(const[x,z]of[[-74,8],[-80,-22],[-112,14],[-84,20]]){box(W,2.2,.12,.6,0x9a6a48,x,.55,z);box(W,2.2,.6,.1,0x9a6a48,x,.9,z-.3);box(W,.12,.55,.5,0x333333,x-.9,.27,z);box(W,.12,.55,.5,0x333333,x+.9,.27,z)}
+for(const[x,z]of[[-74,8],[-80,-22],[-112,14],[-84,20],[-95.5,20],[-101,22.5]]){box(W,2.2,.12,.6,0x9a6a48,x,.55,z);box(W,2.2,.6,.1,0x9a6a48,x,.9,z-.3);box(W,.12,.55,.5,0x333333,x-.9,.27,z);box(W,.12,.55,.5,0x333333,x+.9,.27,z)}
 cyl(W,9,.14,9,0xf2ead8,-90,.07,30);for(let i=0;i<6;i++)cyl(W,.25,3.6,.25,0xfff7ea,-90+Math.cos(i*1.047)*4,1.8,30+Math.sin(i*1.047)*4);cone(W,10,2.4,10,0xff3fa4,-90,4.8,30);ball(W,.6,.6,.6,0xffd23c,-90,6.1,30);
 // farm
 box(W,10,6,8,TM(TXplank,5,1,0xd0403c),118,3,-30);{const r=box(W,7.2,7.2,8.4,0x6e1f1f,118,6,-30);r.rotation.z=PI/4}box(W,3,3.6,.2,0xfff7ea,118,1.8,-25.95);solid(118,-30,10,8);
@@ -326,7 +326,7 @@ box(W,28,.1,20,0x8a3a3a,0,.05,-88);for(const x of[-9,-3,3,9]){box(W,.2,1.2,.2,0x
 // props that creatures (and you) bump into instead of walking through: street lamps and hydrants, park benches, the gazebo's
 // columns, the palm behind the vape shop, farm fences (the gate stays open), playground frames and the muscle-beach benches
 for(const a of LINES)for(const b of LINES){if((a+b)%4)continue;solid(a+4,b+4,.3,.3);solid(a-4,b+4.4,.45,.45)}
-for(const[x,z]of[[-74,8],[-80,-22],[-112,14],[-84,20]])solid(x,z,2.2,.7);for(let i=0;i<6;i++)solid(-90+Math.cos(i*1.047)*4,30+Math.sin(i*1.047)*4,.3,.3);solid(-7.3,26,.6,.6);
+for(const[x,z]of[[-74,8],[-80,-22],[-112,14],[-84,20],[-95.5,20],[-101,22.5]])solid(x,z,2.2,.7);for(let i=0;i<6;i++)solid(-90+Math.cos(i*1.047)*4,30+Math.sin(i*1.047)*4,.3,.3);solid(-7.3,26,.6,.6);
 solid(102,-52,64,.3);solid(102,52,64,.3);solid(134,0,.3,104);solid(70,-30,.3,44);solid(70,30,.3,44);
 solid(-36,78,1.2,1.2);solid(-36,81.6,1.1,3.4);for(const sx of[-1,1])solid(-22+sx*2.5,78,.3,1.6);solid(-27,97,4.4,.5);for(const x of[-9,-3,3,9]){solid(x,-90,1.9,.25);solid(x,-88.6,.6,1.6)}
 // sky
@@ -841,7 +841,7 @@ function mouth(n,o){const ry=n.g.rotation.y;return o.set(n.g.position.x+Math.sin
 const mult=()=>Math.min(5,1+combo*.25)*(act.boost>0?2:1)*(act.dual>0?2:1);
 function drain(v){charge-=v;while(charge<=0&&count>0){charge+=1;count--;used++;holdN++;if(STOCK[fi]>0)STOCK[fi]--;emit('vape',fi);if(STOCK[fi]<=0&&count>0){const was=flav[0];setFlav(fi,1);0}else if(fr%4===0)flavHUD();toss();if(dingT<=0&&!BUF['sfx/toss']){beep(rand(480,760),.07,'sine',.018);dingT=.15}}
   if(newsI<NEWS.length&&count<=NEWS[newsI][0]){newsEl.textContent='BREAKING: '+NEWS[newsI++][1];newsEl.classList.add('on');newsT=6}
-  if(!twist&&count<=500&&count>0){twist=true;count+=1500;container(9,-6,0x2a7ad2,0x1a4a8a);for(let i=0;i<1500;i++)STOCK[ri(FLAV.length)]++;flavHUD();toast('A SECOND CONTAINER HAS ARRIVED  +1,500',4);voice('twist',1);if(!clip('sfx/slam',{vol:.9}))beep(120,.8,'sawtooth',.08)}
+  /* (the old surprise second container at 500 is gone for good: the story's own twist is the ten containers on the truck at the end) */
   if(count<=0){count=0;win()}}
 const whiteC=new T.Color(1,1,1),fireC=new T.Color(0xff7a1a);
 function release(n,kind){if(held===n)held=null;const match=kind!=='passive'&&n.crave===fi;const f=n.inh/n.t.cap;n.state='exhale';n.exI=clamp(f,.3,1.15)*n.t.cloud;n.ex=.8+Math.min(n.inh,n.t.cap)*.8;n.times++;lungs++;n.ringT=0;n.side=Math.random()<.5?-1:1;heat=Math.min(1,heat+.05);
