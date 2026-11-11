@@ -1,0 +1,22 @@
+{
+ "R": {
+  "w": 822,
+  "h": 510,
+  "idle": [
+   "r_idle.webp"
+  ],
+  "hit": [
+   "r_hit.webp"
+  ]
+ },
+ "L": {
+  "w": 542,
+  "h": 429,
+  "rest": [
+   "l_rest.webp"
+  ],
+  "grab": [
+   "l_grab.webp"
+  ]
+ }
+}
