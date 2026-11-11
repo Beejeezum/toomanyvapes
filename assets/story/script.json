@@ -58,7 +58,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_1",
-    "cap": "Kid! Start right here, downtown. Get me five customers. Go!",
+    "cap": "Kid! Start right here, downtown. Hook me five customers and bring 'em back to the shop. Go!",
     "pic": "ch1_in_2",
     "crop": [
      50,
@@ -111,7 +111,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_2",
-    "cap": "The park, kid! Get me five more. And watch out for the opera lady.",
+    "cap": "The park, kid! Hook five more, grandmas, joggers, whoever, and walk 'em back here. And watch out for the opera lady!",
     "pic": "ch2_out_1",
     "crop": [
      46,
@@ -164,7 +164,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_3",
-    "cap": "Beach, kid! Five more. And take down the big guy at the gym!",
+    "cap": "Beach, kid! Hook five more and bring 'em back to the shop. And take down the big guy at the gym!",
     "pic": "ch2_out_1",
     "crop": [
      46,
@@ -205,7 +205,7 @@
    "call": {
     "who": "SAL",
     "vo": "sal_goal_4",
-    "cap": "The farm, kid. Five. Cows count.",
+    "cap": "The farm, kid. Hook five and bring 'em home. …Yeah. Cows count.",
     "pic": "ch3_out_1",
     "crop": [
      45,
@@ -286,7 +286,7 @@
   "clear": {
    "who": "SAL",
    "vo": "sal_clear",
-   "cap": "That's the district, kid! Get back here!",
+   "cap": "That's the district, kid! Look at 'em all! LOOK at 'em!",
    "pic": "ch2_out_1",
    "crop": [
     46,
@@ -315,7 +315,94 @@
     36,
     337
    ]
+  },
+  "back1": {
+   "who": "SAL",
+   "vo": "sal_back_1",
+   "cap": "Kid! Bring 'em back to the shop! Bring 'em HERE!",
+   "pic": "ch1_in_2",
+   "crop": [
+    50,
+    14,
+    305
+   ]
+  },
+  "back2": {
+   "who": "SAL",
+   "vo": "sal_back_2",
+   "cap": "You got customers? Walk 'em over, kid! Cloud Kingz! I'm right here!",
+   "pic": "ch2_out_1",
+   "crop": [
+    46,
+    36,
+    337
+   ]
+  },
+  "back3": {
+   "who": "SAL",
+   "vo": "sal_back_3",
+   "cap": "Kid, kid, kid! Don't leave 'em out there! Bring 'em to the store!",
+   "pic": "ch1_in_2",
+   "crop": [
+    50,
+    14,
+    305
+   ]
+  },
+  "enough": {
+   "who": "SAL",
+   "vo": "sal_enough",
+   "cap": "That's enough, kid! That's the whole order! Bring 'em home, I'm holding the door!",
+   "pic": "ch3_out_1",
+   "crop": [
+    45,
+    32,
+    320
+   ]
   }
+ },
+ "live": {
+  "_note": "Sal's live reactions at the Cloud Kingz door as delivered customers walk in (audio only, no caption on screen). count[k-1] is said for the chapter's k-th delivery; alright opens a fresh batch.",
+  "alright": [
+   {
+    "vo": "sal_alr_1",
+    "cap": "Alright!"
+   },
+   {
+    "vo": "sal_alr_2",
+    "cap": "ALRIGHT!!"
+   },
+   {
+    "vo": "sal_alr_3",
+    "cap": "Alright, alright, ALRIGHT!"
+   },
+   {
+    "vo": "sal_alr_4",
+    "cap": "Come in, come in! Welcome!"
+   }
+  ],
+  "count": [
+   {
+    "vo": "sal_n1",
+    "cap": "Alright! That's one!"
+   },
+   {
+    "vo": "sal_n2",
+    "cap": "ALRIGHT! That's two!"
+   },
+   {
+    "vo": "sal_n3",
+    "cap": "THREE!"
+   },
+   {
+    "vo": "sal_n4",
+    "cap": "Four! Ha!"
+   },
+   {
+    "vo": "sal_n5",
+    "cap": "FIVE! Yes! YES!"
+   }
+  ]
  },
  "districts": {
   "_note": "Game-world coordinates (x, z). Ocean is at -z (east on the map). See assets/clay/map_town.png and docs/story-bible.md.",

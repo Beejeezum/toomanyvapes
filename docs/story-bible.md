@@ -46,6 +46,16 @@ Each chapter: a cutscene in, a new district, one new gameplay element, a "town h
 | 5 | Zero | Town square | Everything at once, haze | Last vapes go. Twist: demand is now so high Sal has ordered 50,000. Second truck arrives. |
 
 - Ending line (Sal, crying with joy): "You did it, kid… so, uh. I ordered another container."
+
+## Gameplay loop: hook them, bring them back (chapters 1–4)
+
+- **Hook.** Vape the district's kinds (downtown workers and co., park grandmas, the beach crowd, the farm animals) until they're hooked. A hooked customer joins your conga line and stays in it: stragglers scurry to catch up (even when you sprint), and anyone wedged behind a building pops back onto the line, so you never lose a customer silently. The goal token for them half-fills and wiggles: you can see who you're carrying.
+- **Sal phones.** Once when the first customer tags along ("Kid! Bring 'em back to the shop!"), once when the whole order is following you ("That's enough, kid! That's the whole order!"), then at most every 40 s while you're carrying people away from the shop. Never at the door.
+- **Bring them back.** While you carry anyone, Cloud Kingz lights up in clay: a chunky pink arrow bobs over the door (it grows and rides higher with distance so it clears the rooftops), a ring of felt pads chases round the sidewalk and the cloud sign blinks pink, all on held stop-motion frames. Once the whole order is following you, the paper arrow at the screen edge points home instead of out to the district. No words on screen: the voice and the clay do it.
+- **Drop off.** Walk onto the shop's sidewalk. Customers peel off the line one at a time (about every half second), shuffle up to the door, squash through past Sal and are gone. Each one counts as it goes in: the token gets stamped, the vapes counter ticks down (they're buying), and Sal hops and counts them in live ("Alright! That's one!", "ALRIGHT! That's two!", "THREE!", "Four! Ha!", "FIVE! Yes! YES!"). When they arrive faster than he can shout he skips to the latest number; a fresh batch opens with an "Alright!".
+- **Clear.** The chapter clears when the goal is delivered and any required boss is beaten (Gym Bro Prime in chapter 3 counts by being beaten, not delivered). Then the usual check stamp, Sal's clear call and the out cutscene.
+- **Distances.** Every district is a short walk from the shop: about 14 s from the park and the farm and 16–21 s from the beach at a walk (11 s sprinting from the farm), so every chapter delivers to Cloud Kingz itself. The farm's only gate is on its west fence, by the road.
+- Chapter 5 (Zero) is unchanged: empty the container and beat Detecto.
 - Optional post-credits: the "Breathe Easy" water tower, barely visible through haze.
 
 ## Soundtrack plan
