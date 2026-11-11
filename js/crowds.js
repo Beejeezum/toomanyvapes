@@ -116,10 +116,15 @@ const fanfare=()=>{if(!X.clip('sfx/slam',{vol:.7}))X.beep(110,.6,'sawtooth',.07)
 // builders: the core human()/BUILD helpers, scaled up, with props in the same toon materials (spawn() inkifies them)
 const gold=0xffd23c,whiteC=new T.Color(1,1,1);
 const BUILD={
- diva:()=>{const b=X.human({w:.82,depth:.55,head:.46,skirt:1,pants:0xc2253a,shirt:0xc2253a,sleeve:0xffe0e8,hair:'long',hairC:0xd9b45a,extra:(U,H,A)=>{const d=H.d;
-    X.dome(H.h,d*1.14,d*.95,d*1.14,0xc9ccd6,0,d*.18,0);for(const s of[-1,1]){const h=X.cone(H.h,d*.22,d*.7,d*.22,0xfff7ea,s*d*.62,d*.55,0);h.rotation.z=-s*.7;X.cyl(H.h,d*.16,d*.9,d*.16,0xd9b45a,s*d*.5,-d*.55,d*.05)}
-    for(const s of[-1,1])X.ball(U,.24,.24,.2,0xc9ccd6,s*.17,1.24,.2);for(let i=-3;i<=3;i++)X.ball(U,.06,.06,.06,gold,i*.07,1.44-Math.abs(i)*.02,.24);
-    if(A[1]&&A[1].k){X.cyl(A[1].k,.05,1.9,.05,0x9a6a48,0,-.3,.1).rotation.x=PI/2;X.cone(A[1].k,.14,.32,.06,0xc9ccd6,0,-.3,1.1).rotation.x=PI/2}}});
+ // grand soprano: tall blonde updo with a small silver tiara, pearl necklace, a folded lace fan in hand (gown + gold hem below)
+ diva:()=>{const b=X.human({w:.82,depth:.55,head:.46,skirt:1,pants:0xc2253a,shirt:0xc2253a,sleeve:0xffe0e8,hair:'bun',hairC:0xe2c062,extra:(U,H,A)=>{const d=H.d,blond=0xe2c062,silver=0xd4d7e0,pearl=0xf6f0e4;
+    X.ball(H.h,d*.6,d*.5,d*.58,blond,0,d*.62,-d*.06);X.ball(H.h,d*.44,d*.5,d*.42,blond,0,d*1.02,-d*.1);X.ball(H.h,d*.28,d*.3,d*.27,blond,0,d*1.36,-d*.12);// stacked updo
+    for(const s of[-1,1])X.ball(H.h,d*.14,d*.36,d*.14,blond,s*d*.5,d*.02,d*.12);// face-framing curls
+    for(let i=-2;i<=2;i++){const k=Math.abs(i);X.cone(H.h,d*.06,d*(.2-k*.05),d*.04,silver,i*d*.13,d*(.74-k*.03),d*(.44-k*.07))}// tiara points
+    X.ball(H.h,d*.06,d*.06,d*.04,0x9fd8ff,0,d*.7,d*.48);// one blue stone
+    for(let i=-4;i<=4;i++)X.ball(U,.055,.055,.055,pearl,i*.055,1.45-Math.abs(i)*.018-i*i*.004,.24);// pearl necklace
+    if(A[1]&&A[1].k){const k=A[1].k;X.ball(k,.05,.05,.05,gold,0,-.32,.1);// folded lace fan: a few ribs splayed from the hand
+      for(let i=0;i<7;i++){const a=-.9+i*.3,r=X.box(k,.1,.4,.014,i%2?0xfff4f6:0xf3dde4,Math.sin(a)*.18,-.32-Math.cos(a)*.18,.12);r.rotation.z=-a}}}});
    const gown=X.mk('v',b.g,1.5,1.05,1.5,0xc2253a,0,.52,0);gown.rotation.x=PI;X.cyl(b.g,1.55,.1,1.55,gold,0,.06,0);b.g.scale.setScalar(1.75);b.r=.75;return b},
  prime:()=>{const b=X.BUILD.gym();const H=b.H,d=H.d;X.box(H.h,d*.95,d*.2,d*.1,0x111111,0,d*.08,d*.5);for(const s of[-1,1])X.box(H.h,d*.36,d*.22,d*.06,0x3c8cff,s*d*.22,d*.08,d*.54);
    for(let i=0;i<5;i++)X.cone(H.h,d*.18,d*.32,d*.18,gold,(i-2)*d*.22,d*.78,0);X.cyl(H.h,d*1.12,d*.16,d*1.12,gold,0,d*.55,0);
@@ -136,19 +141,19 @@ for(const k in BUILD){X.BUILD[k]=BUILD[k];X.TYPES[k]=TYPES[k]}
 const knock={x:0,z:0},PV={x:0,z:0};
 function shove(n,sp,st){const p=n.g.position,dx=X.px-p.x,dz=X.pz-p.z,d=Math.hypot(dx,dz)||1;knock.x=dx/d*sp;knock.z=dz/d*sp;X.stun=Math.max(X.stun,st)}
 const BOSS={
- diva:{chapter:2,x:-87.5,z:27.5,hp:4,reward:350,drops:['boost','chain'],emo:'🎶',col:0xc2253a,short:'THE DIVA',
+ diva:{chapter:2,x:-87.5,z:27.5,hp:2,reward:350,drops:['boost','chain'],emo:'🎶',col:0xc2253a,short:'THE DIVA',
   name:'LA DIVA LUNGAROTTI',sub:'Soprano. Four octaves. Lungs the size of a bass drum.',where:'📍 THE PARK GAZEBO',
   intro:'You dare interrupt my REHEARSAL?',hit:['MMMMM-AAAAAH ♪','*hits a note only dogs hear*','my DIAPHRAGM!','a lovely vintage…'],low:['my… final… aria…','the fat lady is about to sing'],
   over:['FORTISSIMO!!','*SONIC HIGH C*'],defeat:'…bravissimo. I am your fan now.',
   onHit(n){[1046,1318,1568,2093].forEach((f,i)=>X.beep(f,.18,'triangle',.03,i*.09));const m=X.mouth(n,V1);for(let i=0;i<6;i++)X.emo(pick(['🎶','🎵','🎼']),m.x,m.y,m.z,rand(-2,2),rand(1,2.5),rand(-2,2),.6);react(n,26,false)},
   onOver(n){shove(n,15,.35);X.slide(1800,2400,.5,'square',.04);const m=X.mouth(n,V1);for(let i=0;i<24;i++){const a=i/24*PI*2;X.puff(m.x,m.y,m.z,Math.cos(a)*7,rand(-.5,.5),Math.sin(a)*7,whiteC,1.2,.3,1.4)}}},
- prime:{chapter:3,x:0,z:-84,hp:5,reward:500,drops:['rush','dual','boost'],emo:'💪',col:0xe02a2a,short:'PRIME',
+ prime:{chapter:3,x:0,z:-84,hp:3,reward:500,drops:['rush','dual','boost'],emo:'💪',col:0xe02a2a,short:'PRIME',
   name:'GYM BRO PRIME',sub:'Never skipped lung day. Spots himself.',where:'📍 MUSCLE BEACH (NO BEACH)',
   intro:'COME AT ME, BRO. I\'LL WAIT.',hit:['THAT ALL YOU GOT?','*flexes so hard a cloud comes out*','FEEL THE BURN BRO','DO YOU EVEN RIP'],low:['bro… I think I\'m… hooked bro','LAST SET. LAST SET.'],
   over:['SPOTTED.','*bench-presses you*'],defeat:'…respect, king. RESPECT.',
   onHit(n){X.beep(98,.25,'sawtooth',.06);X.beep(65,.4,'sawtooth',.06,.1);for(const o of near(n.g.position.x,n.g.position.z,30,L2))if(o.type==='gym'&&Math.random()<.6)X.say(o,pick(['PRIME! PRIME! PRIME!','THE KING RIPS','LET HIM COOK']),1.6)},
   onOver(n){shove(n,20,.9);X.beep(70,.5,'sawtooth',.08)}},
- detecto:{chapter:5,x:3,z:-11,hp:6,reward:700,drops:['free','fog','boost'],emo:'🚨',col:0xf2f2f2,short:'DETECTO',
+ detecto:{chapter:5,x:3,z:-11,hp:3,reward:700,drops:['free','fog','boost'],emo:'🚨',col:0xf2f2f2,short:'DETECTO',
   name:'DETECTO',sub:'Mascot of the Smoke Detector Outlet. Detects smoke. Is now smoke.',where:'📍 ROAMING THE STREETS',
   intro:'*BEEP* SMOKE DETECTED *BEEP*',hit:['*BEEP BEEP BEEP*','ALARM ALARM ALARM','*battery chirp of shame*','EVACUATE. NOT YOU. EVERYONE ELSE.'],low:['*sad 9-volt chirp*','beep… beep……'],
   over:['FIRE DEPARTMENT NOTIFIED','*MAXIMUM ALARM*'],defeat:'*soft chirp* (I love vapes now)',
@@ -163,7 +168,7 @@ function spawnBoss(key){const c=BOSS[key];if(!c)return null;if(c.n)return c.n;TM
   c.n=n;c.spawned=1;showCard('⚠ A MEGA-LUNG HAS APPEARED ⚠',c.name,c.sub,c.where);fanfare();X.emit('boss',n,'spawn');return n}
 function despawn(c){const n=c.n;if(n){scene.remove(n.g);if(n.cb)scene.remove(n.cb);const i=npcs.indexOf(n);if(i>=0)npcs.splice(i,1)}if(c.beam)scene.remove(c.beam);if(c.crown)scene.remove(c.crown);c.n=c.beam=c.crown=null;c.spawned=0}
 function bossHit(n,kind,match){const b=n.boss,c=b.cfg;n.times=0;
-  let dmg=kind==='perfect'?1:kind==='ok'?.34:kind==='passive'?.12:-.5;if(match&&dmg>0)dmg+=.6;b.hp=clamp(b.hp-dmg,0,c.hp);
+  const fq=n.inh/(n.t.cap||1);let dmg=kind==='perfect'||(kind==='ok'&&fq>=SWEET)?1:kind==='ok'?.34:kind==='passive'?.12:-.5;if(match&&dmg>0)dmg+=.6;b.hp=clamp(b.hp-dmg,0,c.hp);
   bar.classList.remove('hit');void bar.offsetWidth;bar.classList.add('hit');
   if(b.hp<=0)return defeat(n);
   if(kind==='over'){X.say(n,pick(c.over),2.4);c.onOver(n);return}
@@ -177,7 +182,10 @@ function defeat(n){const b=n.boss,c=b.cfg,p=n.g.position;b.dead=1;n.hooked=true;
   X.combo+=5;X.drain(c.reward);react(n,30,false);X.emit('boss',n,'defeat')}
 // a giant can't shrink to vape height: bend at the waist, then bow the whole body until the mouth is at eye level
 // (the core pitches the camera toward the mouth, so the vape tip follows it down); never lift them off the ground
-function bossHeld(n,dt){const p=n.g.position,g=n.g;X.armR.tip.getWorldPosition(V1);
+// a wider sweet spot for the mega-lungs: an early release from SWEET of the lungful already lands as a perfect rip, and
+// past a full lungful their breath fills at about half speed, so the zone before a coughing fit lasts ~1.8x longer
+const SWEET=.55;
+function bossHeld(n,dt){const p=n.g.position,g=n.g;X.armR.tip.getWorldPosition(V1);if(n.inh>n.t.cap)n.inh=Math.max(n.t.cap,n.inh-dt*.45);
   n._bend=lerp(n._bend,.75,Math.min(1,dt*6));if(n.P)n.P.rotation.x=n._bend;p.y=0;g.rotation.x=0;g.updateMatrixWorld(true);n.H.m.getWorldPosition(V2);
   const fx=Math.sin(g.rotation.y),fz=Math.cos(g.rotation.y),h=V2.y-p.y,f=(V2.x-p.x)*fx+(V2.z-p.z)*fz,R=Math.hypot(h,f)||1,a=clamp(Math.acos(clamp(Math.min(V1.y,1.7)/R,-1,1))-Math.atan2(f,h),0,1.25);
   n._tilt=lerp(n._tilt,a,Math.min(1,dt*8));g.rotation.x=n._tilt;g.updateMatrixWorld(true);n.H.m.getWorldPosition(V2);

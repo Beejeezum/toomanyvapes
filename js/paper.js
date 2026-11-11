@@ -16,10 +16,24 @@ const wrap9=(w,h,f)=>{for(const ox of[-w,0,w])for(const oy of[-h,0,h])f(ox,oy)};
 function strands(g,w,h,n,cols,len,lw){g.lineCap='round';for(let i=0;i<n;i++){const s=[];let x=R(0,w),y=R(0,h),a=R(0,6.28);s.push([x,y]);
   for(let k=0;k<4;k++){a+=R(-.7,.7);x+=Math.cos(a)*R(len*.5,len);y+=Math.sin(a)*R(len*.5,len);s.push([x,y])}
   g.strokeStyle=cols[i%cols.length];g.lineWidth=R(lw*.5,lw);wrap9(w,h,(ox,oy)=>{g.beginPath();s.forEach((p,j)=>j?g.lineTo(p[0]+ox,p[1]+oy):g.moveTo(p[0]+ox,p[1]+oy));g.stroke()})}}
-const GRAIN=tex(256,256,(g,w,h)=>{const id=g.createImageData(w,h),d=id.data;
-  for(let i=0;i<d.length;i+=4){const v=Math.random();if(v<.5){d[i]=d[i+1]=40;d[i+2]=30;d[i+3]=Math.random()*24}else{d[i]=d[i+1]=d[i+2]=255;d[i+3]=Math.random()*26}}
-  g.putImageData(id,0,0);strands(g,w,h,90,['rgba(70,45,20,.07)','rgba(255,255,255,.14)'],7,2)});
-const FIBER=tex(256,256,(g,w,h)=>strands(g,w,h,220,['rgba(80,50,22,.16)','rgba(255,232,190,.18)','rgba(60,38,16,.1)'],12,2.4));
+/* construction paper: soft mottling, short felted fibres both lighter and darker than the sheet, dark and coloured
+   inclusions (flecks), fine tooth. Semi-transparent light + dark marks, so it reads on any colour layered under it. */
+function blobs(g,w,h,n,r0,r1,cols){for(let i=0;i<n;i++){const x=R(0,w),y=R(0,h),r=R(r0,r1),c=cols[i%cols.length];
+  wrap9(w,h,(ox,oy)=>{const gr=g.createRadialGradient(x+ox,y+oy,0,x+ox,y+oy,r);gr.addColorStop(0,c);gr.addColorStop(1,c.replace(/[\d.]+\)$/,'0)'));g.fillStyle=gr;g.fillRect(x+ox-r,y+oy-r,r*2,r*2)})}}
+function flecks(g,w,h,n,cols,s0,s1){for(let i=0;i<n;i++){g.fillStyle=cols[i%cols.length];const x=R(0,w),y=R(0,h),a=R(s0,s1),b=R(s0*.5,s1*.7);g.beginPath();g.ellipse(x,y,a,b,R(0,3.14),0,7);g.fill()}}
+function tooth(g,w,h,a0,a1){const id=g.getImageData(0,0,w,h),d=id.data;for(let i=0;i<d.length;i+=4){if(Math.random()<.5){const v=Math.random()<.5?40:255,k=Math.random()*(v>100?a1:a0);
+  const a=d[i+3]/255,na=k/255;if(na<=0)continue;const oa=na+a*(1-na);d[i]=(v*na+d[i]*a*(1-na))/oa;d[i+1]=(v*na+d[i+1]*a*(1-na))/oa;d[i+2]=((v===40?30:v)*na+d[i+2]*a*(1-na))/oa;d[i+3]=oa*255}}g.putImageData(id,0,0)}
+const GRAIN=tex(256,256,(g,w,h)=>{
+  blobs(g,w,h,26,14,40,['rgba(70,45,20,.07)','rgba(255,250,235,.09)']);
+  strands(g,w,h,260,['rgba(70,45,20,.13)','rgba(255,252,240,.24)','rgba(255,252,240,.16)'],5,1.5);
+  flecks(g,w,h,70,['rgba(50,32,14,.30)','rgba(50,32,14,.22)','rgba(255,255,255,.5)','rgba(200,60,90,.22)','rgba(60,110,200,.2)'],.5,1.3);
+  tooth(g,w,h,26,34)});
+const FIBER=tex(256,256,(g,w,h)=>{
+  blobs(g,w,h,18,20,50,['rgba(60,36,14,.09)','rgba(255,232,190,.08)']);
+  strands(g,w,h,240,['rgba(80,50,22,.2)','rgba(255,232,190,.22)','rgba(60,38,16,.14)'],13,2.4);
+  flecks(g,w,h,90,['rgba(40,24,8,.42)','rgba(40,24,8,.28)','rgba(255,240,210,.4)'],.6,1.8)});
+/* big, low-frequency colour wander laid under the grain so neighbouring scraps never look like the same flat swatch */
+const MOTTLE=tex(384,384,(g,w,h)=>blobs(g,w,h,22,50,120,['rgba(60,36,14,.085)','rgba(255,250,235,.11)','rgba(60,36,14,.05)']));
 const CRAYON=tex(192,64,(g,w,h)=>{g.lineCap='round';for(let i=0;i<260;i++){const x=R(0,w),y=R(0,h),l=R(8,22),a=-1.05+R(-.15,.15);g.strokeStyle=`rgba(255,255,255,${f2(R(.55,1))})`;g.lineWidth=R(1.4,3.2);
     wrap9(w,h,(ox,oy)=>{g.beginPath();g.moveTo(x+ox-Math.cos(a)*l,y+oy-Math.sin(a)*l);g.lineTo(x+ox+Math.cos(a)*l,y+oy+Math.sin(a)*l);g.stroke()})}
   g.globalCompositeOperation='destination-out';for(let i=0;i<500;i++){g.fillStyle=`rgba(0,0,0,${f2(R(.3,.9))})`;g.fillRect(R(0,w),R(0,h),R(.6,1.8),R(.6,1.8))}});
@@ -60,8 +74,8 @@ const C={paper:'#fbf5e6',pink:'#f6a6c1',teal:'#6cc9bf',mustard:'#eebd4b',lime:'#
   kraft:'#c69c6d',kraft2:'#a9804f',ink:'#2b2233',brown:'#3b2614',tape:'rgba(240,229,192,.9)',washi:'rgba(245,142,182,.93)',washi2:'rgba(108,201,191,.93)'};
 const PASTEL=[C.paper,C.pink,C.teal,C.mustard,C.lime,C.sky,C.lav,C.orange];
 const RANSOM=[...PASTEL,C.paper,C.ink,C.red];const DARK=new Set([C.ink,C.red]);
-const P=c=>`var(--pp-grain) 0 0/128px 128px,${c}`;                       // coloured construction paper
-const KRAFT=`var(--pp-fiber) 0 0/128px 128px,var(--pp-grain) 0 0/128px 128px,${C.kraft}`;
+const P=c=>`var(--pp-grain) 0 0/128px 128px,var(--pp-mottle) 0 0/240px 240px,${c}`; // coloured construction paper
+const KRAFT=`var(--pp-fiber) 0 0/128px 128px,var(--pp-grain) 0 0/128px 128px,var(--pp-mottle) 0 0/240px 240px,${C.kraft}`;
 const FLUTE='repeating-linear-gradient(90deg,#7a5530 0 1.2px,#dcbb8e 1.2px 2.6px,#a57b4c 2.6px 4px) 0 0/100% 4px no-repeat'; // corrugation showing at a cut edge
 const WASHI=c=>`repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 3px,transparent 3px 8px),var(--pp-grain) 0 0/128px 128px,${c}`;
 const CRAY='-webkit-mask:var(--pp-crayon) 0 0/96px 32px;mask:var(--pp-crayon) 0 0/96px 32px';
@@ -73,9 +87,10 @@ const XR=[ring(),ring(),ring()];
 
 /* ---------- styles ---------- */
 const css=D.createElement('style');css.id='pp-css';css.textContent=`
-:root{--pp-grain:${GRAIN};--pp-fiber:${FIBER};--pp-crayon:${CRAYON};
+:root{--pp-grain:${GRAIN};--pp-fiber:${FIBER};--pp-mottle:${MOTTLE};--pp-crayon:${CRAYON};
  --pp-marker:'Permanent Marker','Comic Sans MS','Chalkboard SE',cursive;--pp-ink:${C.ink};
- --pp-sh:drop-shadow(0 2px 1.2px rgba(45,28,12,.42));--pp-sh2:drop-shadow(0 3px 2px rgba(45,28,12,.38));
+ --pp-rim:drop-shadow(0 0 .55px rgba(255,249,236,.95)) drop-shadow(0 0 .35px rgba(255,249,236,.8));
+ --pp-sh:var(--pp-rim) drop-shadow(0 2px 1.2px rgba(45,28,12,.42));--pp-sh2:var(--pp-rim) drop-shadow(0 3px 2px rgba(45,28,12,.38));
  --pp-lift:0 2px 0 rgba(60,38,16,.28),0 4px 6px rgba(40,24,10,.26);
  --pp-tear1:${tear(2.6,48)};--pp-tear2:${tear(3,40)};--pp-tear3:${tear(4,56)};--pp-tear4:${tear(2.4,44)};--pp-tear5:${tear(4.5,110)};
  --pp-tape1:${tape()};--pp-tape2:${tape()};--pp-tape3:${tape()};
@@ -226,10 +241,47 @@ html .ov>button:focus-visible{outline:3px dashed ${C.ink};outline-offset:5px}
 #game #st .cap::before{content:'';position:absolute;inset:0;z-index:-1;background:${P(C.paper)};clip-path:var(--pp-tear5)}
 #game .cap b{position:absolute;left:16px;top:0;translate:0 -62%;rotate:-4deg;margin:0;padding:.34em 1em .28em;font:400 .78em/1 var(--display);letter-spacing:.06em;color:${C.ink};background:${WASHI(C.washi)};clip-path:var(--pp-tape2)}
 #game #st .sk{color:${C.ink};opacity:1;font:400 12px/1 var(--pp-marker);letter-spacing:.06em;padding:6px 12px 5px;background:${P(C.tape)};clip-path:var(--pp-tape1);rotate:3deg}
-#game #stc .hd{font:400 12px/1 var(--display);letter-spacing:.06em;color:${C.ink};background:${WASHI(C.washi2)};clip-path:var(--pp-tape3);padding:6px 12px 5px;rotate:-3deg;position:relative;z-index:1;margin-bottom:-5px}
-#game #stc .fr{border:0;background:${P(C.paper)};padding:7px 7px 20px;box-shadow:var(--pp-lift);rotate:1.5deg}
-#game #stc .cap{font:400 clamp(13px,1.5vw,15px)/1.3 var(--pp-marker);color:${C.ink};text-shadow:none;background:${P(C.paper)};padding:.5em .8em .45em;box-shadow:var(--pp-lift);rotate:-1deg}
+/* Sal's call: a paper polaroid taped in the corner, a teal paper phone scrap, the line on a torn strip */
+#game #stc{filter:var(--pp-sh2)}
+#game #stc .fr{border:0;background:${P(C.paper)};padding:7px 7px 20px;box-shadow:none;clip-path:var(--pp-scrap3);rotate:2deg}
+#game #stc .fr::after{content:'';position:absolute;left:50%;top:-4px;width:46px;height:15px;margin-left:-23px;background:${P(C.tape)};clip-path:var(--pp-tape2);rotate:-4deg}
+#game #stc .pic{box-shadow:inset 0 0 0 1px rgba(43,34,51,.25);filter:sepia(.18) saturate(.9) contrast(.97)}
+#game #stc .hd{background:${P(C.teal)};border-radius:0;clip-path:var(--pp-scrap1);width:30px;height:30px}
+#game #stc .hd svg{fill:${C.ink};mix-blend-mode:multiply}
+#game #stc .cap{font:400 clamp(13px,1.6vw,16px)/1.32 var(--pp-marker);color:${C.ink};text-shadow:none;background:${P(C.paper)};box-shadow:none;clip-path:var(--pp-tear4);padding:.7em 1em .6em;rotate:-1.2deg}
+#game #stc .cap b{position:static;translate:none;display:inline-block;margin:0 .45em 0 0;padding:.28em .7em .22em;font:400 .74em/1 var(--display);rotate:-3deg;background:${WASHI(C.washi)};clip-path:var(--pp-tape1)}
+#game #stc.live .cap{clip-path:var(--pp-tear5);padding:.8em 1.4em .7em;font-size:clamp(15px,2.2vw,21px)}
 #game #stc .cap:empty{display:none}
+/* goal tokens: empty slots are kraft card with a faint pencil silhouette; a hooked customer is a stamped colour scrap */
+#game #stg{filter:var(--pp-sh)}
+#game #stg .tk{background:${KRAFT};color:#6b4c2c;--tkp:${C.kraft};opacity:.8}
+#game #stg .tk>svg{opacity:.5;mix-blend-mode:multiply}
+#game #stg .tk.on{background:${P('var(--bg)')};--tkp:var(--bg);color:${C.ink};opacity:1}
+#game #stg .tk.on>svg{opacity:.92}
+#game #stg .tk.ctn{background:${FLUTE.replace('0 0/','0 100%/')},${KRAFT};opacity:1}
+#game #stg .tk.ctn>svg{mix-blend-mode:normal;opacity:1;filter:drop-shadow(0 1px 0 rgba(43,34,51,.3))}
+#game #stg svg.ctn .sh{fill:${C.red}}#game #stg svg.ctn .in{fill:${C.brown}}
+#game #stg .tkb .cr{filter:drop-shadow(0 0 .5px rgba(255,249,236,.9)) drop-shadow(0 1px 0 rgba(60,38,16,.45))}
+/* direction: a cut-paper arrow and a little paper chevron (textured scraps, not vector fills) */
+#game #starw svg,#game #stchev svg{display:none}
+#game #starw,#game #stchev{filter:var(--pp-sh2)}
+#game #starw::before{content:'';position:absolute;inset:0;background:${P('var(--stc,'+C.pink+')')};clip-path:polygon(50% 3%,61% 15%,96.5% 45%,68% 45.5%,69% 96%,31.5% 95%,32.5% 44.5%,3.5% 45%,38% 14%)}
+#game #starw::after{content:'';position:absolute;left:50%;bottom:6%;width:30px;height:11px;margin-left:-15px;background:${P(C.tape)};clip-path:var(--pp-tape3);rotate:-8deg}
+#game #stchev::before{content:'';position:absolute;inset:0;background:${P(C.paper)};clip-path:polygon(4% 25%,24% 6%,50% 44%,76% 7%,96% 26%,51% 92%)}
+/* chapter clear: a green paper disc with a cut-paper check, slammed on like a rubber stamp */
+#game #stk{filter:var(--pp-sh2)}
+#game #stk .disc{background:${P(C.green)}}
+#game #stk svg{display:none}
+#game #stk::after{content:'';position:absolute;inset:15%;background:${P(C.paper)};clip-path:polygon(6% 54%,22% 38.5%,40% 56.5%,79% 11%,95% 25.5%,41% 87%)}
+#game #stk::before{content:'';position:absolute;right:4%;top:2%;width:38%;height:15%;background:${P(C.tape)};clip-path:var(--pp-tape1);rotate:34deg;z-index:1}
+/* chapter title card: the number and the name in cut-out letters */
+#game #stt{background:none}
+#game #stt b,#game #stt i{text-shadow:none;color:${C.ink}}
+#game #stt b.pp-rn,#game #stt i.pp-rn{display:flex;flex-wrap:wrap;justify-content:center;column-gap:.28em;row-gap:.05em;filter:var(--pp-sh2)}
+#game #stt i.pp-rn{font-size:clamp(26px,5.4vw,54px)}
+/* rhythm.js: the perfect line is a strip of black paper, the grade bursts get the cut-paper rim */
+#game #rhLine{background:${P(C.ink)};box-shadow:none;filter:var(--pp-rim)}
+#game #rhPop svg{filter:var(--pp-sh2)}
 
 @media (prefers-reduced-motion:no-preference){
  .pp-l,#ppnum span,#game #panic .pp-tag,#game .pw,#game #intro .loc,#game #stats,#game #stch,#game .stch,#game .pp-tp{animation:ppb .4s steps(1,end) var(--d,0s) infinite}
