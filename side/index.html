@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Too Many Vapes · Tuesday in the Park (prototype)</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Gochi+Hand&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#24180f;--paper:#f6eedc;--kraft:#c9a774;--pink:#ef6fa6;--lime:#b6ff3c;--mint:#5fc7a8}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#120d09;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+[hidden]{display:none!important}
+canvas{display:block;width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100vw*9/16))}
+#hud{position:fixed;inset:0;pointer-events:none;font-family:Nunito,system-ui,sans-serif;color:var(--ink)}
+.tape{position:absolute;background:var(--paper);padding:6px 14px 7px;box-shadow:2px 3px 0 rgba(0,0,0,.35);transform:rotate(-1.2deg)}
+#goal{top:max(14px,env(safe-area-inset-top));left:50%;translate:-50% 0;font:400 clamp(13px,1.9vw,24px)/1.15 Bungee,Impact,sans-serif;text-align:center;letter-spacing:.02em;max-width:min(92vw,820px)}
+#goal small{display:block;font:800 clamp(10px,1.1vw,13px) Nunito,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#7a5a3c;margin-top:2px}
+#count{top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));transform:rotate(1.5deg);font:400 clamp(12px,1.5vw,18px) Bungee,sans-serif}
+#count i{font-style:normal;color:#b0306a}
+#lung{position:absolute;left:50%;top:clamp(78px,11vh,120px);translate:-50% 0;width:min(46vw,420px);opacity:0;transition:opacity .15s}
+#lung.on{opacity:1}
+#lung .bar{height:18px;border:3px solid var(--ink);background:linear-gradient(90deg,var(--paper) 0 56%,var(--lime) 56% 80%,#ff6a5a 80%);box-shadow:2px 3px 0 rgba(0,0,0,.35);position:relative}
+#lung .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(36,24,15,.55)}
+#cap{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom));translate:-50% 0;max-width:min(88vw,760px);background:rgba(246,238,220,.95);padding:8px 14px;font:800 clamp(13px,1.6vw,19px)/1.3 Nunito,sans-serif;box-shadow:2px 3px 0 rgba(0,0,0,.35);opacity:0;transition:opacity .2s;text-align:center}
+#cap.on{opacity:1}
+#cap b{font:400 .8em Bungee,sans-serif;color:#b0306a;margin-right:8px}
+#card{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(18,13,9,.72);pointer-events:auto;text-align:center;padding:24px}
+#card h1{margin:0;font:400 clamp(30px,6vw,72px)/1 Bungee,Impact,sans-serif;color:var(--paper);text-shadow:4px 4px 0 var(--pink);transform:rotate(-2deg)}
+#card p{margin:0;max-width:560px;color:var(--paper);font:600 clamp(14px,1.8vw,19px)/1.45 Nunito,sans-serif}
+#card button{font:400 clamp(16px,2.2vw,24px) Bungee,sans-serif;padding:12px 28px;background:var(--lime);color:var(--ink);border:0;box-shadow:5px 5px 0 var(--pink);cursor:pointer}
+#card button:focus-visible{outline:3px solid var(--paper);outline-offset:3px}
+#card kbd{font:800 .85em Nunito,sans-serif;background:var(--paper);color:var(--ink);padding:1px 6px;border-radius:3px}
+#touch{position:fixed;inset:0;pointer-events:none;display:none}
+.touch #touch{display:block}
+#stick{position:absolute;left:max(24px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:130px;height:130px;border-radius:50%;background:rgba(246,238,220,.18);border:3px solid rgba(246,238,220,.5);pointer-events:auto}
+#stick i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border-radius:50%;background:var(--paper)}
+.touch #cap{bottom:auto;top:clamp(64px,13vh,110px);max-width:min(70vw,620px)}
+.touch #lung{top:auto;bottom:max(22px,env(safe-area-inset-bottom));width:min(40vw,360px)}
+#turn{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#120d09;color:#f6eedc;font:400 22px/1.2 Bungee,sans-serif;text-align:center;padding:24px;z-index:9}
+#turn span{font:600 15px Nunito,sans-serif;opacity:.8}
+@media (orientation:portrait) and (pointer:coarse){#turn{display:flex}}
+#cine{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:5;cursor:pointer}
+#cine video{width:min(100vw,calc(100vh*16/9));height:auto;max-height:100vh;display:block}
+#cineskip{position:absolute;right:max(16px,env(safe-area-inset-right));top:max(14px,env(safe-area-inset-top));font:400 14px Bungee,sans-serif;background:rgba(246,238,220,.9);color:#24180f;border:0;padding:6px 12px;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,.4)}
+#cap{z-index:6}
+#puffbtn{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(28px,env(safe-area-inset-bottom));width:112px;height:112px;border-radius:50%;background:var(--pink);color:var(--paper);font:400 20px Bungee,sans-serif;border:0;pointer-events:auto;opacity:.9;box-shadow:4px 4px 0 rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv" width="1920" height="1080"></canvas></div>
+<div id="hud">
+  <div id="goal" class="tape">WIN OVER LA DIVA<small>then walk 5 grandmas to Cloud Kingz</small></div>
+  <div id="count" class="tape">GRANDMAS <i id="cn">0</i>/5</div>
+  <div id="lung"><div class="bar"><i></i></div></div>
+  <div id="cap"></div>
+</div>
+<div id="touch"><div id="stick"><i></i></div><button id="puffbtn" aria-label="Hold to puff">PUFF</button></div>
+<div id="cine" hidden><video id="cinev" playsinline preload="auto"></video><button id="cineskip">SKIP</button></div>
+<div id="turn">TURN YOUR PHONE SIDEWAYS<span>The park is a long table. It plays in landscape.</span></div>
+<div id="card">
+  <h1>TUESDAY</h1>
+  <p>The Mayor has the town soprano singing the anthem in the park, all day. No grandma dares leave her bench.</p>
+  <p><kbd>←</kbd><kbd>→</kbd> walk (<kbd>Shift</kbd> hurries, but grandmas can't keep up) · <kbd>↑</kbd><kbd>↓</kbd> step back and forward · hold <kbd>Space</kbd> to offer a puff, let go in the green. Puff the dozing tuba player: he'll guard your line.</p>
+  <button id="go">PLAY</button>
+</div>
+<script src="park.js?v=4"></script>
+</body>
+</html>
