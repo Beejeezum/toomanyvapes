@@ -37,6 +37,11 @@ canvas{display:block;width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100
 .touch #touch{display:block}
 #stick{position:absolute;left:max(24px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:130px;height:130px;border-radius:50%;background:rgba(246,238,220,.18);border:3px solid rgba(246,238,220,.5);pointer-events:auto}
 #stick i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border-radius:50%;background:var(--paper)}
+.touch #cap{bottom:auto;top:clamp(64px,13vh,110px);max-width:min(70vw,620px)}
+.touch #lung{top:auto;bottom:max(22px,env(safe-area-inset-bottom));width:min(40vw,360px)}
+#turn{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#120d09;color:#f6eedc;font:400 22px/1.2 Bungee,sans-serif;text-align:center;padding:24px;z-index:9}
+#turn span{font:600 15px Nunito,sans-serif;opacity:.8}
+@media (orientation:portrait) and (pointer:coarse){#turn{display:flex}}
 #puffbtn{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:max(28px,env(safe-area-inset-bottom));width:112px;height:112px;border-radius:50%;background:var(--pink);color:var(--paper);font:400 20px Bungee,sans-serif;border:0;pointer-events:auto;opacity:.9;box-shadow:4px 4px 0 rgba(0,0,0,.4)}
 </style>
 </head>
@@ -49,6 +54,7 @@ canvas{display:block;width:min(100vw,calc(100vh*16/9));height:min(100vh,calc(100
   <div id="cap"></div>
 </div>
 <div id="touch"><div id="stick"><i></i></div><button id="puffbtn" aria-label="Hold to puff">PUFF</button></div>
+<div id="turn">TURN YOUR PHONE SIDEWAYS<span>The park is a long table. It plays in landscape.</span></div>
 <div id="card">
   <h1>TUESDAY</h1>
   <p>The Mayor has the town soprano singing the anthem in the park, all day. No grandma dares leave her bench.</p>
