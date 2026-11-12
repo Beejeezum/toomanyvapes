@@ -1,5 +1,5 @@
 {
- "_note": "Story script + shot list. img = assets/story/clay/<img>.jpg, vo = audio/vo/<vo>.mp3 (missing files must be tolerated: fall back to showing the caption for a few seconds). who is the speaker label shown on the subtitle. Captions are subtitles of the spoken line only. call = Sal's goal line, phoned in as the chapter starts (pic/crop = the polaroid: assets/story/clay/<pic>.jpg cropped by background-position x%, y% and background-size %). calls = clear (goal met), nudge (wandering away from the district), hey (walking up to Sal at the shop; followed by the chapter's call). day = the weekday on the chapter card (one chapter per day, Monday to Friday). mission = the big paper mission card [headline, second line]. why = an extra phone line after the goal call. Shot extras (no re-encode): flip:true mirrors the still and the clip; vid 'name#t=a,b' plays only a..b of the clip (a media fragment; the shot ends at b); mute:true silences the clip's own track; over = a vo line laid over the clip (a line over someone's back).",
+ "_note": "Story script + shot list. img = assets/story/clay/<img>.jpg, vo = audio/vo/<vo>.mp3 (missing files must be tolerated: fall back to showing the caption for a few seconds). who is the speaker label shown on the subtitle. Captions are subtitles of the spoken line only. Story: \"Breathe Easy\" (Mayor Pristine). Shot clips are assets/story/clay/be_<shot>.mp4 with their own lip-synced audio; vo is the fallback line.",
  "chapters": [
   {
    "id": 1,
@@ -12,103 +12,95 @@
    "district": "downtown",
    "in": [
     {
-     "img": "ch1_v2_1",
-     "vid": "ch1_v2_1",
+     "img": "be_m1",
+     "vid": "be_m1",
      "aud": true,
-     "hold": 6
+     "hold": 8
     },
     {
-     "img": "ch1_v2_2",
-     "vid": "ch1_v2_2",
+     "img": "be_m3",
+     "vid": "be_m3",
+     "aud": true,
+     "who": "MAYOR",
+     "vo": "be_mayor_m3",
+     "cap": "Whose. Is. This."
+    },
+    {
+     "img": "be_m4",
+     "vid": "be_m4",
+     "aud": true,
+     "who": "SAL",
+     "vo": "be_sal_m4",
+     "cap": "…Mine?"
+    },
+    {
+     "img": "be_m5",
+     "vid": "be_m5",
+     "aud": true,
+     "who": "MAYOR",
+     "vo": "be_mayor_m5",
+     "cap": "Friday at sundown, the judges come for my trophy. Thirty-one years, Salvatore. That box is gone by then… or you are."
+    },
+    {
+     "img": "be_m6",
+     "vid": "be_m6",
      "aud": true,
      "who": "BRO",
-     "vo": "bro_ch1_in_3",
-     "cap": "Duuude. That's like… a lot of vapes."
+     "vo": "be_bro_m6",
+     "cap": "Ohhh. That is a LOT of inventory."
     },
     {
-     "img": "ch1_v2_3",
-     "vid": "ch1_v2_3#t=1.5",
+     "img": "be_m7",
+     "vid": "be_m7",
      "aud": true,
      "who": "SAL",
-     "vo": "sal_ch1_phone",
-     "cap": "Fifty! I said FIFTY! Five, zero! Not five THOUSAND! …Hello? HELLO?!",
-     "jIn": "sal_ch1_phone_pre.m4a",
-     "jLead": 1.5
+     "vo": "be_sal_m7",
+     "cap": "Champ. Five thousand vapes. One Friday. And the Mayor wants my head. Get this town HOOKED."
     },
     {
-     "img": "ch1_kid_v3",
-     "vid": "ch1_kid_v3",
+     "img": "be_m8",
+     "vid": "be_m8",
      "aud": true,
-     "who": "SAL",
-     "vo": "sal_ch1_kid",
-     "cap": "Kid! Oh, thank God you're here. I gotta sell all of these by Friday… or I'm closing the shop."
-    },
-    {
-     "img": "ch1_go_v3",
-     "vid": "ch1_go_v3",
-     "aud": true,
-     "who": "SAL",
-     "vo": "sal_ch1_go",
-     "cap": "So get out there. Get this town HOOKED!"
+     "who": "BRO",
+     "vo": "be_bro_m8",
+     "cap": "Boss. I was BORN for this!"
     },
     {
      "engine": "fly",
-     "hold": 10,
-     "over": "bro_ch1_go",
-     "overAt": 0.5,
-     "who": "BRO",
-     "cap": "Say less, boss. I got you."
+     "hold": 10
     }
    ],
    "call": {
     "who": "SAL",
-    "vo": "sal_goal_1",
-    "cap": "Kid! Start right here, downtown. Hook me five customers and bring 'em back to the shop. Go!",
-    "pic": "ch1_in_2",
+    "vo": "be_sal_call_1",
+    "cap": "Downtown, kid. Hook me five, and walk 'em back to the shop!",
+    "pic": "be_m4",
     "crop": [
-     50,
-     14,
-     305
+     49,
+     68,
+     400
     ]
    },
    "out": [
     {
-     "img": "ch1_out_v2_1",
-     "vid": "ch1_out_v2_1",
-     "aud": true,
-     "hold": 5,
-     "flip": true
-    },
-    {
-     "img": "ch1_out_v2_2",
-     "vid": "ch1_out_v2_2",
+     "img": "be_m9",
+     "vid": "be_m9",
      "aud": true,
      "who": "SAL",
-     "vo": "sal_ch1_out_1",
-     "cap": "They're… coming back? They're coming BACK!"
+     "vo": "be_sal_m9",
+     "cap": "They came back? They're coming BACK!"
     },
     {
-     "img": "ch1_out_v2_3",
-     "vid": "ch1_out_v2_3",
+     "img": "be_m10",
+     "vid": "be_m10",
      "aud": true,
      "hold": 5
     }
-   ],
-   "why": {
-    "who": "SAL",
-    "vo": "sal_ch1_why",
-    "cap": "And kid? The invoice is due FRIDAY, or the bank takes Cloud Kingz. This town won Cleanest Air in Florida, 1994. Nobody here's ever SEEN a vape!",
-    "pic": "ch1_in_2",
-    "crop": [
-     50,
-     14,
-     305
-    ]
-   }
+   ]
   },
   {
    "id": 2,
-   "title": "Word of Mouth",
+   "title": "The Anthem",
    "day": "Tuesday",
    "mission": [
     "WIN OVER LA DIVA",
@@ -117,66 +109,57 @@
    "district": "park",
    "in": [
     {
-     "img": "ch2_in_1",
-     "who": "BRO",
-     "vo": "bro_ch2_in_1",
-     "cap": "Park's full of grandmas, man. Grandmas love me.",
-     "vid": "ch2_in_1",
+     "img": "be_t1",
+     "vid": "be_t1",
      "aud": true,
-     "flip": true
+     "who": "MAYOR",
+     "vo": "be_mayor_t1",
+     "cap": "Good morning, Coral Vista. Today, for your health, our town soprano will sing the anthem in the park. All day. Walking out would be… rude. Breathe easy."
     },
     {
-     "img": "ch2_boss",
-     "vid": "ch2_boss",
+     "img": "be_t2",
+     "vid": "be_t2",
      "aud": true,
-     "hold": 6
-    },
-    {
-     "img": "ch2_gran",
-     "vid": "ch2_gran",
-     "aud": true,
-     "hold": 4
+     "hold": 5
     }
    ],
    "call": {
     "who": "SAL",
-    "vo": "sal_goal_2",
-    "cap": "The park, kid! Grandmas run this town: one grandma tells forty. But nobody walks out on the opera lady mid-song. Get her on our side, then walk me five!",
-    "pic": "ch2_out_1",
+    "vo": "be_sal_call_2",
+    "cap": "Nobody walks out on the opera lady mid-song. Win her over, and every grandma in that park is ours. Then walk me five!",
+    "pic": "be_m9",
     "crop": [
-     46,
-     36,
-     337
+     2,
+     6,
+     300
     ]
    },
    "out": [
     {
-     "img": "ch2_ring",
-     "vid": "ch2_ring",
-     "aud": true,
-     "hold": 6
-    },
-    {
-     "img": "ch2_mango",
-     "vid": "ch2_mango",
+     "img": "be_t3",
+     "vid": "be_t3",
      "aud": true,
      "hold": 5
     },
     {
-     "img": "ch2_out_1",
-     "who": "SAL",
-     "vo": "sal_ch2_out_1",
-     "cap": "Kid! I sold out of mango! I've never sold out of ANYTHING!",
-     "vid": "ch2_out_1#t=0.7",
+     "img": "be_t4",
+     "vid": "be_t4",
      "aud": true,
-     "jIn": "sal_ch2_out_1_pre.m4a",
-     "jLead": 0.7
+     "hold": 5
+    },
+    {
+     "img": "be_t5",
+     "vid": "be_t5",
+     "aud": true,
+     "who": "SAL",
+     "vo": "be_sal_t5",
+     "cap": "Kid! I sold out of mango! I've never sold out of ANYTHING!"
     }
    ]
   },
   {
    "id": 3,
-   "title": "Home Turf",
+   "title": "Lungs of Steel",
    "day": "Wednesday",
    "mission": [
     "OUT-LUNG PRIME: 3 REPS",
@@ -185,58 +168,49 @@
    "district": "beach",
    "in": [
     {
-     "img": "ch3_in_1",
-     "who": "BRO",
-     "vo": "bro_ch3_in_1",
-     "cap": "My beach, bro. Home turf.",
-     "vid": "ch3_in_1",
+     "img": "be_w1",
+     "vid": "be_w1",
      "aud": true,
-     "flip": true
+     "who": "MAYOR",
+     "vo": "be_mayor_w1",
+     "cap": "Introducing Lungs of Steel, with our fitness ambassador, Prime. Real lungs breathe air. Breathe easy."
     },
     {
-     "img": "ch3_in_2",
-     "who": "SAL",
-     "vo": "sal_ch3_in_2",
-     "cap": "Watch out for cops. And the big guy at the gym.",
-     "vid": "ch3_in_2",
-     "aud": true
-    },
-    {
-     "img": "ch3_boss",
-     "vid": "ch3_boss#t=0,4.1",
+     "img": "be_w2",
+     "vid": "be_w2",
      "aud": true,
-     "flip": true
+     "hold": 5
     }
    ],
    "call": {
     "who": "SAL",
-    "vo": "sal_goal_3",
-    "cap": "Beach, kid! Nobody on Muscle Beach breathes till Prime breathes first. Out-lung the big guy and his boys'll follow you anywhere. Five, back to the shop!",
-    "pic": "ch2_out_1",
+    "vo": "be_sal_call_3",
+    "cap": "Nobody on Muscle Beach breathes till Prime breathes first. Out-lung the big guy, and his boys'll follow you anywhere. Five, back to the shop!",
+    "pic": "be_m9",
     "crop": [
-     46,
-     36,
-     337
+     2,
+     6,
+     300
     ]
    },
    "out": [
     {
-     "img": "ch3_chain",
-     "vid": "ch3_chain",
+     "img": "be_w3",
+     "vid": "be_w3",
      "aud": true,
      "hold": 5
     },
     {
-     "img": "ch3_out_1",
+     "img": "be_w4",
+     "vid": "be_w4",
+     "aud": true,
      "who": "SAL",
-     "vo": "sal_ch3_out_1",
-     "cap": "Two chains, kid. TWO. We're franchising.",
-     "vid": "ch3_out_1",
-     "aud": true
+     "vo": "be_sal_w4",
+     "cap": "Two chains, kid. TWO. We're franchising."
     },
     {
-     "img": "ch3_flat",
-     "vid": "ch3_flat",
+     "img": "be_w5",
+     "vid": "be_w5",
      "aud": true,
      "hold": 5
     }
@@ -244,7 +218,7 @@
   },
   {
    "id": 4,
-   "title": "Fresh Lungs",
+   "title": "Lockdown",
    "day": "Thursday",
    "mission": [
     "HOOK 5 FARM ANIMALS",
@@ -253,53 +227,73 @@
    "district": "farm",
    "in": [
     {
-     "img": "ch4_in_1",
-     "who": "SAL",
-     "vo": "sal_ch4_in_1",
-     "cap": "We're out of people, kid. …What about the cows?",
-     "vid": "ch4_in_1",
-     "aud": true
+     "img": "be_h1",
+     "vid": "be_h1",
+     "aud": true,
+     "who": "MAYOR",
+     "vo": "be_mayor_h1",
+     "cap": "Effective immediately: curfew. Everyone indoors. An officer on every corner. Coral Vista is closed."
     },
     {
-     "img": "ch4_in_2",
+     "img": "be_h2",
+     "vid": "be_h2",
+     "aud": true,
+     "hold": 5
+    },
+    {
+     "img": "be_h3",
+     "vid": "be_h3",
+     "aud": true,
+     "who": "SAL",
+     "vo": "be_sal_h3",
+     "cap": "We're out of people, kid. …What about the cows?"
+    },
+    {
+     "img": "be_h4",
+     "vid": "be_h4",
+     "aud": true,
      "who": "BRO",
-     "vo": "bro_ch4_in_2",
-     "cap": "…The cows, dude?",
-     "vid": "ch4_in_2",
-     "aud": true
+     "vo": "be_bro_h4",
+     "cap": "…The cows, boss?"
     }
    ],
    "call": {
     "who": "SAL",
-    "vo": "sal_goal_4",
-    "cap": "Thursday, kid. Two thousand left and nobody left in town. …The farm. Five. Yeah. Cows count.",
-    "pic": "ch3_out_1",
+    "vo": "be_sal_call_4",
+    "cap": "Thursday, kid. Two thousand left. She said people stay indoors. She didn't say nothin' about cows. Five. Yeah. Cows count.",
+    "pic": "be_w4",
     "crop": [
-     45,
-     32,
-     320
+     50,
+     1,
+     300
     ]
    },
    "out": [
     {
-     "img": "ch4_out_1",
+     "img": "be_h5",
+     "vid": "be_h5",
+     "aud": true,
      "who": "BRO",
-     "vo": "bro_ch4_out_1",
-     "cap": "Can't even see the waves anymore, man.",
-     "vid": "ch4_out_1",
-     "aud": true
+     "vo": "be_bro_h5",
+     "cap": "Is it weird I miss when nobody came in?"
     },
     {
-     "img": "ch4_phone",
-     "vid": "ch4_phone",
+     "img": "be_h6",
+     "vid": "be_h6",
      "aud": true,
-     "hold": 5
+     "hold": 6
+    },
+    {
+     "img": "be_h7",
+     "vid": "be_h7",
+     "aud": true,
+     "hold": 4
     }
    ]
   },
   {
    "id": 5,
-   "title": "Zero",
+   "title": "Sundown",
    "day": "Friday",
    "mission": [
     "EMPTY THE CONTAINER",
@@ -308,29 +302,29 @@
    "district": "square",
    "in": [
     {
-     "img": "ch5_in_1",
-     "who": "SAL",
-     "vo": "sal_ch5_in_1",
-     "cap": "Last stretch! EMPTY THE CONTAINER!",
-     "vid": "ch5_in_1",
-     "aud": true
+     "img": "be_f1",
+     "vid": "be_f1",
+     "aud": true,
+     "who": "MAYOR",
+     "vo": "be_mayor_f1",
+     "cap": "Judges arrive at sundown. Detecto, our official mascot, will escort everyone… out. Breathe…"
     },
     {
-     "img": "ch5_boss",
-     "vid": "ch5_boss",
+     "img": "be_f2",
+     "vid": "be_f2",
      "aud": true,
-     "hold": 6
+     "hold": 5
     }
    ],
    "call": {
     "who": "SAL",
-    "vo": "sal_goal_5",
-    "cap": "Invoice is due at SUNDOWN, kid! Empty the container! And somebody shut up that smoke detector!",
-    "pic": "ch3_out_1",
+    "vo": "be_sal_call_5",
+    "cap": "Sundown, kid! Empty that box! And somebody shut up that smoke detector!",
+    "pic": "be_w4",
     "crop": [
-     45,
-     32,
-     320
+     50,
+     1,
+     300
     ]
    },
    "out": []
@@ -338,35 +332,46 @@
  ],
  "end": [
   {
-   "img": "end_sleep",
-   "vid": "end_sleep",
+   "img": "be_f3",
+   "vid": "be_f3",
    "aud": true,
    "hold": 5
   },
   {
-   "img": "end_1",
-   "who": "SAL",
-   "vo": "sal_end_1",
-   "cap": "Zero. You did it, kid… So, uh. I ordered fifty thousand.",
-   "vid": "end_1",
-   "aud": true
+   "img": "be_f4",
+   "vid": "be_f4",
+   "aud": true,
+   "hold": 7
   },
   {
-   "img": "end_v2_2",
-   "vid": "end_v2_2",
+   "img": "be_f5",
+   "vid": "be_f5",
    "aud": true,
-   "subs": [
-    {
-     "t": 0,
-     "cap": ""
-    },
-    {
-     "t": 5.4,
-     "who": "BRO",
-     "cap": "…Bro."
-    }
-   ],
-   "vo": "bro_end_2"
+   "who": "SAL",
+   "vo": "be_sal_f5",
+   "cap": "Zero. You did it, kid… So, uh. I ordered fifty thousand."
+  },
+  {
+   "img": "be_f6",
+   "vid": "be_f6",
+   "aud": true,
+   "who": "BRO",
+   "vo": "be_bro_f6",
+   "cap": "…Bro."
+  },
+  {
+   "img": "be_f7",
+   "vid": "be_f7",
+   "aud": true,
+   "hold": 5
+  },
+  {
+   "img": "be_f8",
+   "vid": "be_f8",
+   "aud": true,
+   "who": "MAYOR",
+   "vo": "be_mayor_f8",
+   "cap": "…Do you have mango?"
   }
  ],
  "calls": {
@@ -374,77 +379,77 @@
    "who": "SAL",
    "vo": "sal_clear",
    "cap": "That's the district, kid! Look at 'em all! LOOK at 'em!",
-   "pic": "ch2_out_1",
+   "pic": "be_m9",
    "crop": [
-    46,
-    36,
-    337
+    2,
+    6,
+    300
    ]
   },
   "nudge": {
    "who": "SAL",
    "vo": "sal_nudge",
    "cap": "Kid, the other way! Follow the cloud!",
-   "pic": "ch1_in_2",
+   "pic": "be_m4",
    "crop": [
-    50,
-    14,
-    305
+    49,
+    68,
+    400
    ]
   },
   "hey": {
    "who": "SAL",
    "vo": "sal_hey",
    "cap": "Hey! Kid! You lost? Here's the deal.",
-   "pic": "ch2_out_1",
+   "pic": "be_m9",
    "crop": [
-    46,
-    36,
-    337
+    2,
+    6,
+    300
    ]
   },
   "back1": {
    "who": "SAL",
    "vo": "sal_back_1",
    "cap": "Kid! Bring 'em back to the shop! Bring 'em HERE!",
-   "pic": "ch1_in_2",
+   "pic": "be_m4",
    "crop": [
-    50,
-    14,
-    305
+    49,
+    68,
+    400
    ]
   },
   "back2": {
    "who": "SAL",
    "vo": "sal_back_2",
    "cap": "You got customers? Walk 'em over, kid! Cloud Kingz! I'm right here!",
-   "pic": "ch2_out_1",
+   "pic": "be_m9",
    "crop": [
-    46,
-    36,
-    337
+    2,
+    6,
+    300
    ]
   },
   "back3": {
    "who": "SAL",
    "vo": "sal_back_3",
    "cap": "Kid, kid, kid! Don't leave 'em out there! Bring 'em to the store!",
-   "pic": "ch1_in_2",
+   "pic": "be_m4",
    "crop": [
-    50,
-    14,
-    305
+    49,
+    68,
+    400
    ]
   },
   "enough": {
    "who": "SAL",
    "vo": "sal_enough",
    "cap": "That's enough, kid! That's the whole order! Bring 'em home, I'm holding the door!",
-   "pic": "ch3_out_1",
+   "pic": "be_w4",
    "crop": [
-    45,
-    32,
-    320
+    50,
+    1,
+    300
    ]
   }
  },
@@ -549,7 +554,7 @@
   },
   "detecto_intro": {
    "who": "DETECTO",
-   "cap": "SMOKE DETECTED. I am DETECTO, official mascot of Cleanest Air in Florida, 1994. Everybody: EVACUATE."
+   "cap": "SMOKE DETECTED. I am DETECTO, official mascot of Cleanest Air in Florida, thirty-one years running. Everybody: EVACUATE."
   },
   "detecto_sleep": {
    "who": "DETECTO",
