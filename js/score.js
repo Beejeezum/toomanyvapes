@@ -31,7 +31,9 @@ function pick(){const m=X.mode;
   return[PLAY[chap]||'down',BASE]}
 
 let acc=0;
-X.on('frame',dt=>{dt=dt||1/60;acc+=dt;
+/* runs on prerender (every frame in every mode), not 'frame' (play only): otherwise the title music never fades under cutscenes */
+let lastP=performance.now();
+X.on('prerender',()=>{const now=performance.now(),dt=Math.min(.1,(now-lastP)/1000)||1/60;lastP=now;acc+=dt;
   const boost=X.act&&X.act.boost>0;if(boost&&!lastBoost&&X.mode==='play'){const d=get('fire');d.a.currentTime=0;d.t=BASE;d.a.play().catch(()=>{});stingT=d.a.duration&&isFinite(d.a.duration)?Math.min(d.a.duration,10):8}lastBoost=boost;
   stingT=Math.max(0,stingT-dt);if(!stingT&&deck.fire)deck.fire.t=0;
   if(acc>.25){acc=0;const[k,v]=pick();if(k!==cur){if(cur&&deck[cur])deck[cur].t=0;cur=k;const d=get(k);if(d.a.paused){d.a.play().catch(()=>{})}}
@@ -42,5 +44,5 @@ X.on('frame',dt=>{dt=dt||1/60;acc+=dt;
     if(Math.abs(d.a.volume-d.v)>.004)d.a.volume=Math.max(0,Math.min(1,d.v));
     if(k!=='fire'&&Math.abs(d.a.playbackRate-rate)>.004)d.a.playbackRate=rate;
     if(d.v<=.002&&d.t===0&&!d.a.paused)d.a.pause()}});
-X.score={get track(){return cur}};
+X.score={get track(){return cur},get vols(){const o={};for(const k in deck)if(!deck[k].a.paused)o[k]=+deck[k].a.volume.toFixed(3);return o}};
 })();

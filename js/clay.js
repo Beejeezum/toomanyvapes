@@ -51,7 +51,7 @@ const CLAYT=(()=>{const n=256,a=clayHeight(n),b=paperGrain(n),d=new Uint8Array(n
    e = sheets: each map tile is one sheet of felt / card (seam width in tile units, per-sheet colour shift, random turn/flip, soft raised edges)
    r = (corrugation ridges per unit, ridge depth, fuzzy felt sheen at grazing angles, per-sheet warp) */
 const KIND={
-  clay:[.04,1.15,0,1,0,.24], vc:[.036,1.15,0,.8,0,.22], cloth:[.026,1.4,0,.5,.3,.15],
+  clay:[.04,1.15,0,1,0,.24], thumb:[.085,1.3,0,.9,0,.22], vc:[.036,1.15,0,.8,0,.22], cloth:[.026,1.4,0,.5,.3,.15],
   felt:[.07,2,.75,0,1,.1, .0045,.14,1,.9, 0,0,.2,.5], feltHill:[.07,2,.75,0,1,.1, .006,.11,1,.6, 0,0,.2,.3],
   sand:[.05,2,1,.15,1,.08], cpaper:[.03,2.2,.7,0,1,.05], paint:[.05,2,.9,.7,1,.04], tile:[.04,1.6,.55,.15,1,.08, .007,.09,1,1, 0,0,0,4], wood:[.035,1.5,.7,.35,1,.08],
   leaf:[.06,1.3,.8,.6,0,.12], water:[.03,1,.65,1.2,0,.06], paper:[.018,2.5,.3,.1,1,.1], corr:[.045,1,.85,.3,1,.08], hay:[.06,2,.9,0,1,.1],
@@ -157,8 +157,8 @@ function sand(k,n){k.fillStyle='#e4cc98';k.fillRect(0,0,n,n);
     k.fillStyle=C[(Math.random()*C.length)|0];k.fillRect(x,y,r,r);if(r>1.6){k.fillStyle='rgba(255,252,240,.6)';k.fillRect(x,y,r*.45,r*.45)}}
   for(let i=0;i<n/8;i++){const x=rand(0,n),y=rand(0,n),r=rand(2,4.5);k.fillStyle='rgba(90,70,50,.45)';k.beginPath();k.ellipse(x+1,y+1.2,r,r*.75,0,0,PI*2);k.fill();k.fillStyle=pick(['#9c8f84','#b3a089','#7d6f66','#f4ece0','#e9b9a3']);k.beginPath();k.ellipse(x,y,r,r*.75,rand(0,3),0,PI*2);k.fill();k.fillStyle='rgba(255,255,255,.4)';k.fillRect(x-r*.4,y-r*.4,r*.5,r*.35)}}
 // sidewalk: one panel of thick grey card per tile (the shader adds the seams), pulpy mottling, fibres, scuffs, crushed edges
-function tile(k,n){k.fillStyle='#d2ccc1';k.fillRect(0,0,n,n);k.lineCap='round';
-  for(let i=0;i<50;i++){const x=rand(0,n),y=rand(0,n),r=rand(10,40),d=rand(-7,6);blob(k,x,y,r,hsl(36,10,79+d,.45),hsl(36,10,79+d,0))}
+function tile(k,n){k.fillStyle='#bdb6aa';/* mid-grey card (was near-white in sun) */k.fillRect(0,0,n,n);k.lineCap='round';
+  for(let i=0;i<50;i++){const x=rand(0,n),y=rand(0,n),r=rand(10,40),d=rand(-7,6);blob(k,x,y,r,hsl(36,10,71+d,.45),hsl(36,10,71+d,0))}
   for(let i=0;i<n*n/10;i++){const x=rand(0,n),y=rand(0,n),a=rand(0,PI*2),L=rand(1.5,4.5);k.strokeStyle=Math.random()<.5?'rgba(110,95,80,.18)':'rgba(255,252,245,.25)';k.lineWidth=rand(.4,.9);k.beginPath();k.moveTo(x,y);k.lineTo(x+Math.cos(a)*L,y+Math.sin(a)*L);k.stroke()}
   for(let i=0;i<4;i++){let x=rand(0,n),y=rand(0,n);k.strokeStyle='rgba(90,80,70,.22)';k.lineWidth=rand(2,6);k.beginPath();k.moveTo(x,y);k.quadraticCurveTo(x+rand(-30,30),y+rand(-30,30),x+rand(-50,50),y+rand(-50,50));k.stroke()}
   k.strokeStyle='rgba(70,70,90,.18)';k.lineWidth=1;k.beginPath();{const x=rand(30,n-30),y=rand(30,n-30);k.moveTo(x,y);k.lineTo(x+rand(30,70),y+rand(-6,6))}k.stroke();
@@ -320,7 +320,7 @@ float coc(float a){float id=1./max(8.*a/max(1.-a,.004),.05);return clamp(max(id-
 void main(){vec4 c0=texture2D(tC,vUv);float r0=coc(c0.a);vec3 acc=c0.rgb;float ws=1.;
  if(r0>.6){for(int i=0;i<NT;i++){float fi=float(i)+.5,rr=sqrt(fi/float(NT)),th=fi*2.39996;vec2 o=vec2(cos(th),sin(th))*rr*r0;vec4 s=texture2D(tC,vUv+o*px);
    float w=clamp(coc(s.a)-rr*r0+1.,0.,1.);acc+=s.rgb*w;ws+=w;}}
- vec3 c=acc/ws;float l=dot(c,vec3(.3,.59,.11));c=mix(vec3(l),c,.86)*vec3(1.05,1.,.9);c=mix(c,smoothstep(vec3(-.08),vec3(1.06),c),.55);vec2 q=vUv-.5;c*=1.-vig*dot(q,q)*2.4;gl_FragColor=vec4(c,1.);}`});
+ vec3 c=acc/ws;float l=dot(c,vec3(.3,.59,.11));c=mix(vec3(l),c,.86)*vec3(1.05,1.,.9);c=mix(c,smoothstep(vec3(-.08),vec3(1.06),c),.55);c=mix(c,.82+(c-.82)*.38,step(vec3(.82),c));/* highlight roll-off: whites keep paper/felt detail instead of clipping */vec2 q=vUv-.5;c*=1.-vig*dot(q,q)*2.4;gl_FragColor=vec4(c,1.);}`});
 const postG=new T.BufferGeometry();postG.setAttribute('position',new T.BufferAttribute(new Float32Array([-1,-1,0,3,-1,0,-1,3,0]),3));
 const postQ=new T.Mesh(postG,postM);postQ.frustumCulled=false;const postS=new T.Scene();postS.add(postQ);const postC=new T.OrthographicCamera(-1,1,1,-1,0,1);
 /* focus follows the aim: a creature (or Sal) near the crosshair, else the first wall/prop/ground the view ray meets */
@@ -332,8 +332,10 @@ function rayCols(ox,oz,dx,dz,tm){let t=tm;for(const c of X.cols){if(ox>c.a&&ox<c
 function focusTarget(){const cp=cam.position;if(X.held&&X.mouth){X.mouth(X.held,fv);return clamp(fv.distanceTo(cp),.4,30)}
   cam.updateMatrixWorld();cam.getWorldDirection(fdir);let best=1e9,bd=0;
   const look=(x,y,z,rad)=>{fto.set(x-cp.x,y-cp.y,z-cp.z);const d=fto.length(),al=fto.dot(fdir);if(al<.3||d>45)return 1e9;const sc=Math.sqrt(Math.max(0,d*d-al*al))/(rad+d*.05);if(sc<1&&sc<best){best=sc;bd=al}return sc};
-  const sal=X.sal&&X.sal.g;if(sal&&sal.parent&&sal.visible!==false){sal.getWorldPosition(fv);const sh=sal.scale.y*1.5;fto.set(fv.x-cp.x,fv.y+sh-cp.y,fv.z-cp.z);const d=fto.length(),al=fto.dot(fdir);
-    if(d<6.5&&al>0&&al/d>Math.cos(.42))return Math.max(al,.4);look(fv.x,fv.y+sh,fv.z,.6)}
+  // Sal stays crisp whenever he's near or in view (salKeep: the depth band is stretched to hold him; see the per-frame DOF below)
+  DOF.salKeep=0;const sal=X.sal&&X.sal.g;if(sal&&sal.parent&&sal.visible!==false){sal.getWorldPosition(fv);const sh=sal.scale.y*1.5;fto.set(fv.x-cp.x,fv.y+sh-cp.y,fv.z-cp.z);const d=fto.length(),al=fto.dot(fdir);
+    if(al>0&&(d<7||al/d>Math.cos(.7))&&d<24)DOF.salKeep=d;
+    if(d<9&&al>0&&al/d>Math.cos(.5))return Math.max(al,.4);look(fv.x,fv.y+sh,fv.z,.9)}
   for(const n of npcs){if(!n.g||!n.g.parent||!n.g.visible)continue;if(X.mouth)X.mouth(n,fv);else fv.copy(n.g.position);look(fv.x,fv.y-.2,fv.z,.65)}
   if(bd)return bd;let t=rayCols(cp.x,cp.z,fdir.x,fdir.z,60);if(fdir.y<-.005)t=Math.min(t,cp.y/-fdir.y);return clamp(t,.6,60)}
 
@@ -358,7 +360,8 @@ X.on('prerender',dt=>{const now=performance.now(),ft=now-last;last=now;
     const a=Math.round(tgtP.dot(rgt)/tx)*tx,b=Math.round(tgtP.dot(upv)/tx)*tx,cc=tgtP.dot(lit);tgtP.copy(rgt).multiplyScalar(a).addScaledVector(upv,b).addScaledVector(lit,cc);
     sun.target.position.copy(tgtP);sun.target.updateMatrixWorld();sun.position.copy(tgtP).addScaledVector(lit,90)}
   // depth of field: focus pulls to whoever you're aiming at / vaping, otherwise the middle distance
-  if(DOF.on){DOF.target=focusTarget();DOF.focus=lerp(DOF.focus,DOF.target,1-Math.exp(-dt*14));DOF.near=Math.min(DOF.focus*.5,1.5);DOF.far=Math.max(DOF.focus*2+1,7)}
+  if(DOF.on){DOF.target=focusTarget();DOF.focus=lerp(DOF.focus,DOF.target,1-Math.exp(-dt*14));DOF.near=Math.min(DOF.focus*.5,1.5);DOF.far=Math.max(DOF.focus*2+1,7);
+    if(DOF.salKeep){DOF.near=Math.min(DOF.near,Math.max(.4,DOF.salKeep*.6));DOF.far=Math.max(DOF.far,DOF.salKeep*1.6+3)}}
   // cotton puffs: soft tint, random tuft and spin, a firmer body that pops in and thins out at the end
   for(const P of puffs){if(P.life<=0){P._cl=0;continue}const m=P.s.material;if(!P._cl||P.life>P._cl+1e-4){if(TUFTS.indexOf(m.map)<0){m.map=TUFTS[(Math.random()*4)|0];m.needsUpdate=true}else m.map=TUFTS[(Math.random()*4)|0];m.rotation=rand(0,PI*2);m.color.lerp(WHITE,.78)}P._cl=P.life;
     const k=1-P.life/P.max;m.opacity=Math.min(1,k*14)*(1-k*k*k)*.95}

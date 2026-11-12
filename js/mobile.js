@@ -76,6 +76,81 @@ ${touch?`
 `:''}
 `;D.head.appendChild(css);
 
+/* ===== phone declutter (touch only): on a phone held sideways (short screen) every HUD scrap is smaller and tucked to an edge,
+   the centre stays clear, and only what matters right now is up. Rules are prefixed html.tmvT so they outrank the paper/story
+   styles injected after this file, whatever the load order. Mute and full-screen live in the pause menu during play (see sync). ===== */
+if(touch){D.documentElement.classList.add('tmvT');const dc=D.createElement('style');dc.id='mDeclutter';dc.textContent=`
+html.tmvT:has(#mPause:not([hidden])) #stob,html.tmvT:has(#stmc.go) #stob,html.tmvT:has(#stt.go) #stob{display:none!important}/* the title and mission cards already say it */
+html.tmvT #stob .tg,html.tmvT #stob .ct{display:none!important}
+@media (max-height:540px){
+ html.tmvT{--hR:40vh;--hL:34vh}
+ /* title: logo, tagline and Play fit; the small print goes to the bottom corners instead of over the button */
+ html.tmvT #game #intro{gap:6px;padding-block:8px}
+ html.tmvT #game #intro .logo{width:min(780px,80vw,calc(50vh * 2.26))}
+ html.tmvT #game #intro .loc{font-size:14px;padding:.4em 1.3em .35em}
+ html.tmvT #game #st .sk{right:max(16px,env(safe-area-inset-right,0px))}
+ html.tmvT #game #intro>button{font-size:20px;padding:11px 30px 9px;margin-top:4px}
+ html.tmvT #game #intro .warn{left:max(14px,env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:none;font-size:9px!important;opacity:.6}
+ html.tmvT #game #intro .bruce{left:auto;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:rotate(-1.5deg);font-size:10px;padding:5px 8px;opacity:.7}
+ /* corner buttons: small kraft scraps */
+ html.tmvT #mob .mBtn{width:34px;height:34px}html.tmvT #mob .mBtn svg{width:17px;height:17px}
+ html.tmvT #mob .mBtn::after{width:14px;height:7px;margin-left:-7px;top:-4px}
+ html.tmvT #mob #mPauseB{top:max(8px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));opacity:.85}
+ html.tmvT #mob #mMuteB{top:max(8px,env(safe-area-inset-top,0px));left:calc(max(10px,env(safe-area-inset-left,0px)) + 44px)}
+ html.tmvT #mob #mPauseB[hidden]+#mMuteB{left:max(10px,env(safe-area-inset-left,0px))}
+ html.tmvT #game #scFS{width:34px;height:34px;top:max(8px,env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px))}html.tmvT #game #scFS svg{width:18px;height:18px}
+ /* power-up chips: one small row beside the pause scrap */
+ html.tmvT #game #powers{top:max(8px,env(safe-area-inset-top,0px))!important;left:calc(max(10px,env(safe-area-inset-left,0px)) + 46px);flex-direction:row;gap:6px}
+ html.tmvT #game .pw{font-size:15px;min-width:34px;padding:5px 6px 4px}html.tmvT #game .pw i{height:4px;margin-top:3px}html.tmvT #game .pw::after{width:14px;height:7px}
+ /* vapes left + goal tokens: one compact strip along the top */
+ html.tmvT #game #count{top:max(4px,env(safe-area-inset-top,0px));flex-direction:row;align-items:center;gap:6px;padding:2px 6px}
+ html.tmvT #ppnum{font-size:25px}
+ html.tmvT #game #stg{margin-top:0;gap:2px;min-height:0}html.tmvT #game #stg .tks{gap:2px}
+ html.tmvT #game #stg .tk{width:23px;height:25px}html.tmvT #game #stg .tk>svg{width:18px;height:18px}
+ html.tmvT #game #stg .tkb{margin-left:3px;padding-top:5px}html.tmvT #game #stg .tkb .tk{width:28px;height:30px}html.tmvT #game #stg .tkb .tk>svg{width:22px;height:22px}
+ html.tmvT #game #stg .tkb .cr{width:16px;height:9px;margin-left:-8px;top:0}
+ html.tmvT #game #stg .tk.ctn{width:40px;height:25px}html.tmvT #game #stg .tk.ctn>svg{width:36px;height:21px}
+ html.tmvT #game #stch{font-size:10px;padding:1px 5px 0;margin-right:2px}
+ /* objective panel: just the step, small, top-left under the pause scrap (still tucks away 6 s after a step change) */
+ html.tmvT #game #stob{top:calc(max(8px,env(safe-area-inset-top,0px)) + 44px);left:max(10px,env(safe-area-inset-left,0px));width:auto;max-width:min(220px,24vw);padding:6px 9px 7px}
+ html.tmvT #game #stob .st{font-size:13px;line-height:1.05;text-wrap:balance}
+ /* chapter title card and mission card: smaller, and above the crosshair instead of on it */
+ html.tmvT #game #stt{padding-bottom:22vh}
+ html.tmvT #game #stt b{font-size:64px}html.tmvT #game #stt i,html.tmvT #game #stt i.pp-rn{font-size:22px;margin-top:4px}html.tmvT #game #stt s{font-size:11px;margin-bottom:6px}
+ html.tmvT #game #stmc{top:29%;left:0;right:0;margin:0 auto;width:fit-content;max-width:min(400px,56vw);gap:2px;padding:6px 16px 8px;box-shadow:0 3px 0 rgba(43,34,51,.35)}
+ html.tmvT #game #stmc .ic svg{width:18px;height:18px}html.tmvT #game #stmc .ic .ar{width:14px;height:14px}html.tmvT #game #stmc .ic{gap:5px}
+ html.tmvT #game #stmc b{font-size:22px;text-shadow:2px 2px 0 #fbf5e6}html.tmvT #game #stmc i{font-size:11px;padding:.25em .5em}
+ /* Sal on the phone: a stamp-sized polaroid beside a short strip, tucked top-right under the full-screen corner (that button is away in play) */
+ html.tmvT #game #stc{top:calc(max(4px,env(safe-area-inset-top,0px)) + 38px);right:max(10px,env(safe-area-inset-right,0px));flex-direction:row-reverse;align-items:flex-start;gap:2px}
+ html.tmvT #game #stc .fr{width:40px;padding:3px 3px 9px}html.tmvT #game #stc .fr::after{width:24px;height:8px;margin-left:-12px;top:-3px}
+ html.tmvT #game #stc .hd{width:16px;height:16px;left:-7px;top:-6px}html.tmvT #game #stc .hd svg{width:10px;height:10px}
+ html.tmvT #game #stc .cap{margin:3px 0 0;max-width:min(290px,40vw);font-size:11.5px;line-height:1.25;padding:.55em .8em .5em}
+ html.tmvT #game #stc .cap b{font-size:.7em}
+ /* someone talking in person: a short subtitle strip at the very bottom, between the thumbs */
+ html.tmvT #game #stc.live{top:auto;left:0;right:0;bottom:calc(6px + env(safe-area-inset-bottom,0px));flex-direction:row;justify-content:center}
+ html.tmvT #game #stc.live .cap{max-width:min(420px,48vw);font-size:12.5px;padding:.6em 1.1em .55em}
+ /* boss: smaller name card above the middle; a thin progress strip under the top strip */
+ html.tmvT #game #bosscard{top:34%;width:auto;max-width:min(460px,66vw);padding:7px 16px 5px}
+ html.tmvT #game #bosscard b{font-size:24px}
+ html.tmvT #game #bossbar{top:calc(max(4px,env(safe-area-inset-top,0px)) + 40px);width:min(200px,24vw);padding:3px 8px 5px}
+ html.tmvT #game #bossbar .bn{font-size:9px}html.tmvT #game #bossbar .bb{height:6px;margin-top:2px}html.tmvT #game #bossbar small{display:none}
+ /* hold-to-vape meter, combo stamp, direction scraps, clear stamp */
+ html.tmvT #game #lung{top:22%;width:min(210px,32vw);padding:5px 7px}html.tmvT #game #lung .bar{height:12px}
+ html.tmvT #game #lung .bar::after{width:16px;height:8px;top:-7px;left:calc(68% - 8px)}
+ html.tmvT #game #jz-combo{top:37%;right:calc(max(10px,env(safe-area-inset-right,0px)) + 8px)}html.tmvT #game #jz-combo b{font-size:28px}
+ html.tmvT #game #starw{width:26px;height:33px;margin:-16px 0 0 -13px}html.tmvT #game #starw::after{width:18px;height:7px;margin-left:-9px}
+ html.tmvT #game #stchev{width:18px;height:13px;margin:-7px 0 0 -9px}
+ html.tmvT #game #stk{width:24vmin;height:24vmin;margin:-12vmin 0 0 -12vmin}
+ /* thumbs: the stick only hints where it is; VAPE sits low in the right corner with RUN stacked just above it */
+ html.tmvT #game #stick{width:90px;height:90px;left:calc(max(10px,env(safe-area-inset-left,0px)) + 14px);bottom:calc(22px + env(safe-area-inset-bottom,0px));opacity:.18}
+ html.tmvT #game #stick.live{opacity:.7}html.tmvT #game #stick i{width:34px;height:34px;margin:-17px}
+ html.tmvT #game #stick::after{font-size:9px;top:calc(100% + 1px)}
+ html.tmvT #game #vbtn{width:82px;height:82px;font-size:16px;right:calc(max(10px,env(safe-area-inset-right,0px)) + 8px);bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+ html.tmvT #game #vbtn::before{inset:-12px}
+ html.tmvT #mob #mRun{width:48px;height:48px;font-size:11px;right:calc(max(10px,env(safe-area-inset-right,0px)) + 25px);bottom:calc(114px + env(safe-area-inset-bottom,0px));opacity:.75}
+ html.tmvT #mob #mRun.on{opacity:1}
+}`;D.head.appendChild(dc)}
+
 /* ===== DOM (lives outside #game so the core's touch handlers never see these taps) ===== */
 const IC={pause:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/></svg>',
  on:'<svg viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
@@ -251,7 +326,7 @@ setLevel(gmode==='high'?0:gmode==='low'?3:gov.lvl);
 let lastMode='';
 function sync(dt){const m=X.mode;
   if(paused&&m!=='paused'){paused=false;ov.hidden=true;applyMute()}   // something else moved the game out of pause
-  if(m!==lastMode){lastMode=m;pauseB.hidden=m!=='play';runB.hidden=!(touch&&m==='play');if(m!=='play'){closePick();if(m!=='paused'){setSprint(false);if(stId!==null){stId=null;restStick()}}}}
+  if(m!==lastMode){lastMode=m;pauseB.hidden=m!=='play';if(touch)muteB.hidden=m==='play'||m==='paused';/* phones: sound toggle lives in the pause menu during play */runB.hidden=!(touch&&m==='play');if(m!=='play'){closePick();if(m!=='paused'){setSprint(false);if(stId!==null){stId=null;restStick()}}}}
   if(sprint&&!X.keys.ShiftLeft)X.keys.ShiftLeft=1;
   if(dt>0&&rotT>0)rotT-=dt;
   const showRot=touch&&!rotOff&&portrait()&&(m==='intro'||(m==='play'&&rotT>0));if(rotEl.hidden===showRot)rotEl.hidden=!showRot;if(showRot)rotEl.classList.toggle('intro',m==='intro');

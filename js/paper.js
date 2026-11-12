@@ -11,7 +11,12 @@ const R=(a,b)=>a+Math.random()*(b-a),f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
 {const l=D.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap';D.head.appendChild(l)}
 
 /* ---------- textures (canvas, drawn once at 2x so they stay crisp on high-DPI) ---------- */
-function tex(w,h,draw){const c=D.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);return 'url('+c.toDataURL()+')'}
+/* handed to CSS as a short blob: URL, not a data: URL. These sheets are 200-470 KB of base64 each, and every element that uses
+   var(--pp-grain) etc. re-substitutes and re-parses the whole string on each style recalc: with data: URLs the chapter card, mission
+   card and HUD coming in at the landing cost a ~170 ms style recalc in one frame. Same pixels either way. */
+function tex(w,h,draw){const c=D.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const d=c.toDataURL();
+  try{const b=atob(d.slice(d.indexOf(',')+1)),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return 'url('+URL.createObjectURL(new Blob([u],{type:'image/png'}))+')'}
+  catch(e){return 'url('+d+')'}}
 const wrap9=(w,h,f)=>{for(const ox of[-w,0,w])for(const oy of[-h,0,h])f(ox,oy)}; // draw strokes tiled so the texture repeats without seams
 function strands(g,w,h,n,cols,len,lw){g.lineCap='round';for(let i=0;i<n;i++){const s=[];let x=R(0,w),y=R(0,h),a=R(0,6.28);s.push([x,y]);
   for(let k=0;k<4;k++){a+=R(-.7,.7);x+=Math.cos(a)*R(len*.5,len);y+=Math.sin(a)*R(len*.5,len);s.push([x,y])}

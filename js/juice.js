@@ -165,7 +165,6 @@ function finStart(){const n=J.held;fe.set(J.px,1.6,J.pz);
   J.armR.visible=false;J.armL.visible=false;cineOn(true);doFlash('#fff',.85,500);shake(.5);
   J.beep(55,1,'sine',.12);J.slide(900,120,1.3,'sine',.04);
   stinger('ZERO','');
-  for(let i=0;i<14;i++)J.emo(J.pick(['🎉','💨','🏆','✨']),ft.x,ft.y+.2,ft.z,rand(-2.5,2.5),rand(1.5,4),rand(-2.5,2.5),rand(.35,.6));
   for(let i=0;i<40;i++){const a=i/40*PI*2;J.puff(ft.x,ft.y,ft.z,Math.cos(a)*rand(3,6),rand(0,2.2),Math.sin(a)*rand(3,6),_c.setHSL(i/40,.95,.62),rand(1.8,3),.2,rand(.8,1.6))}}
 function finEnd(){if(!fin)return;const f=fin;fin=null;zoomBase=1;cineOn(false);J.armR.visible=true;title.classList.remove('go');if('slow' in J)J.slow=0;
   if(f.hid&&J.mode==='won')$('win').hidden=false}
